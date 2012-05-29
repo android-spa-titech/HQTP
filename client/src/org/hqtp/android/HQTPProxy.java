@@ -1,5 +1,6 @@
 package org.hqtp.android;
 
+import java.util.ArrayList;
 import java.util.List;
 
 //HQTPサーバーとの通信をラップするクラス
@@ -35,6 +36,18 @@ public class HQTPProxy {
 
     public List<Question> getQuestions() {
         // TODO:implement
-        return null;
+//        return null;
+//テスト
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        ArrayList<Question> res = new ArrayList<Question>();
+        for(int i=0;i<10;i++){
+            res.add(new Question("質問"+new Integer(i).toString(), "質問です", "author"));
+        }
+        return res;
     }
 }

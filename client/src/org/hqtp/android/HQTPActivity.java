@@ -1,8 +1,11 @@
 package org.hqtp.android;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,9 +34,8 @@ public class HQTPActivity extends Activity implements OnClickListener {
             // TODO: 戻り値に応じてダイアログ表示
             break;
         case R.id.getallpost_button:
-            showAlert("getallpost", "getallpost_button is clicked");
-            // TODO: HQTPProxy.getInstance().getQuestions()
-            // TODO: 戻り値を表示
+            GetPostTask gp_task = new GetPostTask();
+            gp_task.execute();
             break;
         case R.id.post_button:
             showAlert("post", "post_button is clicked");
@@ -54,5 +56,29 @@ public class HQTPActivity extends Activity implements OnClickListener {
                 public void onClick(DialogInterface dialog, int which) {
                 }
             }).show();
+    }
+    
+    private class GetPostTask extends AsyncTask<Void,Void,Void> {
+        private List<Question> questions;
+        @Override
+        protected Void doInBackground(Void... params) {
+            this.questions = HQTPProxy.getInstance().getQuestions();
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void result) {
+            StringBuilder sb = new StringBuilder();
+            if (this.questions == null) {
+                sb.append("質問がありません＞＜");
+            } else {
+                for (Question q : this.questions) {
+                    sb.append(q.getTitle());
+                    sb.append("\n");
+                    sb.append(q.getBody());
+                    sb.append("\n");
+                }
+            }
+            showAlert("質問一覧", sb.toString());
+        }
     }
 }
