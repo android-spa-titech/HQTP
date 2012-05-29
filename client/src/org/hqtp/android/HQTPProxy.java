@@ -1,5 +1,7 @@
 package org.hqtp.android;
 
+import java.util.List;
+
 //HQTPサーバーとの通信をラップするクラス
 //とりあえずSingletonにしておきます
 public class HQTPProxy {
@@ -31,7 +33,8 @@ public class HQTPProxy {
         return false;
     }
 
-    // TODO: 投稿されている質問一覧を取得
-    // public 戻り値 getQuestions(){
-    // }
+    public List<Question> getQuestions() {
+        // TODO:implement
+        return null;
+    }
 }
