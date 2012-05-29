@@ -13,8 +13,8 @@ public class HQTPActivity extends Activity implements OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        View verification_button = this.findViewById(R.id.verification_button);
-        verification_button.setOnClickListener(this);
+        View authentication_button = this.findViewById(R.id.authentication_button);
+        authentication_button.setOnClickListener(this);
         View getallpost_button = this.findViewById(R.id.getallpost_button);
         getallpost_button.setOnClickListener(this);
         View post_button = this.findViewById(R.id.post_button);
@@ -24,8 +24,8 @@ public class HQTPActivity extends Activity implements OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-        case R.id.verification_button:
-            showAlert("verification", "verification_button is clicked");
+        case R.id.authentication_button:
+            showAlert("authentication", "authentication_button is clicked");
             // TODO: implement
             break;
         case R.id.getallpost_button:
