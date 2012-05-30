@@ -3,5 +3,8 @@
 
     <string name="hello">Hello World, HQTPActivity!</string>
     <string name="app_name">HQTP</string>
+    <string name="post">投稿</string>
+    <string name="verification">認証</string>
+    <string name="getallpost">投稿一覧</string>
 
 </resources>
