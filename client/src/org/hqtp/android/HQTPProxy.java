@@ -40,7 +40,7 @@ public class HQTPProxy {
             IOException {
         Log.d("info", ">>sendByGet");
         Uri.Builder builder = Uri.parse(api_gateway).buildUpon();
-        builder.appendPath(path);
+        builder.appendEncodedPath(path);
         // TODO: パラメータの指定
         HttpGet http_get = new HttpGet(builder.build().toString());
         DefaultHttpClient client = new DefaultHttpClient();
@@ -92,12 +92,14 @@ public class HQTPProxy {
         Log.d("info", ">>getQuestions");
         // ネットワークからの読込テスト
         try {
-            HttpResponse res = sendByGet("get/");
+            HttpResponse res = sendByGet("get/hoge/");
             Log.d("info", getResponseContentText(res));
         } catch (Exception e1) {
             Log.d("err", e1.getMessage());
             e1.printStackTrace();
         }
+        //TODO: resをJSON文字列としてパース
+        //TODO: パースしたJSONに基づいて戻り値を構成する
         // テスト
         try {
             Thread.sleep(1000);
