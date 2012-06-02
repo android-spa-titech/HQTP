@@ -92,7 +92,7 @@ public class HQTPProxy {
         Log.d("info", ">>getQuestions");
         // ネットワークからの読込テスト
         try {
-            HttpResponse res = sendByGet("");
+            HttpResponse res = sendByGet("get/");
             Log.d("info", getResponseContentText(res));
         } catch (Exception e1) {
             Log.d("err", e1.getMessage());
