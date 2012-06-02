@@ -6,6 +6,8 @@
 
     <uses-sdk android:minSdkVersion="13" />
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name="org.hqtp.android.HQTPApplication"
         android:icon="@drawable/ic_launcher"

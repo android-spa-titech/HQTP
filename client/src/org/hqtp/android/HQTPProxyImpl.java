@@ -1,7 +1,21 @@
 package org.hqtp.android;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.client.DefaultHttpClient;
+import android.net.Uri;
+import android.util.Log;
 
 import com.google.inject.Singleton;
 
@@ -9,6 +23,12 @@ import com.google.inject.Singleton;
 //とりあえずSingletonにしておきます
 @Singleton
 public class HQTPProxyImpl implements HQTPProxy {
+    // APIを投げる先のURL
+    // 今はデバッグのためエミュレータからPC側のローカルホストへアクセスするURLを指定している
+    private final String api_gateway = "http://10.0.2.2:8000/api/";
+    // private final String api_gateway = "http://www.hqtp.org/api/";
+
+    private CookieStore cookie_store = null;
 
     // Instance methods
     @Override
@@ -33,6 +53,17 @@ public class HQTPProxyImpl implements HQTPProxy {
     public List<Question> getQuestions() {
         // TODO:implement
 //        return null;
+        Log.d("info", ">>getQuestions");
+        // ネットワークからの読込テスト
+        try {
+            HttpResponse res = sendByGet("get/");
+            Log.d("info", getResponseContentText(res));
+        } catch (Exception e1) {
+            Log.d("err", e1.getMessage());
+            e1.printStackTrace();
+        }
+        //TODO: resをJSON文字列としてパース
+        //TODO: パースしたJSONに基づいて戻り値を構成する
 //テスト
         try {
             Thread.sleep(1000);
@@ -47,4 +78,48 @@ public class HQTPProxyImpl implements HQTPProxy {
         return res;
     }
 
+    // TODO: 引数でパラメータを受け取る。連想配列かなんか？
+    // 戻り値をHttpResponseで返しているがレスポンスの文字列を返してもいいかもしれない
+    private HttpResponse sendByGet(String path) throws ClientProtocolException,
+            IOException {
+        Log.d("info", ">>sendByGet");
+        Uri.Builder builder = Uri.parse(api_gateway).buildUpon();
+        builder.appendEncodedPath(path);
+        // TODO: パラメータの指定
+        HttpGet http_get = new HttpGet(builder.build().toString());
+        DefaultHttpClient client = new DefaultHttpClient();
+        client.setCookieStore(cookie_store);
+        HttpResponse response = client.execute(http_get);
+        this.cookie_store = client.getCookieStore();
+        {//Cookieのデバッグ表示
+            Iterator<Cookie> c_it = cookie_store.getCookies().iterator();
+            while (c_it.hasNext()) {
+                Cookie c = c_it.next();
+                Log.d("cookie", c.getName() + ":" + c.getValue());
+            }
+        }
+        return response;
+    }
+
+    // TODO: パラメータの受け取り
+    private HttpResponse sendByPost(String path) {
+        // TODO: implement
+        return null;
+    }
+
+    private static String getResponseContentText(HttpResponse response)
+            throws IllegalStateException, IOException {
+        HttpEntity entity = response.getEntity();
+        if (entity == null) {
+            return null;
+        }
+        BufferedReader br = new BufferedReader(new InputStreamReader(
+                entity.getContent()));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line).append("\n");
+        }
+        return sb.toString();
+    }
 }
