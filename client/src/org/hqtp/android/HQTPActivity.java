@@ -2,25 +2,32 @@ package org.hqtp.android;
 
 import java.util.List;
 
-import android.app.Activity;
+import roboguice.activity.RoboActivity;
+import roboguice.inject.InjectView;
+import roboguice.util.RoboAsyncTask;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 
-public class HQTPActivity extends Activity implements OnClickListener {
-    /** Called when the activity is first created. */
+import com.google.inject.Inject;
+
+public class HQTPActivity extends RoboActivity implements OnClickListener {
+
+    @InjectView(R.id.authentication_button) Button authentication_button;
+    @InjectView(R.id.getallpost_button)     Button getallpost_button;
+    @InjectView(R.id.post_button)           Button post_button;
+    @Inject HQTPProxy proxy;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        View authentication_button = this.findViewById(R.id.authentication_button);
+
         authentication_button.setOnClickListener(this);
-        View getallpost_button = this.findViewById(R.id.getallpost_button);
         getallpost_button.setOnClickListener(this);
-        View post_button = this.findViewById(R.id.post_button);
         post_button.setOnClickListener(this);
     }
 
@@ -57,21 +64,20 @@ public class HQTPActivity extends Activity implements OnClickListener {
                 }
             }).show();
     }
-    
-    private class GetPostTask extends AsyncTask<Void,Void,Void> {
-        private List<Question> questions;
+
+    private class GetPostTask extends RoboAsyncTask<List<Question>> {
         @Override
-        protected Void doInBackground(Void... params) {
-            this.questions = HQTPProxy.getInstance().getQuestions();
-            return null;
+        public List<Question> call() throws Exception {
+            return proxy.getQuestions();
         }
+
         @Override
-        protected void onPostExecute(Void result) {
+        protected void onSuccess(List<Question> questions) {
             StringBuilder sb = new StringBuilder();
-            if (this.questions == null) {
+            if (questions == null) {
                 sb.append("質問がありません＞＜");
             } else {
-                for (Question q : this.questions) {
+                for (Question q : questions) {
                     sb.append(q.getTitle());
                     sb.append("\n");
                     sb.append(q.getBody());
@@ -81,4 +87,5 @@ public class HQTPActivity extends Activity implements OnClickListener {
             showAlert("質問一覧", sb.toString());
         }
     }
+
 }
