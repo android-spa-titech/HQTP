@@ -20,6 +20,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -58,44 +59,54 @@ public class HQTPProxyImpl implements HQTPProxy {
         HashMap<String , String> params = new HashMap<String, String>();
         params.put("title", title);
         params.put("body", body);
+        boolean res = false;
         try{
             response = sendByPost("post/", params);
             JSONObject json = toJSON(response.getEntity());
             Log.d("info", json.toString());
+            if(json.getString("status")=="OK"){
+                res = true;
+            }
         }catch (Exception e) {
             // TODO: handle exception
             e.printStackTrace();
         }
-        // TODO: 妥当な戻り値を返す
-        return false;
+        return res;
     }
 
     @Override
     public List<Question> getQuestions() {
         // ネットワークからの読込テスト
-        HttpResponse response;
+        JSONObject json;
         try {
-            response = sendByGet("get/",null);
+            HttpResponse response = sendByGet("get/",null);
             //TODO: ネットワークまわりの例外とレスポンスまわりの例外処理がごっちゃになってるのをどうにかしたい
-            JSONObject json = toJSON(response.getEntity());
+            json = toJSON(response.getEntity());
             Log.d("info", json.toString());
         } catch (Exception e1) {
+            //TODO: 真面目に例外処理しましょう
             Log.d("err", e1.getMessage());
             e1.printStackTrace();
+            return null;
         }
-        //TODO: パースしたJSONに基づいて戻り値を構成する
-//テスト
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
+
+        try{
+            if(json.getString("status")!="OK"){
+                //TODO: エラー処理
+            }
+            JSONArray array = json.getJSONArray("posts");
+            ArrayList<Question> res = new ArrayList<Question>();
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject post = array.getJSONObject(i);
+                res.add(new Question(post.getString("title"), post.getString("body"), null));
+            }
+            return res;
+        }catch(JSONException e){
+            //TODO: JSONまわりのエラー対応
+            Log.d("err",e.getMessage());
             e.printStackTrace();
+            return null;
         }
-        ArrayList<Question> res = new ArrayList<Question>();
-        for(int i=0;i<10;i++){
-            res.add(new Question("質問"+new Integer(i).toString(), "質問です", "author"));
-        }
-        return res;
     }
 
     private HttpResponse sendByGet(String path, Map<String, String> params)
