@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -56,7 +58,7 @@ public class HQTPProxyImpl implements HQTPProxy {
         Log.d("info", ">>getQuestions");
         // ネットワークからの読込テスト
         try {
-            HttpResponse res = sendByGet("get/");
+            HttpResponse res = sendByGet("get/",null);
             Log.d("info", getResponseContentText(res));
         } catch (Exception e1) {
             Log.d("err", e1.getMessage());
@@ -80,12 +82,18 @@ public class HQTPProxyImpl implements HQTPProxy {
 
     // TODO: 引数でパラメータを受け取る。連想配列かなんか？
     // 戻り値をHttpResponseで返しているがレスポンスの文字列を返してもいいかもしれない
-    private HttpResponse sendByGet(String path) throws ClientProtocolException,
+    private HttpResponse sendByGet(String path,Map<String, String> params) throws ClientProtocolException,
             IOException {
         Log.d("info", ">>sendByGet");
         Uri.Builder builder = Uri.parse(api_gateway).buildUpon();
         builder.appendEncodedPath(path);
-        // TODO: パラメータの指定
+        if(params!=null){
+            for (Map.Entry<String, String> param : params.entrySet()) {
+                //TODO: パラメータ
+                builder.appendQueryParameter(param.getKey(), param.getValue());
+            }
+        }
+        Log.d("url",builder.build().toString());
         HttpGet http_get = new HttpGet(builder.build().toString());
         DefaultHttpClient client = new DefaultHttpClient();
         client.setCookieStore(cookie_store);
@@ -102,7 +110,7 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     // TODO: パラメータの受け取り
-    private HttpResponse sendByPost(String path) {
+    private HttpResponse sendByPost(String path,Map<String, String> params) {
         // TODO: implement
         return null;
     }
