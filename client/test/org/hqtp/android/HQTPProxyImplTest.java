@@ -37,4 +37,19 @@ public class HQTPProxyImplTest {
 
     }
 
+    @Test
+    public void postQuestionShouldCallAPI() throws Exception {
+        Robolectric.clearHttpResponseRules();
+        Robolectric.clearPendingHttpResponses();
+        Robolectric.addPendingHttpResponse(200, "{ \"status\": \"OK\" }");
+
+        proxy.postQuestion("test title", "test body");
+
+        HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
+        assertThat(sentHttpRequest.getURI(), equalTo(URI.create("http://www.hqtp.org/api/post/")));
+        assertThat(sentHttpRequest.getMethod(), equalTo("POST"));
+        //TODO: パラメータについても検査したい
+        //Assert.assertTrue((EntityUtils.toString(((HttpPost)sentHttpRequest).getEntity())), false);
+    }
+
 }
