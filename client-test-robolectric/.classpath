@@ -6,6 +6,7 @@
 	<classpathentry kind="lib" path="lib/robolectric-1.0-jar-with-dependencies.jar"/>
 	<classpathentry kind="lib" path="/HQTP/lib/guice-2.0-no_aop.jar"/>
 	<classpathentry kind="lib" path="/HQTP/lib/roboguice-1.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/json-20080701.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/HQTP"/>
 	<classpathentry kind="var" path="ANDROID_HOME/add-ons/addon-google_apis-google-13/libs/maps.jar"/>
 	<classpathentry kind="var" path="ANDROID_HOME/platforms/android-13/android.jar"/>

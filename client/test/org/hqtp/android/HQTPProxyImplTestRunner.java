@@ -10,6 +10,7 @@ import android.app.Application;
 
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.name.Names;
 import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.RobolectricTestRunner;
 
@@ -28,6 +29,7 @@ class HQTPProxyImplTestModule extends AbstractAndroidModule {
     @Override
     protected void configure() {
         bind(HQTPProxy.class).to(HQTPProxyImpl.class);
+        bind(String.class).annotatedWith(Names.named("HQTP API Endpoint URL")).toInstance("http://www.hqtp.org/api/");
     }
 
 }
