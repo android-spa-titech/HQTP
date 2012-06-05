@@ -27,18 +27,23 @@ import org.json.JSONObject;
 import android.net.Uri;
 import android.util.Log;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 //HQTPサーバーとの通信をラップするクラス
 //とりあえずSingletonにしておきます
 @Singleton
 public class HQTPProxyImpl implements HQTPProxy {
-    // APIを投げる先のURL
-    // 今はデバッグのためエミュレータからPC側のローカルホストへアクセスするURLを指定している
-    private final String api_gateway = "http://10.0.2.2:8000/api/";
-    //private final String api_gateway = "http://www.hqtp.org/api/";
 
+    private final String api_gateway;
     private CookieStore cookie_store = null;
+
+    @Inject
+    public HQTPProxyImpl(@Named("HQTP API Endpoint URL") String api_gateway) {
+        super();
+        this.api_gateway = api_gateway;
+    }
 
     // Instance methods
     @Override
