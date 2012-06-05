@@ -82,35 +82,37 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     // 戻り値をHttpResponseで返しているがレスポンスの文字列を返してもいいかもしれない
-    private HttpResponse sendByGet(String path,Map<String, String> params) throws ClientProtocolException,
-            IOException {
+    private HttpResponse sendByGet(String path, Map<String, String> params)
+            throws ClientProtocolException, IOException {
         Uri.Builder builder = Uri.parse(api_gateway).buildUpon();
         builder.appendEncodedPath(path);
-        if(params!=null){
+        if (params != null) {
             for (Map.Entry<String, String> param : params.entrySet()) {
-                //TODO: パラメータ
                 builder.appendQueryParameter(param.getKey(), param.getValue());
             }
         }
         HttpGet http_get = new HttpGet(builder.build().toString());
-        DefaultHttpClient client = new DefaultHttpClient();
-        client.setCookieStore(cookie_store);
-        HttpResponse response = client.execute(http_get);
-        this.cookie_store = client.getCookieStore();
-        {//Cookieのデバッグ表示
-            Iterator<Cookie> c_it = cookie_store.getCookies().iterator();
-            while (c_it.hasNext()) {
-                Cookie c = c_it.next();
-                Log.d("cookie", c.getName() + ":" + c.getValue());
-            }
-        }
-        return response;
+        return send(http_get);
     }
 
     // TODO: パラメータの受け取り
     private HttpResponse sendByPost(String path,Map<String, String> params) {
         // TODO: implement
         return null;
+    }
+    
+    private HttpResponse send(HttpUriRequest request) throws ClientProtocolException, IOException
+    {
+        DefaultHttpClient client = new DefaultHttpClient();
+        HttpResponse response = null;
+        client.setCookieStore(cookie_store);
+        try {
+            response = client.execute(request);
+            this.cookie_store = client.getCookieStore();
+        } finally {
+            client.getConnectionManager().shutdown();
+        }
+        return response;
     }
     
     private JSONObject toJSON(HttpEntity entity) throws ParseException, IOException, JSONException
