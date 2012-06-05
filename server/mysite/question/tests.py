@@ -46,6 +46,8 @@ So, use csrf check client
 >>> response=c.post('/api/post/',dict(title='csrf test2',body='this pass'))
 >>> response.status_code
 200
+>>> 'status' in jsonobj
+True
 """
 
 from django.test import TestCase
