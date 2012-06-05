@@ -1,25 +1,23 @@
 package org.hqtp.android;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.cookie.Cookie;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.net.Uri;
-import android.provider.ContactsContract.RawContacts.Entity;
 import android.util.Log;
 
 import com.google.inject.Singleton;
@@ -57,11 +55,12 @@ public class HQTPProxyImpl implements HQTPProxy {
     @Override
     public List<Question> getQuestions() {
         // ネットワークからの読込テスト
+        HttpResponse response;
         try {
-            HttpResponse res = sendByGet("get/",null);
+            response = sendByGet("get/",null);
             //TODO: ネットワークまわりの例外とレスポンスまわりの例外処理がごっちゃになってるのをどうにかしたい
-            String res_str = EntityUtils.toString(res.getEntity());
-            Log.d("info", res_str);
+            JSONObject json = toJSON(response.getEntity());
+            Log.d("info", json.toString());
         } catch (Exception e1) {
             Log.d("err", e1.getMessage());
             e1.printStackTrace();
@@ -112,5 +111,11 @@ public class HQTPProxyImpl implements HQTPProxy {
     private HttpResponse sendByPost(String path,Map<String, String> params) {
         // TODO: implement
         return null;
+    }
+    
+    private JSONObject toJSON(HttpEntity entity) throws ParseException, IOException, JSONException
+    {
+        String response = EntityUtils.toString(entity);
+        return new JSONObject(response);
     }
 }
