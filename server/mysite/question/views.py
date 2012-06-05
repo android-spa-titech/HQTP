@@ -30,7 +30,7 @@ def get_view(request):
     context=dict(
         status='ok'
        ,posts=[
-            dict(title='課題',body="今日の課題の範囲が分からない")
+            dict(title=u'課題',body=u'今日の課題の範囲が分からない')
            ,dict(title='NFA?',body=u'NFAってなんの略だっけ？')
            ,dict(title=u'状態数orz',body=u'決定化してるんだけど、状態めちゃ増える。人間にやらせるなんて')
         ]
