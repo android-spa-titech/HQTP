@@ -16,7 +16,10 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+
 import android.net.Uri;
+import android.provider.ContactsContract.RawContacts.Entity;
 import android.util.Log;
 
 import com.google.inject.Singleton;
@@ -53,13 +56,12 @@ public class HQTPProxyImpl implements HQTPProxy {
 
     @Override
     public List<Question> getQuestions() {
-        // TODO:implement
-//        return null;
-        Log.d("info", ">>getQuestions");
         // ネットワークからの読込テスト
         try {
             HttpResponse res = sendByGet("get/",null);
-            Log.d("info", getResponseContentText(res));
+            //TODO: ネットワークまわりの例外とレスポンスまわりの例外処理がごっちゃになってるのをどうにかしたい
+            String res_str = EntityUtils.toString(res.getEntity());
+            Log.d("info", res_str);
         } catch (Exception e1) {
             Log.d("err", e1.getMessage());
             e1.printStackTrace();
@@ -80,11 +82,9 @@ public class HQTPProxyImpl implements HQTPProxy {
         return res;
     }
 
-    // TODO: 引数でパラメータを受け取る。連想配列かなんか？
     // 戻り値をHttpResponseで返しているがレスポンスの文字列を返してもいいかもしれない
     private HttpResponse sendByGet(String path,Map<String, String> params) throws ClientProtocolException,
             IOException {
-        Log.d("info", ">>sendByGet");
         Uri.Builder builder = Uri.parse(api_gateway).buildUpon();
         builder.appendEncodedPath(path);
         if(params!=null){
@@ -93,7 +93,6 @@ public class HQTPProxyImpl implements HQTPProxy {
                 builder.appendQueryParameter(param.getKey(), param.getValue());
             }
         }
-        Log.d("url",builder.build().toString());
         HttpGet http_get = new HttpGet(builder.build().toString());
         DefaultHttpClient client = new DefaultHttpClient();
         client.setCookieStore(cookie_store);
@@ -113,21 +112,5 @@ public class HQTPProxyImpl implements HQTPProxy {
     private HttpResponse sendByPost(String path,Map<String, String> params) {
         // TODO: implement
         return null;
-    }
-
-    private static String getResponseContentText(HttpResponse response)
-            throws IllegalStateException, IOException {
-        HttpEntity entity = response.getEntity();
-        if (entity == null) {
-            return null;
-        }
-        BufferedReader br = new BufferedReader(new InputStreamReader(
-                entity.getContent()));
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line).append("\n");
-        }
-        return sb.toString();
     }
 }
