@@ -2,6 +2,7 @@
 
 from django.http import HttpResponse,HttpResponseNotFound
 from django.shortcuts import render_to_response
+from django.views.decorators.csrf import csrf_exempt
 import json
 
 def convert_context_to_json(context):
@@ -37,6 +38,7 @@ def get_view(request):
     )
     return json_response(context) 
 
+@csrf_exempt
 def post_view(request):
     title=request.POST['title']
     body=request.POST['body']
