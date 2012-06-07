@@ -1,7 +1,13 @@
 # -*- coding:utf-8 -*-
 
+def clean_questions():
+    """ before test, call this method for clear questions """
+    from mysite.question.models import Question
+    Question.objects.all().delete()
+
 def test_about_auth_view():
     """
+    >>> clean_questions()
     >>> from django.test.client import Client
     >>> import json
     >>> c=Client(enforce_csrf_checks=True)
@@ -16,6 +22,7 @@ def test_about_auth_view():
 
 def test_about_get_view():
     """
+    >>> clean_questions()
     >>> from django.test.client import Client
     >>> import json
     >>> c=Client(enforce_csrf_checks=True)
@@ -35,6 +42,7 @@ def test_about_post():
     >>> # このテストはすぐに廃止されるでしょう
     >>> # Djangoにおける認証の流れと、認証するとpostができる様子を示すための草案です。
     >>>
+    >>> clean_questions()
     >>> from django.test.client import Client
     >>> 
     >>> c=Client(enforce_csrf_checks=True)
@@ -95,6 +103,7 @@ def test_about_post():
 
 def test_about_csrf():
     """
+    >>> clean_questions()
     >>> from django.test.client import Client
     >>> c1=Client()
     >>> response=c1.get('/api/auth/?access_token=acc')
