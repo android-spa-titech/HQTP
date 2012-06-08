@@ -20,6 +20,10 @@ public class PostQuestionActivity extends RoboActivity implements
     Button post_button;
     @InjectView(R.id.cancel_buttton)
     Button cancel_button;
+    @InjectView(R.id.title_text)
+    EditText titleEditText;
+    @InjectView(R.id.body_text)
+    EditText bodyEditText;
     @Inject
     HQTPProxy proxy;
 
@@ -29,6 +33,8 @@ public class PostQuestionActivity extends RoboActivity implements
         setContentView(R.layout.post);
         post_button.setOnClickListener(this);
         cancel_button.setOnClickListener(this);
+        titleEditText = (EditText) findViewById(R.id.title_text);
+        bodyEditText = (EditText) findViewById(R.id.body_text);
     }
 
     @Override
@@ -49,8 +55,8 @@ public class PostQuestionActivity extends RoboActivity implements
     private class PostQuestion extends RoboAsyncTask<List<Question>> {
         @Override
         public List<Question> call() throws Exception {
-            String title = ((EditText) findViewById(R.id.title_text)).getText().toString();
-            String body = ((EditText) findViewById(R.id.body_text)).getText().toString();
+            String title = titleEditText.getText().toString();
+            String body = bodyEditText.getText().toString();
             proxy.postQuestion(title, body);
             return null;
         }
