@@ -1,9 +1,11 @@
 # -*- coding:utf-8 -*-
 
-from django.http import HttpResponse,HttpResponseNotFound
+from django.http import HttpResponse,HttpResponseNotFound,HttpResponseForbidden
 from django.shortcuts import render_to_response
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
 import json
+from mysite.question.models import Question
 
 def convert_context_to_json(context):
     "Convert the context dictionary into a JSON object"
@@ -13,28 +15,33 @@ def convert_context_to_json(context):
     # -- can be serialized as JSON.
     return json.dumps(context)
 
-def json_response(context):
+def json_response(context={}):
+    context['status']='OK'
     return HttpResponse(convert_context_to_json(context),mimetype='application/json')
-def json_response_not_found(context):
+def json_response_not_found(context={}):
+    context['status']='Not Found'
     return HttpResponseNotFound(convert_context_to_json(context),mimetype='application/json')
+def json_response_forbidden(context={}):
+    context['status']='Forbidden'
+    return HttpResponseForbidden(convert_context_to_json(context),mimetype='application/json')
 
 def auth_view(request):
     access_token=request.GET['access_token']
-    # TODO auth
+    user_name=access_token+'_name'
+    try:
+        user=User.objects.get(username=user_name)
+        created=False
+    except:
+        user=User.objects.create_user(user_name,'',access_token)
+        created=True
 
-    context={'status':'OK'}
+    context=dict(created=created)
     return json_response(context)
 
 def get_view(request):
-    # TODO load questions from database
-
+    posts=[dict(title=q.title, body=q.body) for q in Question.objects.all()]
     context=dict(
-        status='ok'
-       ,posts=[
-            dict(title=u'課題',body=u'今日の課題の範囲が分からない')
-           ,dict(title='NFA?',body=u'NFAってなんの略だっけ？')
-           ,dict(title=u'状態数orz',body=u'決定化してるんだけど、状態めちゃ増える。人間にやらせるなんて')
-        ]
+       posts=posts
     )
     return json_response(context) 
 
@@ -42,7 +49,9 @@ def get_view(request):
 def post_view(request):
     title=request.POST['title']
     body=request.POST['body']
-    # TODO save this post
-
-    context={'status':'OK'}
-    return json_response(context)
+    added_by=request.user
+    if added_by.is_authenticated():
+        Question.objects.create(title=title, body=body, added_by=added_by)
+        return json_response()
+    else:
+        return json_response_forbidden()
