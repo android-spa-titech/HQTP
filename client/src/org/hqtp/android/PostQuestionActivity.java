@@ -33,8 +33,6 @@ public class PostQuestionActivity extends RoboActivity implements
         setContentView(R.layout.post);
         post_button.setOnClickListener(this);
         cancel_button.setOnClickListener(this);
-        titleEditText = (EditText) findViewById(R.id.title_text);
-        bodyEditText = (EditText) findViewById(R.id.body_text);
     }
 
     @Override
