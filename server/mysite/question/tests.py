@@ -1,54 +1,134 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
+# -*- coding:utf-8 -*-
 
-Replace this with more appropriate tests for your application.
+def clean_questions():
+    """ before test, call this method for clear questions """
+    from mysite.question.models import Question
+    Question.objects.all().delete()
 
-Test about [auth_view] function
->>> from django.test.client import Client
->>> import json
->>> c=Client(enforce_csrf_checks=True)
->>> response=c.get('/api/auth/',dict(access_token='ACCESS_TOKEN'))
->>> response.status_code
-200
->>> jsonobj=json.loads(response.content)
->>> 'status' in jsonobj
-True
+def test_about_auth_view():
+    """
+    >>> clean_questions()
+    >>> from django.test.client import Client
+    >>> import json
+    >>> c=Client(enforce_csrf_checks=True)
+    >>> response=c.get('/api/auth/?access_token=acc')
+    >>> response.status_code
+    200
+    >>> jsonobj=json.loads(response.content)
+    >>> 'status' in jsonobj
+    True
+    """
+    pass
 
+def test_about_get_view():
+    """
+    >>> clean_questions()
+    >>> from django.test.client import Client
+    >>> import json
+    >>> c=Client(enforce_csrf_checks=True)
+    >>> response=c.get('/api/get/')
+    >>> response.status_code
+    200
+    >>> jsonobj=json.loads(response.content)
+    >>> 'status' in jsonobj
+    True
+    >>> 'posts' in jsonobj
+    True
+    """    
+    pass
 
+def test_about_post():
+    """
+    >>> # このテストはすぐに廃止されるでしょう
+    >>> # Djangoにおける認証の流れと、認証するとpostができる様子を示すための草案です。
+    >>>
+    >>> clean_questions()
+    >>> from django.test.client import Client
+    >>> 
+    >>> c=Client(enforce_csrf_checks=True)
+    >>> 
+    >>> # getは認証の必要がありません
+    >>> response=c.get('/api/get/')
+    >>> response.content
+    '{"status": "OK", "posts": []}'
+    >>> 
+    >>> 
+    >>> # postはログインしていないとできません（403 Forbidden）
+    >>> response=c.post('/api/post/',dict(title='before login',body='cannot post'))
+    >>> response.content
+    '{"status": "Forbidden"}'
+    >>> 
+    >>> 
+    >>> # authでユーザーを新規作成しています。
+    >>> # access_token=accの場合、
+    >>> # 新しく作られるユーザーはusername=acc_name,
+    >>> # password=accとなっています。
+    >>> # すでに同じusernameのユーザーがいた場合、
+    >>> # createdはfalseになります
+    >>> response=c.get('/api/auth/?access_token=acc3')
+    >>> response.content
+    '{"status": "OK", "created": true}'
+    >>> 
+    >>> 
+    >>> # authをしただけでは、まだpostできません
+    >>> response=c.post('/api/post/',dict(title='before login',body='cannot post'))
+    >>> response.content
+    '{"status": "Forbidden"}'
+    >>> 
+    >>> 
+    >>> # ログインはusernameとpasswordを指定して行います。
+    >>> # 戻り値がTrueならログイン成功です。
+    >>> c.login(username='acc3_name',password='acc3')
+    True
+    >>> 
+    >>> # ログインして始めてpostできます
+    >>> response=c.post('/api/post/',dict(title='after login',body='can post'))
+    >>> response.content
+    '{"status": "OK"}'
+    >>> 
+    >>> 
+    >>> # getで確かめてみると、確かに投稿が反映されています。
+    >>> response=c.get('/api/get/')
+    >>> response.content
+    '{"status": "OK", "posts": [{"body": "can post", "title": "after login"}]}'
+    >>> 
+    >>>
+    >>> # ログアウトしてpostできなくなることを確認します
+    >>> c.logout()
+    >>> response=c.post('/api/post/',dict(title='after logout',body='cannot post'))
+    >>> response.content
+    '{"status": "Forbidden"}'
+    """
+    pass
 
-Test about [get_view] function
->>> from django.test.client import Client
->>> import json
->>> c=Client(enforce_csrf_checks=True)
->>> response=c.get('/api/get/')
->>> response.status_code
-200
->>> jsonobj=json.loads(response.content)
->>> 'status' in jsonobj
-True
->>> 'posts' in jsonobj
-True
+def test_about_csrf():
+    """
+    >>> clean_questions()
+    >>> from django.test.client import Client
+    >>> c1=Client()
+    >>> response=c1.get('/api/auth/?access_token=acc')
+    >>> c1.login(username='acc_name',password='acc')
+    True
+    >>> response=c1.post('/api/post/',dict(title='csrf test2',body='this pass'))
+    >>> response.status_code
+    200
+    >>> 
+    >>> 
+    >>> c2=Client(enforce_csrf_checks=True)
+    >>> response=c2.get('/api/auth/?access_token=acc2')
+    >>> c2.login(username='acc2_name',password='acc2')
+    True
+    >>> response=c2.post('/api/post/',dict(title='csrf test2',body='this pass'))
+    >>> response.status_code
+    200
+    """
 
+    # もしviews.pyのpost_viewに@csrf_exemptデコレーターをつけないと、
+    # c2を使う2つ目のテストは失敗する（response.status_codeが200ではなく403となるので）
+    # 一方c1を使う1つ目のテストは成功する。
+    #なので、テストクライアントを作るときはenforce_csrf_checks=Trueを指定する
 
-
-Test about [post_view] function
->>> from django.test.client import Client
->>> c=Client()
->>> response=c.post('/api/post/',dict(title='csrf test2',body='this pass'))
->>> response.status_code
-200
-
-If don't use @csrf_exempt decorator, this test Failed
-because response.status_code Got 403, while above test is OK.
-So, use csrf check client
->>> c=Client(enforce_csrf_checks=True)
->>> response=c.post('/api/post/',dict(title='csrf test2',body='this pass'))
->>> response.status_code
-200
->>> 'status' in jsonobj
-True
-"""
+    pass
 
 from django.test import TestCase
 
