@@ -7,6 +7,7 @@ import roboguice.inject.InjectView;
 import roboguice.util.RoboAsyncTask;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -45,9 +46,9 @@ public class HQTPActivity extends RoboActivity implements OnClickListener {
             gp_task.execute();
             break;
         case R.id.post_button:
-            showAlert("post", "post_button is clicked");
-            // TODO: 投稿UI表示
-            // TODO: HQTPProxy.getInstance().postQuestion(title,body)
+            Intent intent=new Intent();
+            intent.setClassName("org.hqtp.android","org.hqtp.android.PostQuestionActivity");
+            startActivity(intent);
             break;
         default:
             break;
