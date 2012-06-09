@@ -46,9 +46,7 @@ public class HQTPActivity extends RoboActivity implements OnClickListener {
             gp_task.execute();
             break;
         case R.id.post_button:
-            Intent intent=new Intent();
-            intent.setClassName("org.hqtp.android","org.hqtp.android.PostQuestionActivity");
-            startActivity(intent);
+            startActivity(new Intent(this, PostQuestionActivity.class));
             break;
         default:
             break;

@@ -1,9 +1,5 @@
 package org.hqtp.android;
 
-import java.util.List;
-
-import com.google.inject.Inject;
-
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
 import roboguice.util.RoboAsyncTask;
@@ -13,19 +9,16 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.inject.Inject;
+
 public class PostQuestionActivity extends RoboActivity implements
         OnClickListener {
 
-    @InjectView(R.id.post_button)
-    Button post_button;
-    @InjectView(R.id.cancel_buttton)
-    Button cancel_button;
-    @InjectView(R.id.title_text)
-    EditText titleEditText;
-    @InjectView(R.id.body_text)
-    EditText bodyEditText;
-    @Inject
-    HQTPProxy proxy;
+    @InjectView(R.id.post_button) Button    post_button;
+    @InjectView(R.id.cancel_buttton) Button cancel_button;
+    @InjectView(R.id.title_text) EditText   titleEditText;
+    @InjectView(R.id.body_text) EditText    bodyEditText;
+    @Inject HQTPProxy                       proxy;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,16 +43,17 @@ public class PostQuestionActivity extends RoboActivity implements
         }
     }
 
-    private class PostQuestion extends RoboAsyncTask<List<Question>> {
+    private class PostQuestion extends RoboAsyncTask<Void> {
         @Override
-        public List<Question> call() throws Exception {
+        public Void call() throws Exception {
             String title = titleEditText.getText().toString();
             String body = bodyEditText.getText().toString();
             proxy.postQuestion(title, body);
             return null;
         }
+
         @Override
-        protected void onSuccess(List<Question> t) throws Exception {
+        protected void onSuccess(Void t) throws Exception {
             super.onSuccess(t);
             finish();
         }
