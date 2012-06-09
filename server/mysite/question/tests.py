@@ -39,18 +39,6 @@ def test_about_auth_view():
     True
     """
 
-    """
-    >>> clean_questions()
-    >>> from django.test.client import Client
-    >>> import json
-    >>> c=Client(enforce_csrf_checks=True)
-    >>> response=c.get('/api/auth/?access_token=acc')
-    >>> response.status_code
-    200
-    >>> jsonobj=json.loads(response.content)
-    >>> 'status' in jsonobj
-    True
-    """
     pass
 
 def test_about_get_view():
