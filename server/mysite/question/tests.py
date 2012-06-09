@@ -152,7 +152,13 @@ def test_about_csrf():
     pass
 
 from django.test import TestCase
+import unittest
+import doctest
+import mysite.question.twutil.tw_util as tw_util
 
+def load_tests(loader, tests, ignore):
+    tests.addTests(doctest.DocTestSuite(tw_util))
+    return tests
 
 class SimpleTest(TestCase):
     def test_basic_addition(self):
