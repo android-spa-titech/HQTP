@@ -155,9 +155,13 @@ from django.test import TestCase
 import unittest
 import doctest
 import mysite.question.twutil.tw_util as tw_util
+import mysite.question.views as views
+import mysite.question.admin as admin
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(tw_util))
+    tests.addTests(doctest.DocTestSuite(views))
+    tests.addTests(doctest.DocTestSuite(admin))
     return tests
 
 class SimpleTest(TestCase):

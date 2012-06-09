@@ -75,3 +75,7 @@ def post_view(request):
         return json_response()
     else:
         return json_response_forbidden()
+
+def _test():
+    import doctest
+    doctest.testmod()
