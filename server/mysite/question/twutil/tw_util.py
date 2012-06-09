@@ -15,10 +15,16 @@ def make_api(user_key,user_secret):
 def get_vc(user_key,user_secret):
     """
     >>> import consumer_info as ci
-    >>> get_vc(ci.spa_key,ci.spa_secret)
-    {'screen_name': 'android_spa', 'id': 580619600, 'name': 'android_spa'}
-    >>> get_vc('dummy key','dummy secret')
-    {}
+    >>> vc=get_vc(ci.spa_key,ci.spa_secret)
+    >>> vc['id']==580619600
+    True
+    >>> vc['screen_name']==u'android_spa'
+    True
+    >>> vc['name']==u'android_spa'
+    True
+    >>> vc=get_vc('dummy key','dummy secret')
+    >>> vc=={}
+    True
     """
     api=make_api(user_key,user_secret)
     vc=api.verify_credentials()
