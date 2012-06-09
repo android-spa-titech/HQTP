@@ -5,7 +5,40 @@ def clean_questions():
     from mysite.question.models import Question
     Question.objects.all().delete()
 
+def clean_users():
+    """ before test, call this method for clear users """
+    from django.contrib.auth.models import User
+    User.objects.exclude(pk=1).delete()
+
 def test_about_auth_view():
+    """
+    >>> clean_users()
+    >>> from django.test.client import Client    
+    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
+    >>> import json
+    >>> c=Client(enforce_csrf_checks=True)
+    >>> url='/api/auth/?access_token_key=%s&access_token_secret=%s' % (spa_key, spa_secret)
+    >>> response=c.get(url)
+    >>> jobj=json.loads(response.content)
+    >>> jobj['status']=='OK'
+    True
+    >>> jobj['created']
+    True
+    >>> 
+    >>> response=c.get(url)
+    >>> jobj=json.loads(response.content)
+    >>> jobj['status']=='OK'
+    True
+    >>> jobj['created']
+    False
+    >>> 
+    >>> url='/api/auth/?access_token_key=%s&access_token_secret=%s' % ('dummy key', 'dummy secret')
+    >>> response=c.get(url)
+    >>> jobj=json.loads(response.content)
+    >>> jobj['status']=='Not Found'
+    True
+    """
+
     """
     >>> clean_questions()
     >>> from django.test.client import Client
