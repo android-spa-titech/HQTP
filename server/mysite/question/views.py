@@ -26,13 +26,33 @@ def json_response_forbidden(context={}):
     return HttpResponseForbidden(convert_context_to_json(context),mimetype='application/json')
 
 def auth_view(request):
-    access_token=request.GET['access_token']
-    user_name=access_token+'_name'
+    if 'access_token' in request.GET:
+        # old api version
+        secret=request.GET['access_token']
+        user_name=secret+'_name'
+        try:
+            user=User.objects.get(username=user_name)
+            created=False
+        except User.DoesNotExist:
+            user=User.objects.create_user(user_name,'',secret)
+            created=True
+            
+        context=dict(created=created)
+        return json_response(context)
+
+    from twutil.tw_util import get_vc
+
+    key=request.GET['access_token_key']    
+    secret=request.GET['access_token_secret']
+    vc=get_vc(key,secret)
+    if vc=={}:
+        return json_response_not_found()
+    user_name=vc['id']
     try:
         user=User.objects.get(username=user_name)
         created=False
-    except:
-        user=User.objects.create_user(user_name,'',access_token)
+    except User.DoesNotExist:
+        user=User.objects.create_user(user_name,'',secret)
         created=True
 
     context=dict(created=created)
@@ -55,3 +75,7 @@ def post_view(request):
         return json_response()
     else:
         return json_response_forbidden()
+
+def _test():
+    import doctest
+    doctest.testmod()
