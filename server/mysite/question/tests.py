@@ -48,12 +48,10 @@ def test_about_get_view():
     >>> import json
     >>> c=Client(enforce_csrf_checks=True)
     >>> response=c.get('/api/get/')
-    >>> response.status_code
-    200
-    >>> jsonobj=json.loads(response.content)
-    >>> 'status' in jsonobj
+    >>> jobj=json.loads(response.content)
+    >>> jobj['status']=='OK'
     True
-    >>> 'posts' in jsonobj
+    >>> jobj['posts']==[]
     True
     """    
     pass
@@ -65,20 +63,23 @@ def test_about_post():
     >>>
     >>> clean_questions()
     >>> from django.test.client import Client
+    >>> import json
     >>> 
     >>> c=Client(enforce_csrf_checks=True)
     >>> 
     >>> # getは認証の必要がありません
     >>> response=c.get('/api/get/')
-    >>> response.content
-    '{"status": "OK", "posts": []}'
-    >>> 
+    >>> jobj=json.loads(response.content)
+    >>> jobj['status']=='OK'
+    True
+    >>> jobj['posts']==[]
+    True
     >>> 
     >>> # postはログインしていないとできません（403 Forbidden）
     >>> response=c.post('/api/post/',dict(title='before login',body='cannot post'))
-    >>> response.content
-    '{"status": "Forbidden"}'
-    >>> 
+    >>> jobj=json.loads(response.content)
+    >>> jobj['status']=='Forbidden'
+    True
     >>> 
     >>> # authでユーザーを新規作成しています。
     >>> # access_token=accの場合、
@@ -87,15 +88,18 @@ def test_about_post():
     >>> # すでに同じusernameのユーザーがいた場合、
     >>> # createdはfalseになります
     >>> response=c.get('/api/auth/?access_token=acc3')
-    >>> response.content
-    '{"status": "OK", "created": true}'
+    >>> jobj=json.loads(response.content)
+    >>> jobj['status']=='OK'
+    True
+    >>> jobj['created']
+    True
     >>> 
     >>> 
     >>> # authをしただけでは、まだpostできません
     >>> response=c.post('/api/post/',dict(title='before login',body='cannot post'))
-    >>> response.content
-    '{"status": "Forbidden"}'
-    >>> 
+    >>> jobj=json.loads(response.content)
+    >>> jobj['status']=='Forbidden'
+    True
     >>> 
     >>> # ログインはusernameとpasswordを指定して行います。
     >>> # 戻り値がTrueならログイン成功です。
@@ -104,21 +108,25 @@ def test_about_post():
     >>> 
     >>> # ログインして始めてpostできます
     >>> response=c.post('/api/post/',dict(title='after login',body='can post'))
-    >>> response.content
-    '{"status": "OK"}'
-    >>> 
+    >>> jobj=json.loads(response.content)
+    >>> jobj['status']=='OK'
+    True
     >>> 
     >>> # getで確かめてみると、確かに投稿が反映されています。
     >>> response=c.get('/api/get/')
-    >>> response.content
-    '{"status": "OK", "posts": [{"body": "can post", "title": "after login"}]}'
+    >>> jobj=json.loads(response.content)
+    >>> jobj['status']=='OK'
+    True
+    >>> jobj['posts']==[dict(title='after login', body='can post')]
+    True
     >>> 
     >>>
     >>> # ログアウトしてpostできなくなることを確認します
     >>> c.logout()
     >>> response=c.post('/api/post/',dict(title='after logout',body='cannot post'))
-    >>> response.content
-    '{"status": "Forbidden"}'
+    >>> jobj=json.loads(response.content)
+    >>> jobj['status']=='Forbidden'
+    True
     """
     pass
 
@@ -126,13 +134,16 @@ def test_about_csrf():
     """
     >>> clean_questions()
     >>> from django.test.client import Client
+    >>> import json
+    >>> 
     >>> c1=Client()
     >>> response=c1.get('/api/auth/?access_token=acc')
     >>> c1.login(username='acc_name',password='acc')
     True
     >>> response=c1.post('/api/post/',dict(title='csrf test2',body='this pass'))
-    >>> response.status_code
-    200
+    >>> jobj=json.loads(response.content)
+    >>> jobj['status']=='OK'
+    True
     >>> 
     >>> 
     >>> c2=Client(enforce_csrf_checks=True)
@@ -140,8 +151,9 @@ def test_about_csrf():
     >>> c2.login(username='acc2_name',password='acc2')
     True
     >>> response=c2.post('/api/post/',dict(title='csrf test2',body='this pass'))
-    >>> response.status_code
-    200
+    >>> jobj=json.loads(response.content)
+    >>> jobj['status']=='OK'
+    True
     """
 
     # もしviews.pyのpost_viewに@csrf_exemptデコレーターをつけないと、
