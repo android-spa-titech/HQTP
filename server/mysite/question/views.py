@@ -33,7 +33,7 @@ def auth_view(request):
         try:
             user=User.objects.get(username=user_name)
             created=False
-        except:
+        except User.DoesNotExist:
             user=User.objects.create_user(user_name,'',secret)
             created=True
             
@@ -51,7 +51,7 @@ def auth_view(request):
     try:
         user=User.objects.get(username=user_name)
         created=False
-    except:
+    except User.DoesNotExist:
         user=User.objects.create_user(user_name,'',secret)
         created=True
 
