@@ -8,3 +8,12 @@ class QuestionAdmin(admin.ModelAdmin):
     date_hierarchy='posted_at'
 
 admin.site.register(Question,QuestionAdmin)
+
+def dummytest():
+    """
+    >>> 1==1
+    True
+    """
+def _test():
+    import doctest
+    doctest.testmod()
