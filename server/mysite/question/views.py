@@ -1,11 +1,13 @@
 # -*- coding:utf-8 -*-
 
-from django.http import HttpResponse,HttpResponseNotFound,HttpResponseForbidden
-from django.shortcuts import render_to_response
+from django.http import (HttpResponse,
+                         HttpResponseNotFound,
+                         HttpResponseForbidden)
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 import json
 from mysite.question.models import Question
+
 
 def convert_context_to_json(context):
     "Convert the context dictionary into a JSON object"
@@ -15,66 +17,78 @@ def convert_context_to_json(context):
     # -- can be serialized as JSON.
     return json.dumps(context)
 
+
 def json_response(context={}):
-    context['status']='OK'
-    return HttpResponse(convert_context_to_json(context),mimetype='application/json')
+    context['status'] = 'OK'
+    return HttpResponse(convert_context_to_json(context),
+                        mimetype='application/json')
+
+
 def json_response_not_found(context={}):
-    context['status']='Not Found'
-    return HttpResponseNotFound(convert_context_to_json(context),mimetype='application/json')
+    context['status'] = 'Not Found'
+    return HttpResponseNotFound(convert_context_to_json(context),
+                                mimetype='application/json')
+
+
 def json_response_forbidden(context={}):
-    context['status']='Forbidden'
-    return HttpResponseForbidden(convert_context_to_json(context),mimetype='application/json')
+    context['status'] = 'Forbidden'
+    return HttpResponseForbidden(convert_context_to_json(context),
+                                 mimetype='application/json')
+
 
 def auth_view(request):
     if 'access_token' in request.GET:
         # old api version
-        secret=request.GET['access_token']
-        user_name=secret+'_name'
+        secret = request.GET['access_token']
+        user_name = secret + '_name'
         try:
-            user=User.objects.get(username=user_name)
-            created=False
+            User.objects.get(username=user_name)
+            created = False
         except User.DoesNotExist:
-            user=User.objects.create_user(user_name,'',secret)
-            created=True
-            
-        context=dict(created=created)
+            User.objects.create_user(user_name, '', secret)
+            created = True
+
+        context = dict(created=created)
         return json_response(context)
 
     from twutil.tw_util import get_vc
 
-    key=request.GET['access_token_key']    
-    secret=request.GET['access_token_secret']
-    vc=get_vc(key,secret)
-    if vc=={}:
+    key = request.GET['access_token_key']
+    secret = request.GET['access_token_secret']
+    vc = get_vc(key, secret)
+    if vc == {}:
         return json_response_not_found()
-    user_name=vc['id']
+    user_name = vc['id']
     try:
-        user=User.objects.get(username=user_name)
-        created=False
+        User.objects.get(username=user_name)
+        created = False
     except User.DoesNotExist:
-        user=User.objects.create_user(user_name,'',secret)
-        created=True
+        User.objects.create_user(user_name, '', secret)
+        created = True
 
-    context=dict(created=created)
+    context = dict(created=created)
     return json_response(context)
 
+
 def get_view(request):
-    posts=[dict(title=q.title, body=q.body) for q in Question.objects.all()]
-    context=dict(
+    posts = [dict(title=q.title, body=q.body) for q in Question.objects.all()]
+    context = dict(
        posts=posts
     )
-    return json_response(context) 
+    return json_response(context)
+
 
 @csrf_exempt
 def post_view(request):
-    title=request.POST['title']
-    body=request.POST['body']
-    added_by=request.user
+    title = request.POST['title']
+    body = request.POST['body']
+    added_by = request.user
     if added_by.is_authenticated():
         Question.objects.create(title=title, body=body, added_by=added_by)
         return json_response()
     else:
         return json_response_forbidden()
+
 
 def _test():
     import doctest

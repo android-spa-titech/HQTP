@@ -1,23 +1,27 @@
 # -*- coding:utf-8 -*-
 
+
 def clean_questions():
     """ before test, call this method for clear questions """
     from mysite.question.models import Question
     Question.objects.all().delete()
+
 
 def clean_users():
     """ before test, call this method for clear users """
     from django.contrib.auth.models import User
     User.objects.exclude(pk=1).delete()
 
+
 def test_about_auth_view():
     """
     >>> clean_users()
-    >>> from django.test.client import Client    
+    >>> from django.test.client import Client
     >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
     >>> c=Client(enforce_csrf_checks=True)
-    >>> url='/api/auth/?access_token_key=%s&access_token_secret=%s' % (spa_key, spa_secret)
+    >>> url_template='/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url=url_template % (spa_key, spa_secret)
     >>> response=c.get(url)
     >>> jobj=json.loads(response.content)
     >>> jobj['status']=='OK'
@@ -32,7 +36,8 @@ def test_about_auth_view():
     >>> jobj['created']
     False
     >>> 
-    >>> url='/api/auth/?access_token_key=%s&access_token_secret=%s' % ('dummy key', 'dummy secret')
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url = url_template % ('dummy key', 'dummy secret')
     >>> response=c.get(url)
     >>> jobj=json.loads(response.content)
     >>> jobj['status']=='Not Found'
@@ -40,6 +45,7 @@ def test_about_auth_view():
     """
 
     pass
+
 
 def test_about_get_view():
     """
@@ -55,6 +61,7 @@ def test_about_get_view():
     True
     """    
     pass
+
 
 def test_about_post():
     """
@@ -130,6 +137,7 @@ def test_about_post():
     """
     pass
 
+
 def test_about_csrf():
     """
     >>> clean_questions()
@@ -163,18 +171,20 @@ def test_about_csrf():
 
     pass
 
+
 from django.test import TestCase
-import unittest
 import doctest
 import mysite.question.twutil.tw_util as tw_util
 import mysite.question.views as views
 import mysite.question.admin as admin
+
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(tw_util))
     tests.addTests(doctest.DocTestSuite(views))
     tests.addTests(doctest.DocTestSuite(admin))
     return tests
+
 
 class SimpleTest(TestCase):
     def test_basic_addition(self):
