@@ -28,14 +28,14 @@ def test_about_auth_view():
     True
     >>> jobj['created']
     True
-    >>> 
+    >>> # user is crated only first time
     >>> response=c.get(url)
     >>> jobj=json.loads(response.content)
     >>> jobj['status']=='OK'
     True
     >>> jobj['created']
     False
-    >>> 
+    >>> # if send dummy access token, return Not Found
     >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
     >>> url = url_template % ('dummy key', 'dummy secret')
     >>> response=c.get(url)
@@ -59,7 +59,7 @@ def test_about_get_view():
     True
     >>> jobj['posts']==[]
     True
-    """    
+    """
     pass
 
 
@@ -67,13 +67,10 @@ def test_about_post():
     """
     >>> # このテストはすぐに廃止されるでしょう
     >>> # Djangoにおける認証の流れと、認証するとpostができる様子を示すための草案です。
-    >>>
     >>> clean_questions()
     >>> from django.test.client import Client
     >>> import json
-    >>> 
     >>> c=Client(enforce_csrf_checks=True)
-    >>> 
     >>> # getは認証の必要がありません
     >>> response=c.get('/api/get/')
     >>> jobj=json.loads(response.content)
@@ -81,13 +78,12 @@ def test_about_post():
     True
     >>> jobj['posts']==[]
     True
-    >>> 
     >>> # postはログインしていないとできません（403 Forbidden）
-    >>> response=c.post('/api/post/',dict(title='before login',body='cannot post'))
+    >>> response=c.post('/api/post/',
+    ...                 dict(title='before login', body='cannot post'))
     >>> jobj=json.loads(response.content)
     >>> jobj['status']=='Forbidden'
     True
-    >>> 
     >>> # authでユーザーを新規作成しています。
     >>> # access_token=accの場合、
     >>> # 新しく作られるユーザーはusername=acc_name,
@@ -100,25 +96,22 @@ def test_about_post():
     True
     >>> jobj['created']
     True
-    >>> 
-    >>> 
     >>> # authをしただけでは、まだpostできません
-    >>> response=c.post('/api/post/',dict(title='before login',body='cannot post'))
+    >>> response=c.post('/api/post/',
+    ...                 dict(title='before login', body='cannot post'))
     >>> jobj=json.loads(response.content)
     >>> jobj['status']=='Forbidden'
     True
-    >>> 
     >>> # ログインはusernameとpasswordを指定して行います。
     >>> # 戻り値がTrueならログイン成功です。
     >>> c.login(username='acc3_name',password='acc3')
     True
-    >>> 
     >>> # ログインして始めてpostできます
-    >>> response=c.post('/api/post/',dict(title='after login',body='can post'))
+    >>> response=c.post('/api/post/',
+    ...                 dict(title='after login',body='can post'))
     >>> jobj=json.loads(response.content)
     >>> jobj['status']=='OK'
     True
-    >>> 
     >>> # getで確かめてみると、確かに投稿が反映されています。
     >>> response=c.get('/api/get/')
     >>> jobj=json.loads(response.content)
@@ -126,11 +119,10 @@ def test_about_post():
     True
     >>> jobj['posts']==[dict(title='after login', body='can post')]
     True
-    >>> 
-    >>>
     >>> # ログアウトしてpostできなくなることを確認します
     >>> c.logout()
-    >>> response=c.post('/api/post/',dict(title='after logout',body='cannot post'))
+    >>> response=c.post('/api/post/',
+    ...                 dict(title='after logout',body='cannot post'))
     >>> jobj=json.loads(response.content)
     >>> jobj['status']=='Forbidden'
     True
@@ -143,22 +135,21 @@ def test_about_csrf():
     >>> clean_questions()
     >>> from django.test.client import Client
     >>> import json
-    >>> 
     >>> c1=Client()
     >>> response=c1.get('/api/auth/?access_token=acc')
     >>> c1.login(username='acc_name',password='acc')
     True
-    >>> response=c1.post('/api/post/',dict(title='csrf test2',body='this pass'))
+    >>> response=c1.post('/api/post/',
+    ...                  dict(title='csrf test2',body='this pass'))
     >>> jobj=json.loads(response.content)
     >>> jobj['status']=='OK'
     True
-    >>> 
-    >>> 
     >>> c2=Client(enforce_csrf_checks=True)
     >>> response=c2.get('/api/auth/?access_token=acc2')
     >>> c2.login(username='acc2_name',password='acc2')
     True
-    >>> response=c2.post('/api/post/',dict(title='csrf test2',body='this pass'))
+    >>> response=c2.post('/api/post/',
+    ...                  dict(title='csrf test2',body='this pass'))
     >>> jobj=json.loads(response.content)
     >>> jobj['status']=='OK'
     True
