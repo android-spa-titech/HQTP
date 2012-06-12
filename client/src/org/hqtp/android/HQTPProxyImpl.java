@@ -47,7 +47,6 @@ public class HQTPProxyImpl implements HQTPProxy {
 
     @Override
     public boolean authenticate(String access_token_key, String access_token_secret) {
-        // TODO: implement
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("access_token_key", access_token_key);
         params.put("access_token_secret", access_token_secret);
