@@ -5,9 +5,7 @@ import java.util.List;
 public interface HQTPProxy {
 
     // Instance methods
-    public abstract HQTPProxy setAccessToken(String access_token);
-
-    public abstract boolean authenticate();
+    public abstract boolean authenticate(String access_token_key, String access_token_secret);
 
     public abstract boolean postQuestion(String title, String body);
 

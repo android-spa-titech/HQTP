@@ -45,17 +45,23 @@ public class HQTPProxyImpl implements HQTPProxy {
         this.api_gateway = api_gateway;
     }
 
-    // Instance methods
     @Override
-    public HQTPProxy setAccessToken(String access_token) {
-        // TODO: implement
-        return this;
-    }
-
-    @Override
-    public boolean authenticate() {
-        // TODO: implement
-        return false;
+    public boolean authenticate(String access_token_key, String access_token_secret) {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("access_token_key", access_token_key);
+        params.put("access_token_secret", access_token_secret);
+        boolean res = false;
+        try {
+            HttpResponse response = sendByGet("auth/", params);
+            JSONObject json = toJSON(response.getEntity());
+            if (json.getString("status") == "OK") {
+                res = true;
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+        }
+        return res;
     }
 
     @Override
