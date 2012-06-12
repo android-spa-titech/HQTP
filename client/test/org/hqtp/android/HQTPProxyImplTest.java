@@ -4,6 +4,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.client.methods.HttpUriRequest;
@@ -33,9 +34,13 @@ public class HQTPProxyImplTest {
         proxy.authenticate("DUMMY_ACCESS_TOKEN_KEY", "DUMMY_ACCESS_TOKEN_SECRET");
 
         HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
-        assertThat(sentHttpRequest.getURI(),
-                equalTo(URI.create("http://www.hqtp.org/api/auth/?access_token_key=DUMMY_ACCESS_TOKEN_KEY&access_token_secret=DUMMY_ACCESS_TOKEN_SECRET")));
-
+        assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
+        assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/auth/"));
+        String[] queries = sentHttpRequest.getURI().getQuery().split("&");
+        Assert.assertTrue("queries contains access_token_key",
+                Arrays.asList(queries).contains("access_token_key=DUMMY_ACCESS_TOKEN_KEY"));
+        Assert.assertTrue("queries contains access_token_secret",
+                Arrays.asList(queries).contains("access_token_secret=DUMMY_ACCESS_TOKEN_SECRET"));
     }
 
     @Test
