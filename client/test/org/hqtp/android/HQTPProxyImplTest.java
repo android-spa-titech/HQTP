@@ -22,7 +22,6 @@ public class HQTPProxyImplTest {
 
     @Before
     public void setUp() throws Exception {
-        proxy.setAccessToken("DUMMY_ACCESS_TOKEN");
     }
 
     @Test
@@ -31,11 +30,11 @@ public class HQTPProxyImplTest {
         Robolectric.clearPendingHttpResponses();
         Robolectric.addPendingHttpResponse(200, "{ \"status\": \"OK\" }");
 
-        proxy.authenticate();
+        proxy.authenticate("DUMMY_ACCESS_TOKEN_KEY", "DUMMY_ACCESS_TOKEN_SECRET");
 
         HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
         assertThat(sentHttpRequest.getURI(),
-                equalTo(URI.create("www.hqtp.org/api/auth?access_token=DUMMY_ACCESS_TOKEN")));
+                equalTo(URI.create("http://www.hqtp.org/api/auth/?access_token_key=DUMMY_ACCESS_TOKEN_KEY&access_token_secret=DUMMY_ACCESS_TOKEN_SECRET")));
 
     }
 

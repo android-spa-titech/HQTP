@@ -37,7 +37,7 @@ public class HQTPActivity extends RoboActivity implements OnClickListener {
         case R.id.authentication_button:
             showAlert("authentication", "authentication_button is clicked");
             // TODO: アクセストークンを取得
-            // TODO: HQTPProxy.getInstance().setAccessToken(access_token).authenticate();
+            // TODO: proxy.authenticate(access_token_key,access_token_secret);
             // TODO: 戻り値に応じてダイアログ表示
             break;
         case R.id.getallpost_button:
@@ -46,8 +46,6 @@ public class HQTPActivity extends RoboActivity implements OnClickListener {
             break;
         case R.id.post_button:
             showAlert("post", "post_button is clicked");
-            // TODO: 投稿UI表示
-            // TODO: HQTPProxy.getInstance().postQuestion(title,body)
             break;
         default:
             break;
