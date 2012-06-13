@@ -15,6 +15,7 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
+        loginButton.setOnClickListener(this);
     }
 
     @Override
