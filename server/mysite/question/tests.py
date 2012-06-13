@@ -188,6 +188,7 @@ def test_about_csrf():
 
 def test_about_login():
     """
+    >>> clean_questions()
     >>> from django.test.client import Client
     >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
