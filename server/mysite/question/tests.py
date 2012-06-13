@@ -186,6 +186,29 @@ def test_about_csrf():
     pass
 
 
+def test_about_login():
+    """
+    >>> from django.test.client import Client
+    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
+    >>> import json
+    >>> c = Client(enforce_csrf_checks=True)
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url = url_template % (spa_key, spa_secret)
+    >>> r = c.get(url)
+    >>> j = json.loads(r.content)
+    >>> j['status'] == 'OK'
+    True
+    >>> r = c.post('/api/post/', dict(title='test', body='hello world'))
+    >>> r = c.get('/api/get/')
+    >>> j = json.loads(r.content)
+    >>> j['status'] == 'OK'
+    True
+    >>> j['posts'] == [dict(title='test', body='hello world')]
+    True
+    """
+    # ログインと認証が同時にできるようになりました
+
+
 from django.test import TestCase
 import doctest
 import mysite.question.twutil.tw_util as tw_util
