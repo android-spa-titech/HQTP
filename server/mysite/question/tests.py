@@ -10,7 +10,7 @@ def clean_questions():
 def clean_users():
     """ before test, call this method for clear users """
     from django.contrib.auth.models import User
-    User.objects.exclude(pk=1).delete()
+    User.objects.all().delete()
 
 
 def test_about_auth_view():
