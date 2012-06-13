@@ -11,6 +11,14 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationContext;
 
 public class LoginActivity extends RoboActivity {
+    //TODO: リクエストトークンの渡し方の改善
+    //AuthorizationCallBackActivityにリクエストトークンを渡すために
+    //request_tokenをstaticに用意している。
+    //あまりいい方法とは思えないので何かいい案があれば変えて欲しい。
+    private static RequestToken request_token;
+    public static RequestToken getRequestToken() {
+        return request_token;
+    }
     
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,8 +36,8 @@ public class LoginActivity extends RoboActivity {
             OAuthAuthorization oauth = new OAuthAuthorization(config);
             oauth.setOAuthConsumer("key", "secret");  //TODO: コンシューマキーの指定
             try {
-                RequestToken req_token = oauth.getOAuthRequestToken(callback_url);
-                String uri = req_token.getAuthorizationURL();
+                request_token = oauth.getOAuthRequestToken(callback_url);
+                String uri = request_token.getAuthorizationURL();
                 startActivityForResult(new Intent(Intent.ACTION_VIEW, Uri.parse(uri)), 0);
             } catch (Exception e) {
                 e.printStackTrace();
