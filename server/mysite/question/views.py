@@ -5,6 +5,7 @@ from django.http import (HttpResponse,
                          HttpResponseForbidden)
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
 import json
 from mysite.question.models import Question
 
@@ -59,12 +60,28 @@ def auth_view(request):
     if vc == {}:
         return json_response_not_found()
     user_name = vc['id']
-    try:
-        User.objects.get(username=user_name)
-        created = False
-    except User.DoesNotExist:
-        User.objects.create_user(user_name, '', secret)
-        created = True
+
+    auth_user = authenticate(username=user_name, password=secret)
+    if auth_user is not None:
+        if auth_user.is_active:
+            # Log in successful
+            created = False
+            login(request, auth_user)
+        else:
+            # User is deleted
+            return json_response_not_found()
+    else:
+        # Log in failed
+        try:
+            # Password is incorrect
+            User.objects.get(username=user_name)
+            return json_response_forbidden()
+        except User.DoesNotExist:
+            # User not found
+            new_user = User.objects.create_user(user_name, '', secret)
+            created = True
+            new_user = authenticate(username=user_name, password=secret)
+            login(request, new_user)
 
     context = dict(created=created)
     return json_response(context)
