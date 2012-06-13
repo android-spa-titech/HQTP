@@ -23,6 +23,19 @@
         </activity>
         <activity android:name=".PostQuestionActivity"></activity>
         <activity android:name=".ListQuestionActivity"></activity>
+        <activity
+            android:name=".AuthorizationCallBackActivity"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="hqtp" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>
