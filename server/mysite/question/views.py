@@ -2,10 +2,12 @@
 
 from django.http import (HttpResponse,
                          HttpResponseNotFound,
-                         HttpResponseForbidden)
+                         HttpResponseForbidden,
+                         HttpResponseBadRequest)
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
+from django.utils.datastructures import MultiValueDictKeyError
 import json
 from mysite.question.models import Question
 
@@ -37,11 +39,22 @@ def json_response_forbidden(context={}):
                                  mimetype='application/json')
 
 
+def json_response_bad_request(context={}):
+    context['status'] = 'Bad Request'
+    return HttpResponseBadRequest(convert_context_to_json(context),
+                                  mimetype='application/json')
+
+
 def auth_view(request):
     from twutil.tw_util import get_vc
 
-    key = request.GET['access_token_key']
-    secret = request.GET['access_token_secret']
+    try:
+        key = request.GET['access_token_key']
+        secret = request.GET['access_token_secret']
+    except MultiValueDictKeyError:
+        # bad request
+        return json_response_bad_request()
+
     vc = get_vc(key, secret)
     if vc == {}:
         return json_response_not_found()
@@ -83,8 +96,13 @@ def get_view(request):
 
 @csrf_exempt
 def post_view(request):
-    title = request.POST['title']
-    body = request.POST['body']
+    try:
+        title = request.POST['title']
+        body = request.POST['body']
+    except MultiValueDictKeyError:
+        # bad request
+        return json_response_bad_request()
+
     added_by = request.user
     if added_by.is_authenticated():
         Question.objects.create(title=title, body=body, added_by=added_by)
