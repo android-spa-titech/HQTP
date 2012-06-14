@@ -47,6 +47,15 @@ def test_about_auth_view():
     >>> jobj=json.loads(response.content)
     >>> jobj['status']=='Not Found'
     True
+
+    # some dummy access token, cause server error
+    # catch exception and return server error
+    >>> url = url_template % ('spam', 'egg')
+    >>> c = Client(enforce_csrf_checks=True)
+    >>> response = c.get(url)
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'Server Error'
+    True
     """
 
     pass
@@ -186,6 +195,51 @@ def test_about_login():
     True
     """
     # ログインと認証が同時にできるようになりました
+
+
+def test_about_bad_request():
+    """
+    >>> from django.test.client import Client
+    >>> import json
+    >>> from question.twutil.consumer_info import spa_key, spa_secret
+
+    >>> c = Client(enforce_csrf_checks=True)
+
+    # this is bad request.
+    # because does not send access_token_key,access_token_secret
+    # so server return Bad Request
+    >>> url_template='/api/auth/?access_token=%s'
+    >>> url = url_template % 'ACC'
+    >>> response = c.get(url)
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'Bad Request'
+    True
+
+    # to test bad request of post, login
+    >>> url_template='/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url = url_template % (spa_key, spa_secret)
+    >>> response = c.get(url)
+
+    # this is bad request.
+    # because does not send body
+    # so server return Bad Request
+    >>> response =c.post('/api/post/',
+    ...                  dict(title='test none boddy'))
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'Bad Request'
+    True
+
+    # this is bad request.
+    # because does not send title
+    # so server return Bad Request
+    >>> response = c.post('/api/post/',
+    ...                   dict(body='test none title'))
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'Bad Request'
+    True
+    """
+    # Must send essential parameter
+    # if does't send, server return Bad Request
 
 
 from django.test import TestCase

@@ -3,7 +3,8 @@
 from django.http import (HttpResponse,
                          HttpResponseNotFound,
                          HttpResponseForbidden,
-                         HttpResponseBadRequest)
+                         HttpResponseBadRequest,
+                         HttpResponseServerError)
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
@@ -45,6 +46,12 @@ def json_response_bad_request(context={}):
                                   mimetype='application/json')
 
 
+def json_response_server_error(context={}):
+    context['status'] = 'Server Error'
+    return HttpResponseServerError(convert_context_to_json(context),
+                                   mimetype='application/json')
+
+
 def auth_view(request):
     from twutil.tw_util import get_vc
 
@@ -55,7 +62,13 @@ def auth_view(request):
         # bad request
         return json_response_bad_request()
 
-    vc = get_vc(key, secret)
+    try:
+        vc = get_vc(key, secret)
+    except TypeError:
+        # Error reason is not well known
+        # sending dummy access token key/secret causes error
+        return json_response_server_error()
+
     if vc == {}:
         return json_response_not_found()
     user_name = vc['id']
