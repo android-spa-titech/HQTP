@@ -38,20 +38,6 @@ def json_response_forbidden(context={}):
 
 
 def auth_view(request):
-    if 'access_token' in request.GET:
-        # old api version
-        secret = request.GET['access_token']
-        user_name = secret + '_name'
-        try:
-            User.objects.get(username=user_name)
-            created = False
-        except User.DoesNotExist:
-            User.objects.create_user(user_name, '', secret)
-            created = True
-
-        context = dict(created=created)
-        return json_response(context)
-
     from twutil.tw_util import get_vc
 
     key = request.GET['access_token_key']
