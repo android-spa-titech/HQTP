@@ -73,11 +73,14 @@ def test_about_get_view():
 
 def test_about_post():
     """
-    # このテストはすぐに廃止されるでしょう
-    # Djangoにおける認証の流れと、認証するとpostができる様子を示すための草案です。
+    # postが認証しないとできないことを確かめるテスト
+    # authする前にpostをするとForbiddenが返る
+    # authした後にpostをするとOKが返る
+
     >>> clean_questions()
 
     >>> from django.test.client import Client
+    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
 
     >>> c=Client(enforce_csrf_checks=True)
@@ -90,41 +93,24 @@ def test_about_post():
     >>> jobj['posts']==[]
     True
 
-    # postはログインしていないとできません（Forbidden）
+    # postはauthしていないとできません（Forbidden）
     >>> response=c.post('/api/post/',
     ...                 dict(title='before login', body='cannot post'))
     >>> jobj=json.loads(response.content)
     >>> jobj['status']=='Forbidden'
     True
 
-    # authでユーザーを新規作成しています。
-    # access_token=accの場合、
-    # 新しく作られるユーザーはusername=acc_name,
-    # password=accとなっています。
-    # すでに同じusernameのユーザーがいた場合、
-    # createdはFalseになります
-    >>> response=c.get('/api/auth/?access_token=acc3')
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
-    True
-    >>> jobj['created']
+    # authをします
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url = url_template % (spa_key, spa_secret)
+    >>> response = c.get(url)
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'OK'
     True
 
-    # authをしただけでは、まだpostできません
+    # authして始めてpostできます
     >>> response=c.post('/api/post/',
-    ...                 dict(title='before login', body='cannot post'))
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='Forbidden'
-    True
-
-    # ログインはusernameとpasswordを指定して行います。
-    # 戻り値がTrueならログイン成功です。
-    >>> c.login(username='acc3_name',password='acc3')
-    True
-
-    # ログインして始めてpostできます
-    >>> response=c.post('/api/post/',
-    ...                 dict(title='after login',body='can post'))
+    ...                 dict(title='after auth',body='can post'))
     >>> jobj=json.loads(response.content)
     >>> jobj['status']=='OK'
     True
@@ -134,15 +120,7 @@ def test_about_post():
     >>> jobj=json.loads(response.content)
     >>> jobj['status']=='OK'
     True
-    >>> jobj['posts']==[dict(title='after login', body='can post')]
-    True
-
-    # ログアウトしてpostできなくなることを確認します
-    >>> c.logout()
-    >>> response=c.post('/api/post/',
-    ...                 dict(title='after logout',body='cannot post'))
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='Forbidden'
+    >>> jobj['posts']==[dict(title='after auth', body='can post')]
     True
     """
     pass
@@ -153,13 +131,15 @@ def test_about_csrf():
     >>> clean_questions()
 
     >>> from django.test.client import Client
+    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
+
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url = url_template % (spa_key, spa_secret)
 
     # don't use csrf checking
     >>> c1=Client()
-    >>> response=c1.get('/api/auth/?access_token=acc')
-    >>> c1.login(username='acc_name',password='acc')
-    True
+    >>> response=c1.get(url)
     >>> response=c1.post('/api/post/',
     ...                  dict(title='csrf test2',body='this pass'))
     >>> jobj=json.loads(response.content)
@@ -168,9 +148,7 @@ def test_about_csrf():
 
     # use csrf checking
     >>> c2=Client(enforce_csrf_checks=True)
-    >>> response=c2.get('/api/auth/?access_token=acc2')
-    >>> c2.login(username='acc2_name',password='acc2')
-    True
+    >>> response=c2.get(url)
     >>> response=c2.post('/api/post/',
     ...                  dict(title='csrf test2',body='this pass'))
     >>> jobj=json.loads(response.content)
