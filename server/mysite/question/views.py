@@ -2,10 +2,13 @@
 
 from django.http import (HttpResponse,
                          HttpResponseNotFound,
-                         HttpResponseForbidden)
+                         HttpResponseForbidden,
+                         HttpResponseBadRequest,
+                         HttpResponseServerError)
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
+from django.utils.datastructures import MultiValueDictKeyError
 import json
 from mysite.question.models import Question
 
@@ -37,26 +40,35 @@ def json_response_forbidden(context={}):
                                  mimetype='application/json')
 
 
+def json_response_bad_request(context={}):
+    context['status'] = 'Bad Request'
+    return HttpResponseBadRequest(convert_context_to_json(context),
+                                  mimetype='application/json')
+
+
+def json_response_server_error(context={}):
+    context['status'] = 'Server Error'
+    return HttpResponseServerError(convert_context_to_json(context),
+                                   mimetype='application/json')
+
+
 def auth_view(request):
-    if 'access_token' in request.GET:
-        # old api version
-        secret = request.GET['access_token']
-        user_name = secret + '_name'
-        try:
-            User.objects.get(username=user_name)
-            created = False
-        except User.DoesNotExist:
-            User.objects.create_user(user_name, '', secret)
-            created = True
-
-        context = dict(created=created)
-        return json_response(context)
-
     from twutil.tw_util import get_vc
 
-    key = request.GET['access_token_key']
-    secret = request.GET['access_token_secret']
-    vc = get_vc(key, secret)
+    try:
+        key = request.GET['access_token_key']
+        secret = request.GET['access_token_secret']
+    except MultiValueDictKeyError:
+        # bad request
+        return json_response_bad_request()
+
+    try:
+        vc = get_vc(key, secret)
+    except TypeError:
+        # Error reason is not well known
+        # sending dummy access token key/secret causes error
+        return json_response_server_error()
+
     if vc == {}:
         return json_response_not_found()
     user_name = vc['id']
@@ -97,8 +109,13 @@ def get_view(request):
 
 @csrf_exempt
 def post_view(request):
-    title = request.POST['title']
-    body = request.POST['body']
+    try:
+        title = request.POST['title']
+        body = request.POST['body']
+    except MultiValueDictKeyError:
+        # bad request
+        return json_response_bad_request()
+
     added_by = request.user
     if added_by.is_authenticated():
         Question.objects.create(title=title, body=body, added_by=added_by)
