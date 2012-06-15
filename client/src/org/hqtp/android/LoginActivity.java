@@ -34,7 +34,7 @@ public class LoginActivity extends RoboActivity {
         public Void call() throws Exception {
             Configuration config = ConfigurationContext.getInstance();
             OAuthAuthorization oauth = new OAuthAuthorization(config);
-            oauth.setOAuthConsumer("key", "secret");  //TODO: コンシューマキーの指定
+            oauth.setOAuthConsumer(getString(R.string.consumer_key), getString(R.string.consumer_secret));
             try {
                 request_token = oauth.getOAuthRequestToken(callback_url);
                 String uri = request_token.getAuthorizationURL();

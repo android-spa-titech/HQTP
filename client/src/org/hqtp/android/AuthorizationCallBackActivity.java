@@ -71,7 +71,7 @@ public class AuthorizationCallBackActivity extends RoboActivity {
         Configuration config = ConfigurationContext.getInstance();
         OAuthAuthorization oauth = new OAuthAuthorization(config);
         AccessToken token;
-        oauth.setOAuthConsumer("consumer-key", "consumer-secret"); // TODO: コンシューマキーの指定
+        oauth.setOAuthConsumer(getString(R.string.consumer_key), getString(R.string.consumer_secret));
         try {
             // TODO: アクセストークンを取得するのにリクエストトークンは必要なのか？必要だとしてもっといい渡し方はないのか？調査すべき
             token = oauth.getOAuthAccessToken(LoginActivity.getRequestToken(), uri.getQueryParameter("oauth_verifier"));
