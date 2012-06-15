@@ -179,6 +179,7 @@ def test_about_login():
     >>> from django.test.client import Client
     >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
+
     >>> c = Client(enforce_csrf_checks=True)
     >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
     >>> url = url_template % (spa_key, spa_secret)
@@ -186,6 +187,7 @@ def test_about_login():
     >>> j = json.loads(r.content)
     >>> j['status'] == 'OK'
     True
+
     >>> r = c.post('/api/post/', dict(title='test', body='hello world'))
     >>> r = c.get('/api/get/')
     >>> j = json.loads(r.content)
@@ -208,7 +210,7 @@ def test_about_bad_request():
     # this is bad request.
     # because does not send access_token_key,access_token_secret
     # so server return Bad Request
-    >>> url_template='/api/auth/?access_token=%s'
+    >>> url_template = '/api/auth/?access_token=%s'
     >>> url = url_template % 'ACC'
     >>> response = c.get(url)
     >>> jobj = json.loads(response.content)
@@ -216,15 +218,15 @@ def test_about_bad_request():
     True
 
     # to test bad request of post, login
-    >>> url_template='/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
     >>> url = url_template % (spa_key, spa_secret)
     >>> response = c.get(url)
 
     # this is bad request.
     # because does not send body
     # so server return Bad Request
-    >>> response =c.post('/api/post/',
-    ...                  dict(title='test none boddy'))
+    >>> response = c.post('/api/post/',
+    ...                   dict(title='test none boddy'))
     >>> jobj = json.loads(response.content)
     >>> jobj['status'] == 'Bad Request'
     True
