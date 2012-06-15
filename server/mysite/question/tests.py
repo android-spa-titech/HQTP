@@ -63,21 +63,40 @@ def test_about_auth_view():
 
 def test_about_get_view():
     """
+    # getが認証しないとできないことを確かめるテスト
+    # authする前にgetをするとForbiddenが返る
+    # authした後にgetをするとOKが返る
+
     >>> clean_questions()
 
     >>> from django.test.client import Client
+    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
 
     >>> c=Client(enforce_csrf_checks=True)
-    >>> response=c.get('/api/get/')
 
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
+    # getはauthしていないとできません（Forbidden）
+    >>> response1 = c.get('/api/get/')
+    >>> jobj1 = json.loads(response1.content)
+    >>> jobj1['status'] == 'Forbidden'
     True
-    >>> jobj['posts']==[]
+
+    # authをします
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url = url_template % (spa_key, spa_secret)
+    >>> response2 = c.get(url)
+    >>> jobj2 = json.loads(response2.content)
+    >>> jobj2['status'] == 'OK'
+    True
+
+    # authして始めてgetできます
+    >>> response3 = c.get('/api/get/')
+    >>> jobj3 = json.loads(response3.content)
+    >>> jobj3['status'] == 'OK'
+    True
+    >>> 'posts' in jobj3
     True
     """
-    pass
 
 
 def test_about_post():
@@ -93,14 +112,6 @@ def test_about_post():
     >>> import json
 
     >>> c=Client(enforce_csrf_checks=True)
-
-    # getは認証の必要がありません
-    >>> response=c.get('/api/get/')
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
-    True
-    >>> jobj['posts']==[]
-    True
 
     # postはauthしていないとできません（Forbidden）
     >>> response=c.post('/api/post/',

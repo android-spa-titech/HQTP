@@ -100,6 +100,10 @@ def auth_view(request):
 
 
 def get_view(request):
+    if not request.user.is_authenticated():
+        # get need auth
+        return json_response_forbidden()
+
     posts = [dict(title=q.title, body=q.body) for q in Question.objects.all()]
     context = dict(
        posts=posts
