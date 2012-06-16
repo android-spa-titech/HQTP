@@ -21,31 +21,31 @@ def test_about_auth_view():
     >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
 
-    >>> c=Client(enforce_csrf_checks=True)
-    >>> url_template='/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> c = Client(enforce_csrf_checks=True)
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
 
     # create user first time
-    >>> url=url_template % (spa_key, spa_secret)
-    >>> response=c.get(url)
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
+    >>> url = url_template % (spa_key, spa_secret)
+    >>> response = c.get(url)
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'OK'
     True
     >>> jobj['created']
     True
 
     # user is crated only first time
-    >>> response=c.get(url)
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
+    >>> response = c.get(url)
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'OK'
     True
     >>> jobj['created']
     False
 
     # if send dummy access token, return Not Found
     >>> url = url_template % ('dummy key', 'dummy secret')
-    >>> response=c.get(url)
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='Not Found'
+    >>> response = c.get(url)
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'Not Found'
     True
 
     # some dummy access token, cause server error
@@ -63,21 +63,40 @@ def test_about_auth_view():
 
 def test_about_get_view():
     """
+    # getが認証しないとできないことを確かめるテスト
+    # authする前にgetをするとForbiddenが返る
+    # authした後にgetをするとOKが返る
+
     >>> clean_questions()
 
     >>> from django.test.client import Client
+    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
 
-    >>> c=Client(enforce_csrf_checks=True)
-    >>> response=c.get('/api/get/')
+    >>> c = Client(enforce_csrf_checks=True)
 
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
+    # getはauthしていないとできません（Forbidden）
+    >>> response1 = c.get('/api/get/')
+    >>> jobj1 = json.loads(response1.content)
+    >>> jobj1['status'] == 'Forbidden'
     True
-    >>> jobj['posts']==[]
+
+    # authをします
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url = url_template % (spa_key, spa_secret)
+    >>> response2 = c.get(url)
+    >>> jobj2 = json.loads(response2.content)
+    >>> jobj2['status'] == 'OK'
+    True
+
+    # authして始めてgetできます
+    >>> response3 = c.get('/api/get/')
+    >>> jobj3 = json.loads(response3.content)
+    >>> jobj3['status'] == 'OK'
+    True
+    >>> 'posts' in jobj3
     True
     """
-    pass
 
 
 def test_about_post():
@@ -92,21 +111,13 @@ def test_about_post():
     >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
 
-    >>> c=Client(enforce_csrf_checks=True)
-
-    # getは認証の必要がありません
-    >>> response=c.get('/api/get/')
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
-    True
-    >>> jobj['posts']==[]
-    True
+    >>> c = Client(enforce_csrf_checks=True)
 
     # postはauthしていないとできません（Forbidden）
-    >>> response=c.post('/api/post/',
-    ...                 dict(title='before login', body='cannot post'))
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='Forbidden'
+    >>> response = c.post('/api/post/',
+    ...                   dict(title='before login', body='cannot post'))
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'Forbidden'
     True
 
     # authをします
@@ -118,18 +129,18 @@ def test_about_post():
     True
 
     # authして始めてpostできます
-    >>> response=c.post('/api/post/',
-    ...                 dict(title='after auth',body='can post'))
+    >>> response = c.post('/api/post/',
+    ...                   dict(title='after auth',body='can post'))
     >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
+    >>> jobj['status'] == 'OK'
     True
 
     # getで確かめてみると、確かに投稿が反映されています。
-    >>> response=c.get('/api/get/')
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
+    >>> response = c.get('/api/get/')
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'OK'
     True
-    >>> jobj['posts']==[dict(title='after auth', body='can post')]
+    >>> jobj['posts'] == [dict(title='after auth', body='can post')]
     True
     """
     pass
@@ -147,21 +158,21 @@ def test_about_csrf():
     >>> url = url_template % (spa_key, spa_secret)
 
     # don't use csrf checking
-    >>> c1=Client()
-    >>> response=c1.get(url)
-    >>> response=c1.post('/api/post/',
-    ...                  dict(title='csrf test2',body='this pass'))
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
+    >>> c1 = Client()
+    >>> response = c1.get(url)
+    >>> response = c1.post('/api/post/',
+    ...                    dict(title='csrf test2',body='this pass'))
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'OK'
     True
 
     # use csrf checking
-    >>> c2=Client(enforce_csrf_checks=True)
-    >>> response=c2.get(url)
-    >>> response=c2.post('/api/post/',
-    ...                  dict(title='csrf test2',body='this pass'))
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
+    >>> c2 = Client(enforce_csrf_checks=True)
+    >>> response = c2.get(url)
+    >>> response = c2.post('/api/post/',
+    ...                    dict(title='csrf test2',body='this pass'))
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'OK'
     True
     """
 
@@ -176,10 +187,12 @@ def test_about_csrf():
 def test_about_login():
     """
     >>> clean_questions()
+
     >>> from django.test.client import Client
     >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
 
+    # 認証をします
     >>> c = Client(enforce_csrf_checks=True)
     >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
     >>> url = url_template % (spa_key, spa_secret)
@@ -188,6 +201,7 @@ def test_about_login():
     >>> j['status'] == 'OK'
     True
 
+    # すると同時にログインも出来ているので、postも可能です
     >>> r = c.post('/api/post/', dict(title='test', body='hello world'))
     >>> r = c.get('/api/get/')
     >>> j = json.loads(r.content)
@@ -196,7 +210,6 @@ def test_about_login():
     >>> j['posts'] == [dict(title='test', body='hello world')]
     True
     """
-    # ログインと認証が同時にできるようになりました
 
 
 def test_about_bad_request():
