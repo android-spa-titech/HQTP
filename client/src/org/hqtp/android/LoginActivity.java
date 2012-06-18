@@ -10,10 +10,16 @@ import twitter4j.conf.ConfigurationContext;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import roboguice.inject.InjectView;
 
 import com.google.inject.Inject;
 
-public class LoginActivity extends RoboActivity {
+public class LoginActivity extends RoboActivity implements OnClickListener {
+    @InjectView(R.id.twitter_login)
+    Button loginButton;
 
     private final String callback_url = "hqtp://request_callback/";
     private OAuthAuthorization oauth;
@@ -26,6 +32,7 @@ public class LoginActivity extends RoboActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
+        loginButton.setOnClickListener(this);
 
         Configuration config = ConfigurationContext.getInstance();
         oauth = new OAuthAuthorization(config);
@@ -33,6 +40,13 @@ public class LoginActivity extends RoboActivity {
 
         if (savedInstanceState != null && savedInstanceState.containsKey("REQUEST_TOKEN")) {
             requestToken = (RequestToken) savedInstanceState.getSerializable("REQUEST_TOKEN");
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == R.id.twitter_login){
+            startActivity(new Intent(this, HQTPActivity.class));
         }
     }
 

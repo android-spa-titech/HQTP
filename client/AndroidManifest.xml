@@ -30,7 +30,6 @@
                 <data android:scheme="hqtp" />
             </intent-filter>
         </activity>
-
         <activity android:name=".HQTPActivity"></activity>
         <activity android:name=".PostQuestionActivity"></activity>
         <activity android:name=".ListQuestionActivity"></activity>

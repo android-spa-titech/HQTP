@@ -42,8 +42,7 @@ public class HQTPActivity extends RoboActivity implements OnClickListener {
             // TODO: 戻り値に応じてダイアログ表示
             break;
         case R.id.getallpost_button:
-            GetPostTask gp_task = new GetPostTask();
-            gp_task.execute();
+            startActivity(new Intent(this, ListQuestionActivity.class));
             break;
         case R.id.post_button:
             startActivity(new Intent(this, PostQuestionActivity.class));

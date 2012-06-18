@@ -1,158 +1,178 @@
 # -*- coding:utf-8 -*-
 
+
 def clean_questions():
     """ before test, call this method for clear questions """
     from mysite.question.models import Question
     Question.objects.all().delete()
 
+
 def clean_users():
     """ before test, call this method for clear users """
     from django.contrib.auth.models import User
-    User.objects.exclude(pk=1).delete()
+    User.objects.all().delete()
+
 
 def test_about_auth_view():
     """
     >>> clean_users()
-    >>> from django.test.client import Client    
+
+    >>> from django.test.client import Client
     >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
-    >>> c=Client(enforce_csrf_checks=True)
-    >>> url='/api/auth/?access_token_key=%s&access_token_secret=%s' % (spa_key, spa_secret)
-    >>> response=c.get(url)
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
+
+    >>> c = Client(enforce_csrf_checks=True)
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+
+    # create user first time
+    >>> url = url_template % (spa_key, spa_secret)
+    >>> response = c.get(url)
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'OK'
     True
     >>> jobj['created']
     True
-    >>> 
-    >>> response=c.get(url)
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
+
+    # user is crated only first time
+    >>> response = c.get(url)
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'OK'
     True
     >>> jobj['created']
     False
-    >>> 
-    >>> url='/api/auth/?access_token_key=%s&access_token_secret=%s' % ('dummy key', 'dummy secret')
-    >>> response=c.get(url)
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='Not Found'
+
+    # if send dummy access token, return Not Found
+    >>> url = url_template % ('dummy key', 'dummy secret')
+    >>> response = c.get(url)
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'Not Found'
+    True
+
+    # some dummy access token, cause server error
+    # catch exception and return server error
+    >>> url = url_template % ('spam', 'egg')
+    >>> c = Client(enforce_csrf_checks=True)
+    >>> response = c.get(url)
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'Server Error'
     True
     """
 
     pass
+
 
 def test_about_get_view():
     """
+    # getが認証しないとできないことを確かめるテスト
+    # authする前にgetをするとForbiddenが返る
+    # authした後にgetをするとOKが返る
+
     >>> clean_questions()
+
     >>> from django.test.client import Client
+    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
-    >>> c=Client(enforce_csrf_checks=True)
-    >>> response=c.get('/api/get/')
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
+
+    >>> c = Client(enforce_csrf_checks=True)
+
+    # getはauthしていないとできません（Forbidden）
+    >>> response1 = c.get('/api/get/')
+    >>> jobj1 = json.loads(response1.content)
+    >>> jobj1['status'] == 'Forbidden'
     True
-    >>> jobj['posts']==[]
+
+    # authをします
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url = url_template % (spa_key, spa_secret)
+    >>> response2 = c.get(url)
+    >>> jobj2 = json.loads(response2.content)
+    >>> jobj2['status'] == 'OK'
     True
-    """    
-    pass
+
+    # authして始めてgetできます
+    >>> response3 = c.get('/api/get/')
+    >>> jobj3 = json.loads(response3.content)
+    >>> jobj3['status'] == 'OK'
+    True
+    >>> 'posts' in jobj3
+    True
+    """
+
 
 def test_about_post():
     """
-    >>> # このテストはすぐに廃止されるでしょう
-    >>> # Djangoにおける認証の流れと、認証するとpostができる様子を示すための草案です。
-    >>>
+    # postが認証しないとできないことを確かめるテスト
+    # authする前にpostをするとForbiddenが返る
+    # authした後にpostをするとOKが返る
+
     >>> clean_questions()
+
     >>> from django.test.client import Client
+    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
-    >>> 
-    >>> c=Client(enforce_csrf_checks=True)
-    >>> 
-    >>> # getは認証の必要がありません
-    >>> response=c.get('/api/get/')
+
+    >>> c = Client(enforce_csrf_checks=True)
+
+    # postはauthしていないとできません（Forbidden）
+    >>> response = c.post('/api/post/',
+    ...                   dict(title='before login', body='cannot post'))
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'Forbidden'
+    True
+
+    # authをします
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url = url_template % (spa_key, spa_secret)
+    >>> response = c.get(url)
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'OK'
+    True
+
+    # authして始めてpostできます
+    >>> response = c.post('/api/post/',
+    ...                   dict(title='after auth',body='can post'))
     >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
+    >>> jobj['status'] == 'OK'
     True
-    >>> jobj['posts']==[]
+
+    # getで確かめてみると、確かに投稿が反映されています。
+    >>> response = c.get('/api/get/')
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'OK'
     True
-    >>> 
-    >>> # postはログインしていないとできません（403 Forbidden）
-    >>> response=c.post('/api/post/',dict(title='before login',body='cannot post'))
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='Forbidden'
-    True
-    >>> 
-    >>> # authでユーザーを新規作成しています。
-    >>> # access_token=accの場合、
-    >>> # 新しく作られるユーザーはusername=acc_name,
-    >>> # password=accとなっています。
-    >>> # すでに同じusernameのユーザーがいた場合、
-    >>> # createdはfalseになります
-    >>> response=c.get('/api/auth/?access_token=acc3')
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
-    True
-    >>> jobj['created']
-    True
-    >>> 
-    >>> 
-    >>> # authをしただけでは、まだpostできません
-    >>> response=c.post('/api/post/',dict(title='before login',body='cannot post'))
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='Forbidden'
-    True
-    >>> 
-    >>> # ログインはusernameとpasswordを指定して行います。
-    >>> # 戻り値がTrueならログイン成功です。
-    >>> c.login(username='acc3_name',password='acc3')
-    True
-    >>> 
-    >>> # ログインして始めてpostできます
-    >>> response=c.post('/api/post/',dict(title='after login',body='can post'))
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
-    True
-    >>> 
-    >>> # getで確かめてみると、確かに投稿が反映されています。
-    >>> response=c.get('/api/get/')
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
-    True
-    >>> jobj['posts']==[dict(title='after login', body='can post')]
-    True
-    >>> 
-    >>>
-    >>> # ログアウトしてpostできなくなることを確認します
-    >>> c.logout()
-    >>> response=c.post('/api/post/',dict(title='after logout',body='cannot post'))
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='Forbidden'
+    >>> jobj['posts'] == [dict(title='after auth', body='can post')]
     True
     """
     pass
+
 
 def test_about_csrf():
     """
     >>> clean_questions()
+
     >>> from django.test.client import Client
+    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
     >>> import json
-    >>> 
-    >>> c1=Client()
-    >>> response=c1.get('/api/auth/?access_token=acc')
-    >>> c1.login(username='acc_name',password='acc')
+
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url = url_template % (spa_key, spa_secret)
+
+    # don't use csrf checking
+    >>> c1 = Client()
+    >>> response = c1.get(url)
+    >>> response = c1.post('/api/post/',
+    ...                    dict(title='csrf test2',body='this pass'))
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'OK'
     True
-    >>> response=c1.post('/api/post/',dict(title='csrf test2',body='this pass'))
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
-    True
-    >>> 
-    >>> 
-    >>> c2=Client(enforce_csrf_checks=True)
-    >>> response=c2.get('/api/auth/?access_token=acc2')
-    >>> c2.login(username='acc2_name',password='acc2')
-    True
-    >>> response=c2.post('/api/post/',dict(title='csrf test2',body='this pass'))
-    >>> jobj=json.loads(response.content)
-    >>> jobj['status']=='OK'
+
+    # use csrf checking
+    >>> c2 = Client(enforce_csrf_checks=True)
+    >>> response = c2.get(url)
+    >>> response = c2.post('/api/post/',
+    ...                    dict(title='csrf test2',body='this pass'))
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'OK'
     True
     """
 
@@ -163,18 +183,93 @@ def test_about_csrf():
 
     pass
 
+
+def test_about_login():
+    """
+    >>> clean_questions()
+
+    >>> from django.test.client import Client
+    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
+    >>> import json
+
+    # 認証をします
+    >>> c = Client(enforce_csrf_checks=True)
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url = url_template % (spa_key, spa_secret)
+    >>> r = c.get(url)
+    >>> j = json.loads(r.content)
+    >>> j['status'] == 'OK'
+    True
+
+    # すると同時にログインも出来ているので、postも可能です
+    >>> r = c.post('/api/post/', dict(title='test', body='hello world'))
+    >>> r = c.get('/api/get/')
+    >>> j = json.loads(r.content)
+    >>> j['status'] == 'OK'
+    True
+    >>> j['posts'] == [dict(title='test', body='hello world')]
+    True
+    """
+
+
+def test_about_bad_request():
+    """
+    >>> from django.test.client import Client
+    >>> import json
+    >>> from question.twutil.consumer_info import spa_key, spa_secret
+
+    >>> c = Client(enforce_csrf_checks=True)
+
+    # this is bad request.
+    # because does not send access_token_key,access_token_secret
+    # so server return Bad Request
+    >>> url_template = '/api/auth/?access_token=%s'
+    >>> url = url_template % 'ACC'
+    >>> response = c.get(url)
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'Bad Request'
+    True
+
+    # to test bad request of post, login
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url = url_template % (spa_key, spa_secret)
+    >>> response = c.get(url)
+
+    # this is bad request.
+    # because does not send body
+    # so server return Bad Request
+    >>> response = c.post('/api/post/',
+    ...                   dict(title='test none boddy'))
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'Bad Request'
+    True
+
+    # this is bad request.
+    # because does not send title
+    # so server return Bad Request
+    >>> response = c.post('/api/post/',
+    ...                   dict(body='test none title'))
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'Bad Request'
+    True
+    """
+    # Must send essential parameter
+    # if does't send, server return Bad Request
+
+
 from django.test import TestCase
-import unittest
 import doctest
 import mysite.question.twutil.tw_util as tw_util
 import mysite.question.views as views
 import mysite.question.admin as admin
+
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(tw_util))
     tests.addTests(doctest.DocTestSuite(views))
     tests.addTests(doctest.DocTestSuite(admin))
     return tests
+
 
 class SimpleTest(TestCase):
     def test_basic_addition(self):
