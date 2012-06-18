@@ -47,7 +47,6 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
     public void onClick(View v) {
         if(v.getId() == R.id.twitter_login){
             TwitterAuthorizationTask task = new TwitterAuthorizationTask();
-            getInjector().injectMembers(task);
             task.execute();
         }
     }
@@ -58,7 +57,6 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
         Uri uri = intent.getData();
         if (uri != null && uri.getScheme().equals("hqtp")) {
             AfterTwitterAuthorizationTask task = new AfterTwitterAuthorizationTask(uri);
-            getInjector().injectMembers(task);
             task.execute();
         }
     }
