@@ -91,6 +91,13 @@ def auth_view(request):
         except User.DoesNotExist:
             # User not found
             new_user = User.objects.create_user(user_name, '', secret)
+
+            # set profile twitter screen_name and name
+            profile = new_user.get_profile()
+            profile.screen_name = vc['screen_name']
+            profile.name = vc['name']
+            profile.save()
+
             created = True
             new_user = authenticate(username=user_name, password=secret)
             login(request, new_user)

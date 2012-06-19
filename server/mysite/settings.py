@@ -159,3 +159,6 @@ LOGGING = {
         },
     }
 }
+
+
+AUTH_PROFILE_MODULE = 'question.UserProfile'

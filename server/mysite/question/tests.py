@@ -257,6 +257,40 @@ def test_about_bad_request():
     # if does't send, server return Bad Request
 
 
+def test_about_user_profile():
+    """
+    >>> clean_users()
+
+    >>> from django.contrib.auth.models import User
+    >>> from question.twutil.consumer_info import spa_key, spa_secret
+    >>> from django.test.client import Client
+    >>> import json
+
+    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> url = url_template % (spa_key, spa_secret)
+
+    >>> c = Client(enforce_csrf_checks=True)
+    >>> response = c.get(url)
+
+    >>> jobj = json.loads(response.content)
+    >>> jobj['status'] == 'OK'
+    True
+    >>> jobj['created']
+    True
+
+    # get android_spa user username=twitter id
+    >>> usr = User.objects.get(username='580619600')
+
+    # get UserProfile and check screen_name,name
+    >>> profile = usr.get_profile()
+    >>> profile.screen_name == 'android_spa'
+    True
+    >>> profile.name == 'android_spa'
+    True
+    """
+    # UserProfileが正しく機能しているか確認
+
+
 from django.test import TestCase
 import doctest
 import mysite.question.twutil.tw_util as tw_util
