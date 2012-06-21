@@ -46,78 +46,57 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     @Override
-    public boolean authenticate(String access_token_key, String access_token_secret) {
+    public boolean authenticate(String access_token_key, String access_token_secret) throws IOException, JSONException {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("access_token_key", access_token_key);
         params.put("access_token_secret", access_token_secret);
         boolean res = false;
-        try {
-            HttpResponse response = sendByGet("auth/", params);
-            JSONObject json = toJSON(response.getEntity());
-            if (json.getString("status") == "OK") {
-                res = true;
-            }
-        } catch (Exception e) {
-            // TODO: handle exception
-            e.printStackTrace();
+        HttpResponse response = sendByGet("auth/", params);
+        JSONObject json = toJSON(response.getEntity());
+        if (json.getString("status") == "OK") {
+            // TODO: 例外を投げるべき?
+            res = true;
         }
+
         return res;
     }
 
     @Override
-    public boolean postQuestion(String title, String body) {
+    public boolean postQuestion(String title, String body) throws JSONException, IOException {
         HttpResponse response;
-        HashMap<String , String> params = new HashMap<String, String>();
+        HashMap<String, String> params = new HashMap<String, String>();
         params.put("title", title);
         params.put("body", body);
         boolean res = false;
-        try{
-            response = sendByPost("post/", params);
-            JSONObject json = toJSON(response.getEntity());
-            Log.d("info", json.toString());
-            if(json.getString("status")=="OK"){
-                res = true;
-            }
-        }catch (Exception e) {
-            // TODO: handle exception
-            e.printStackTrace();
+        response = sendByPost("post/", params);
+        JSONObject json = toJSON(response.getEntity());
+        Log.d("info", json.toString());
+        if (json.getString("status") == "OK") {
+            // TODO: 例外を投げるべき?
+            res = true;
         }
+
         return res;
     }
 
     @Override
-    public List<Question> getQuestions() {
+    public List<Question> getQuestions() throws JSONException, IOException {
         // ネットワークからの読込テスト
         JSONObject json;
-        try {
-            HttpResponse response = sendByGet("get/",null);
-            //TODO: ネットワークまわりの例外とレスポンスまわりの例外処理がごっちゃになってるのをどうにかしたい
-            json = toJSON(response.getEntity());
-            Log.d("info", json.toString());
-        } catch (Exception e1) {
-            //TODO: 真面目に例外処理しましょう
-            Log.d("err", e1.getMessage());
-            e1.printStackTrace();
-            return null;
-        }
+        HttpResponse response = sendByGet("get/", null);
+        json = toJSON(response.getEntity());
+        Log.d("info", json.toString());
 
-        try{
-            if(json.getString("status")!="OK"){
-                //TODO: エラー処理
-            }
-            JSONArray array = json.getJSONArray("posts");
-            ArrayList<Question> res = new ArrayList<Question>();
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject post = array.getJSONObject(i);
-                res.add(new Question(post.getString("title"), post.getString("body"), null));
-            }
-            return res;
-        }catch(JSONException e){
-            //TODO: JSONまわりのエラー対応
-            Log.d("err",e.getMessage());
-            e.printStackTrace();
-            return null;
+        if (json.getString("status") != "OK") {
+            // TODO: エラー処理
         }
+        JSONArray array = json.getJSONArray("posts");
+        ArrayList<Question> res = new ArrayList<Question>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject post = array.getJSONObject(i);
+            res.add(new Question(post.getString("title"), post.getString("body"), null));
+        }
+        return res;
     }
 
     private HttpResponse sendByGet(String path, Map<String, String> params)
@@ -146,15 +125,15 @@ public class HQTPProxyImpl implements HQTPProxy {
             try {
                 http_post.setEntity(new UrlEncodedFormEntity(form_params, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();    // I think here is unreachable...
+                e.printStackTrace(); // I think here is unreachable...
             }
         }
         return send(http_post);
     }
-    
+
     private HttpResponse send(HttpUriRequest request) throws ClientProtocolException, IOException
     {
-        //TODO: Timeoutの設定をすべき？
+        // TODO: Timeoutの設定をすべき？
         DefaultHttpClient client = new DefaultHttpClient();
         HttpResponse response = null;
         client.setCookieStore(cookie_store);
@@ -166,11 +145,11 @@ public class HQTPProxyImpl implements HQTPProxy {
         }
         return response;
     }
-    
+
     private static JSONObject toJSON(HttpEntity entity) throws ParseException, IOException, JSONException
     {
         String response = EntityUtils.toString(entity);
-        entity.consumeContent();    //ここでconsumeするのはキモいのだろうか・・・
+        entity.consumeContent(); // ここでconsumeするのはキモいのだろうか・・・
         return new JSONObject(response);
     }
 }
