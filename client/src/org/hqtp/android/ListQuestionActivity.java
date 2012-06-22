@@ -1,6 +1,5 @@
 package org.hqtp.android;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,23 +37,23 @@ public class ListQuestionActivity extends RoboActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list);
 
-        adapter = new QuestionAdapter( this, R.layout.question_item, questionList);
+        adapter = new QuestionAdapter(this, R.layout.question_item, questionList);
         questionListView.setAdapter(adapter);
- 
+
         // リストの要素をクリックされたときの挙動
         questionListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-           @Override
-           public void onItemClick( AdapterView<?> parent, View view, int position, long id ){
-               ListView listView = (ListView)parent;
-               Question q = (Question)listView.getItemAtPosition(position);
-               showAlert(q.getTitle(), q.getBody());
-           }
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ListView listView = (ListView) parent;
+                Question q = (Question) listView.getItemAtPosition(position);
+                showAlert(q.getTitle(), q.getBody());
+            }
         });
 
         GetQuestion gq = new GetQuestion();
         try {
             gq.execute();
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -70,22 +69,22 @@ public class ListQuestionActivity extends RoboActivity {
         protected void onSuccess(List<Question> questions) {
 
             if (questions == null) {
-                showAlert( "GetQuestion", "質問がありません。" );
+                showAlert("GetQuestion", "質問がありません。");
             } else {
                 for (Question q : questions) {
-                    questionList.add( q );
+                    questionList.add(q);
                 }
             }
             // スクロールを確認するため追加
-            for( int i = 0 ; i < 20 ; i++ )
-                questionList.add( new Question( "タイトル"+i, "本文"+i, "作者"+i ) );
+            for (int i = 0; i < 20; i++)
+                questionList.add(new Question("タイトル" + i, "本文" + i, "作者" + i));
 
             adapter.notifyDataSetChanged();
         }
     }
 
     private class QuestionAdapter extends ArrayAdapter<Question> {
-             
+
         private int resourceId;
 
         public QuestionAdapter(Context context, int resource, List<Question> questions) {
@@ -98,23 +97,23 @@ public class ListQuestionActivity extends RoboActivity {
 
             // メモリを無駄に使わないように
             if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 convertView = inflater.inflate(resourceId, null);
             }
-            
-            Question question = (Question)getItem(position);
 
-            TextView titleview = (TextView)convertView.findViewById(R.id.question_title);
-            TextView bodyview  = (TextView)convertView.findViewById(R.id.question_body);
+            Question question = (Question) getItem(position);
 
-            titleview.setText( question.getTitle() );
+            TextView titleview = (TextView) convertView.findViewById(R.id.question_title);
+            TextView bodyview = (TextView) convertView.findViewById(R.id.question_body);
+
+            titleview.setText(question.getTitle());
             // 文字数が多いと全文をそのまま表示するとよくないかも
-            bodyview.setText( question.getBody() );
+            bodyview.setText(question.getBody());
 
             return convertView;
         }
     }
-    
+
     private void showAlert(String title, String message) {
         new AlertDialog.Builder(this)
             .setTitle(title)
