@@ -16,44 +16,34 @@ def clean_users():
 def test_about_auth_view():
     """
     >>> clean_users()
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_auth_view)
 
-    >>> from django.test.client import Client
-    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
-    >>> import json
 
-    >>> c = Client(enforce_csrf_checks=True)
-    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
+    >>> c = make_client()
 
     # create user first time
-    >>> url = url_template % (spa_key, spa_secret)
-    >>> response = c.get(url)
-    >>> jobj = json.loads(response.content)
+    >>> jobj = access_auth_view(c)
     >>> jobj['status'] == 'OK'
     True
     >>> jobj['created']
     True
 
     # user is crated only first time
-    >>> response = c.get(url)
-    >>> jobj = json.loads(response.content)
+    >>> jobj = access_auth_view(c)
     >>> jobj['status'] == 'OK'
     True
     >>> jobj['created']
     False
 
     # if send dummy access token, return Not Found
-    >>> url = url_template % ('dummy key', 'dummy secret')
-    >>> response = c.get(url)
-    >>> jobj = json.loads(response.content)
+    >>> jobj = access_auth_view(c, key='dummy key', secret='dummy secret')
     >>> jobj['status'] == 'Not Found'
     True
 
     # some dummy access token, cause server error
     # catch exception and return server error
-    >>> url = url_template % ('spam', 'egg')
-    >>> c = Client(enforce_csrf_checks=True)
-    >>> response = c.get(url)
-    >>> jobj = json.loads(response.content)
+    >>> jobj = access_auth_view(c, key='spam', secret='egg')
     >>> jobj['status'] == 'Server Error'
     True
     """
@@ -68,30 +58,25 @@ def test_about_get_view():
     # authした後にgetをするとOKが返る
 
     >>> clean_questions()
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_auth_view,
+    ...                                        access_get_view)
 
-    >>> from django.test.client import Client
-    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
-    >>> import json
 
-    >>> c = Client(enforce_csrf_checks=True)
+    >>> c = make_client()
 
     # getはauthしていないとできません（Forbidden）
-    >>> response1 = c.get('/api/get/')
-    >>> jobj1 = json.loads(response1.content)
+    >>> jobj1 = access_get_view(c)
     >>> jobj1['status'] == 'Forbidden'
     True
 
     # authをします
-    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
-    >>> url = url_template % (spa_key, spa_secret)
-    >>> response2 = c.get(url)
-    >>> jobj2 = json.loads(response2.content)
+    >>> jobj2 = access_auth_view(c)
     >>> jobj2['status'] == 'OK'
     True
 
     # authして始めてgetできます
-    >>> response3 = c.get('/api/get/')
-    >>> jobj3 = json.loads(response3.content)
+    >>> jobj3 = access_get_view(c)
     >>> jobj3['status'] == 'OK'
     True
     >>> 'posts' in jobj3
@@ -106,38 +91,31 @@ def test_about_post():
     # authした後にpostをするとOKが返る
 
     >>> clean_questions()
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_auth_view,
+    ...                                        access_get_view,
+    ...                                        access_post_view)
 
-    >>> from django.test.client import Client
-    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
-    >>> import json
 
-    >>> c = Client(enforce_csrf_checks=True)
+    >>> c = make_client()
 
     # postはauthしていないとできません（Forbidden）
-    >>> response = c.post('/api/post/',
-    ...                   dict(title='before login', body='cannot post'))
-    >>> jobj = json.loads(response.content)
+    >>> jobj = access_post_view(c, title='before login', body='cannot post')
     >>> jobj['status'] == 'Forbidden'
     True
 
     # authをします
-    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
-    >>> url = url_template % (spa_key, spa_secret)
-    >>> response = c.get(url)
-    >>> jobj = json.loads(response.content)
+    >>> jobj = access_auth_view(c)
     >>> jobj['status'] == 'OK'
     True
 
     # authして始めてpostできます
-    >>> response = c.post('/api/post/',
-    ...                   dict(title='after auth',body='can post'))
-    >>> jobj=json.loads(response.content)
+    >>> jobj = access_post_view(c, title='after auth', body='can post')
     >>> jobj['status'] == 'OK'
     True
 
     # getで確かめてみると、確かに投稿が反映されています。
-    >>> response = c.get('/api/get/')
-    >>> jobj = json.loads(response.content)
+    >>> jobj = access_get_view(c)
     >>> jobj['status'] == 'OK'
     True
     >>> jobj['posts'] == [dict(title='after auth', body='can post')]
@@ -187,24 +165,25 @@ def test_about_csrf():
 def test_about_login():
     """
     >>> clean_questions()
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_auth_view,
+    ...                                        access_get_view,
+    ...                                        access_post_view)
 
-    >>> from django.test.client import Client
-    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
-    >>> import json
 
     # 認証をします
-    >>> c = Client(enforce_csrf_checks=True)
-    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
-    >>> url = url_template % (spa_key, spa_secret)
-    >>> r = c.get(url)
-    >>> j = json.loads(r.content)
+    >>> c = make_client()
+    >>> j = access_auth_view(c)
     >>> j['status'] == 'OK'
     True
 
     # すると同時にログインも出来ているので、postも可能です
-    >>> r = c.post('/api/post/', dict(title='test', body='hello world'))
-    >>> r = c.get('/api/get/')
-    >>> j = json.loads(r.content)
+    >>> j = access_post_view(c, title='test', body='hello world')
+    >>> j['status'] == 'OK'
+    True
+
+    # getで確かめてみると、確かに投稿が反映されています。
+    >>> j = access_get_view(c)
     >>> j['status'] == 'OK'
     True
     >>> j['posts'] == [dict(title='test', body='hello world')]
@@ -214,11 +193,14 @@ def test_about_login():
 
 def test_about_bad_request():
     """
-    >>> from django.test.client import Client
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_auth_view)
+
+
     >>> import json
     >>> from question.twutil.consumer_info import spa_key, spa_secret
 
-    >>> c = Client(enforce_csrf_checks=True)
+    >>> c = make_client()
 
     # this is bad request.
     # because does not send access_token_key,access_token_secret
@@ -231,9 +213,7 @@ def test_about_bad_request():
     True
 
     # to test bad request of post, login
-    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
-    >>> url = url_template % (spa_key, spa_secret)
-    >>> response = c.get(url)
+    >>> jobj = access_auth_view(c)
 
     # this is bad request.
     # because does not send body
@@ -260,19 +240,14 @@ def test_about_bad_request():
 def test_about_user_profile():
     """
     >>> clean_users()
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_auth_view)
 
     >>> from django.contrib.auth.models import User
-    >>> from question.twutil.consumer_info import spa_key, spa_secret
-    >>> from django.test.client import Client
-    >>> import json
 
-    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
-    >>> url = url_template % (spa_key, spa_secret)
 
-    >>> c = Client(enforce_csrf_checks=True)
-    >>> response = c.get(url)
-
-    >>> jobj = json.loads(response.content)
+    >>> c = make_client()
+    >>> jobj = access_auth_view(c)
     >>> jobj['status'] == 'OK'
     True
     >>> jobj['created']
