@@ -46,41 +46,40 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     @Override
-    public boolean authenticate(String access_token_key, String access_token_secret) throws IOException, JSONException {
+    public boolean authenticate(String access_token_key, String access_token_secret) throws IOException, JSONException,
+            HQTPAPIException {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("access_token_key", access_token_key);
         params.put("access_token_secret", access_token_secret);
-        boolean res = false;
         HttpResponse response = sendByGet("auth/", params);
         JSONObject json = toJSON(response.getEntity());
-        if (json.getString("status") == "OK") {
-            // TODO: 例外を投げるべき?
-            res = true;
+        if (json.getString("status") != "OK") {
+            throw new HQTPAPIException("Authentication failed. : /api/auth returned status='"
+                    + json.getString("status") + "'");
         }
 
-        return res;
+        return true;
     }
 
     @Override
-    public boolean postQuestion(String title, String body) throws JSONException, IOException {
+    public boolean postQuestion(String title, String body) throws JSONException, IOException, HQTPAPIException {
         HttpResponse response;
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("title", title);
         params.put("body", body);
-        boolean res = false;
         response = sendByPost("post/", params);
         JSONObject json = toJSON(response.getEntity());
         Log.d("info", json.toString());
-        if (json.getString("status") == "OK") {
-            // TODO: 例外を投げるべき?
-            res = true;
+        if (json.getString("status") != "OK") {
+            throw new HQTPAPIException("Post question failed. : /api/post returned status='"
+                    + json.getString("status") + "'");
         }
 
-        return res;
+        return true;
     }
 
     @Override
-    public List<Question> getQuestions() throws JSONException, IOException {
+    public List<Question> getQuestions() throws JSONException, IOException, HQTPAPIException {
         // ネットワークからの読込テスト
         JSONObject json;
         HttpResponse response = sendByGet("get/", null);
@@ -88,7 +87,8 @@ public class HQTPProxyImpl implements HQTPProxy {
         Log.d("info", json.toString());
 
         if (json.getString("status") != "OK") {
-            // TODO: エラー処理
+            throw new HQTPAPIException("Getting questions failed. : /api/get returned status='"
+                    + json.getString("status") + "'");
         }
         JSONArray array = json.getJSONArray("posts");
         ArrayList<Question> res = new ArrayList<Question>();
