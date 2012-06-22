@@ -296,12 +296,14 @@ import doctest
 import mysite.question.twutil.tw_util as tw_util
 import mysite.question.views as views
 import mysite.question.admin as admin
+import mysite.question.shortcuts as shortcuts
 
 
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(tw_util))
     tests.addTests(doctest.DocTestSuite(views))
     tests.addTests(doctest.DocTestSuite(admin))
+    tests.addTests(doctest.DocTestSuite(shortcuts))
     return tests
 
 
