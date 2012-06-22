@@ -71,13 +71,8 @@ public class ListQuestionActivity extends RoboActivity {
             if (questions == null) {
                 showAlert("GetQuestion", "質問がありません。");
             } else {
-                for (Question q : questions) {
-                    questionList.add(q);
-                }
+                questionList.addAll(questions);
             }
-            // スクロールを確認するため追加
-            for (int i = 0; i < 20; i++)
-                questionList.add(new Question("タイトル" + i, "本文" + i, "作者" + i));
 
             adapter.notifyDataSetChanged();
         }
