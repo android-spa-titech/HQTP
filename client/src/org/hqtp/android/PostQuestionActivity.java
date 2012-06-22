@@ -14,11 +14,16 @@ import com.google.inject.Inject;
 public class PostQuestionActivity extends RoboActivity implements
         OnClickListener {
 
-    @InjectView(R.id.post_button) Button    post_button;
-    @InjectView(R.id.cancel_buttton) Button cancel_button;
-    @InjectView(R.id.title_text) EditText   titleEditText;
-    @InjectView(R.id.body_text) EditText    bodyEditText;
-    @Inject HQTPProxy                       proxy;
+    @InjectView(R.id.post_button)
+    Button post_button;
+    @InjectView(R.id.cancel_buttton)
+    Button cancel_button;
+    @InjectView(R.id.title_text)
+    EditText titleEditText;
+    @InjectView(R.id.body_text)
+    EditText bodyEditText;
+    @Inject
+    HQTPProxy proxy;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

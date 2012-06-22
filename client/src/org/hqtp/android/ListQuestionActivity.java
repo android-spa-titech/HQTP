@@ -1,23 +1,24 @@
 package org.hqtp.android;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.inject.Inject;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import roboguice.activity.RoboActivity;
+
 import roboguice.inject.InjectView;
 import roboguice.util.RoboAsyncTask;
 
@@ -25,11 +26,7 @@ public class ListQuestionActivity extends RoboActivity {
 
     @InjectView(R.id.listQuestion)
     ListView questionListView;
-    
-    @InjectView(R.id.question_title)
-    EditText titleEditText;
-    @InjectView(R.id.question_body)
-    EditText bodyEditText;
+
     @Inject
     HQTPProxy proxy;
 
@@ -40,11 +37,19 @@ public class ListQuestionActivity extends RoboActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list);
-        
-        adapter = new QuestionAdapter( this, R.layout.list, questionList);
-        questionListView.setAdapter(adapter);
 
-        // クリックされたとき、選択されたときのコールバックリスナーを登録
+        adapter = new QuestionAdapter( this, R.layout.question_item, questionList);
+        questionListView.setAdapter(adapter);
+ 
+        // リストの要素をクリックされたときの挙動
+        questionListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+           @Override
+           public void onItemClick( AdapterView<?> parent, View view, int position, long id ){
+               ListView listView = (ListView)parent;
+               Question q = (Question)listView.getItemAtPosition(position);
+               showAlert(q.getTitle(), q.getBody());
+           }
+        });
 
         GetQuestion gq = new GetQuestion();
         try {
@@ -52,13 +57,10 @@ public class ListQuestionActivity extends RoboActivity {
         } catch (Exception e){
             e.printStackTrace();
         }
-        // 読み込みをキャンセルしたい場合は何かしないといけない
-
     }
-    
 
- 
     private class GetQuestion extends RoboAsyncTask<List<Question>> {
+
         @Override
         public List<Question> call() throws Exception {
             return proxy.getQuestions();
@@ -66,56 +68,61 @@ public class ListQuestionActivity extends RoboActivity {
 
         @Override
         protected void onSuccess(List<Question> questions) {
-            StringBuilder sb = new StringBuilder();
+
             if (questions == null) {
-                sb.append("質問がありません");
+                showAlert( "GetQuestion", "質問がありません。" );
             } else {
                 for (Question q : questions) {
-                    sb.append(q.getTitle());
-                    sb.append("\n");
-                    sb.append(q.getBody());
-                    sb.append("\n");
                     questionList.add( q );
                 }
             }
-            Log.d("info", sb.toString());       
-            // リストに反映させる
+            // スクロールを確認するため追加
+            for( int i = 0 ; i < 20 ; i++ )
+                questionList.add( new Question( "タイトル"+i, "本文"+i, "作者"+i ) );
+
+            adapter.notifyDataSetChanged();
         }
-        // onExceptionとかしたほうがいいのか
     }
-    
 
-   // BaseAdapterを継承するのがよい？
-   private class QuestionAdapter extends ArrayAdapter<Question> {
-
+    private class QuestionAdapter extends ArrayAdapter<Question> {
+             
         private int resourceId;
-        private LayoutInflater inflater;
 
         public QuestionAdapter(Context context, int resource, List<Question> questions) {
             super(context, resource, questions);
-            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE); // ここ
             resourceId = resource;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
 
-            Question question = (Question)getItem(position);
-            
-            // メモリを無駄に使わないようにらしい
+            // メモリを無駄に使わないように
             if (convertView == null) {
+                LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 convertView = inflater.inflate(resourceId, null);
             }
+            
+            Question question = (Question)getItem(position);
 
-            TextView titleview = (TextView)convertView.titleEditText;
-            TextView bodyview  = (TextView)convertView.bodyEditText;
+            TextView titleview = (TextView)convertView.findViewById(R.id.question_title);
+            TextView bodyview  = (TextView)convertView.findViewById(R.id.question_body);
+
             titleview.setText( question.getTitle() );
+            // 文字数が多いと全文をそのまま表示するとよくないかも
             bodyview.setText( question.getBody() );
-            
-            // ボタンを付けるときはここでSetOnClickListenerを設定
-            
+
             return convertView;
         }
-
+    }
+    
+    private void showAlert(String title, String message) {
+        new AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            }).show();
     }
 }
