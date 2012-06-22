@@ -90,6 +90,7 @@ def auth_view(request):
             return json_response_forbidden()
         except User.DoesNotExist:
             # User not found
+            # create a new user and new user profile in database
             new_user = User.objects.create_user(user_name, '', secret)
 
             # set profile twitter screen_name and name
