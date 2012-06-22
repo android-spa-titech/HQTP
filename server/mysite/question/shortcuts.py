@@ -31,11 +31,11 @@ def access_auth_view(client, key=None, secret=None):
 
     # for convinient, key and secret are allowed blank
     # if blank then use android_spa's key and secret
-    if key == None and secret == None:
+    if key is None and secret is None:
         key = spa_key
         secret = spa_secret
-    elif key == None or secret == None:
-        raise Exception('Usage access_auth_view({KEY}, {SECRET})')
+    elif key is None or secret is None:
+        raise Exception('Usage: access_auth_view({KEY}, {SECRET})')
 
     url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
     url = url_template % (key, secret)
@@ -89,9 +89,9 @@ def access_post_view(client, title=None, body=None):
     # for convenient, title and body are allowed blank
     # to make unique title and body, use now date and time
     now = str(datetime.datetime.now())
-    if title == None:
+    if title is None:
         title = 'TITLE:' + now
-    if body == None:
+    if body is None:
         body = 'BODY:' + now
 
     url = '/api/post/'
