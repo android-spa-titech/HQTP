@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
@@ -100,7 +101,7 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     private HttpResponse sendByGet(String path, Map<String, String> params)
-            throws ClientProtocolException, IOException {
+            throws ClientProtocolException, IOException, HQTPAPIException {
         Uri.Builder builder = Uri.parse(api_gateway).buildUpon();
         builder.appendEncodedPath(path);
         if (params != null) {
@@ -113,7 +114,7 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     private HttpResponse sendByPost(String path, Map<String, String> params)
-            throws ClientProtocolException, IOException {
+            throws ClientProtocolException, IOException, HQTPAPIException {
         Uri.Builder builder = Uri.parse(api_gateway).buildUpon();
         builder.appendEncodedPath(path);
         HttpPost http_post = new HttpPost(builder.build().toString());
@@ -131,7 +132,7 @@ public class HQTPProxyImpl implements HQTPProxy {
         return send(http_post);
     }
 
-    private HttpResponse send(HttpUriRequest request) throws ClientProtocolException, IOException
+    private HttpResponse send(HttpUriRequest request) throws ClientProtocolException, IOException, HQTPAPIException
     {
         // TODO: Timeoutの設定をすべき？
         DefaultHttpClient client = new DefaultHttpClient();
@@ -139,6 +140,11 @@ public class HQTPProxyImpl implements HQTPProxy {
         client.setCookieStore(cookie_store);
         try {
             response = client.execute(request);
+            int status_code = response.getStatusLine().getStatusCode();
+            if (status_code != HttpStatus.SC_OK && status_code != HttpStatus.SC_CREATED) {
+                throw new HQTPAPIException("HTTP response returned failure. : return Http status code="
+                        + Integer.toString(status_code));
+            }
             this.cookie_store = client.getCookieStore();
         } finally {
             client.getConnectionManager().shutdown();
