@@ -1,6 +1,7 @@
 package org.hqtp.android;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -11,16 +12,23 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.inject.Inject;
+import com.xtremelabs.robolectric.Robolectric;
 
 @RunWith(PostQuestionActivityTestRunner.class)
 public class PostQuestionActivityTest {
 
-    @Inject PostQuestionActivity            activity;
-    @Inject HQTPProxy                       proxy;
-    @InjectView(R.id.title_text) TextView   title_text;
-    @InjectView(R.id.body_text) TextView    body_text;
-    @InjectView(R.id.post_button) Button    post_button;
-    @InjectView(R.id.cancel_buttton) Button cancel_button;
+    @Inject
+    PostQuestionActivity activity;
+    @Inject
+    HQTPProxy proxy;
+    @InjectView(R.id.title_text)
+    TextView title_text;
+    @InjectView(R.id.body_text)
+    TextView body_text;
+    @InjectView(R.id.post_button)
+    Button post_button;
+    @InjectView(R.id.cancel_buttton)
+    Button cancel_button;
 
     @Before
     public void setUp() throws Exception {
@@ -32,6 +40,8 @@ public class PostQuestionActivityTest {
         title_text.setText("sample title");
         body_text.setText("sample body");
         post_button.performClick();
+        Robolectric.runBackgroundTasks();
+        Thread.sleep(300);
 
         verify(proxy).postQuestion("sample title", "sample body");
     }
@@ -41,6 +51,8 @@ public class PostQuestionActivityTest {
         title_text.setText("sample title");
         body_text.setText("sample body");
         cancel_button.performClick();
+        Robolectric.runBackgroundTasks();
+        Thread.sleep(300);
 
         verify(proxy, never()).postQuestion("sample title", "sample body");
     }
