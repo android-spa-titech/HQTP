@@ -54,7 +54,7 @@ public class HQTPProxyImpl implements HQTPProxy {
         params.put("access_token_secret", access_token_secret);
         HttpResponse response = sendByGet("auth/", params);
         JSONObject json = toJSON(response.getEntity());
-        if (json.getString("status") != "OK") {
+        if (!json.getString("status").equals("OK")) {
             throw new HQTPAPIException("Authentication failed. : /api/auth returned status='"
                     + json.getString("status") + "'");
         }
@@ -71,7 +71,7 @@ public class HQTPProxyImpl implements HQTPProxy {
         response = sendByPost("post/", params);
         JSONObject json = toJSON(response.getEntity());
         Log.d("info", json.toString());
-        if (json.getString("status") != "OK") {
+        if (!json.getString("status").equals("OK")) {
             throw new HQTPAPIException("Post question failed. : /api/post returned status='"
                     + json.getString("status") + "'");
         }
@@ -87,7 +87,7 @@ public class HQTPProxyImpl implements HQTPProxy {
         json = toJSON(response.getEntity());
         Log.d("info", json.toString());
 
-        if (json.getString("status") != "OK") {
+        if (!json.getString("status").equals("OK")) {
             throw new HQTPAPIException("Getting questions failed. : /api/get returned status='"
                     + json.getString("status") + "'");
         }
