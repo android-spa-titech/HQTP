@@ -29,8 +29,8 @@ public class ListQuestionActivity extends RoboActivity {
     @Inject
     HQTPProxy proxy;
 
-    static List<Question> questionList = new ArrayList<Question>();
-    static QuestionAdapter adapter;
+    private List<Question> questionList = new ArrayList<Question>();
+    private QuestionAdapter adapter;
 
     public void onCreate(Bundle savedInstanceState) {
 
@@ -71,6 +71,7 @@ public class ListQuestionActivity extends RoboActivity {
             if (questions == null) {
                 showAlert("GetQuestion", "質問がありません。");
             } else {
+                questionList.clear();
                 questionList.addAll(questions);
             }
 
@@ -98,12 +99,12 @@ public class ListQuestionActivity extends RoboActivity {
 
             Question question = (Question) getItem(position);
 
-            TextView titleview = (TextView) convertView.findViewById(R.id.question_title);
-            TextView bodyview = (TextView) convertView.findViewById(R.id.question_body);
+            TextView titleView = (TextView) convertView.findViewById(R.id.question_title);
+            TextView bodyView = (TextView) convertView.findViewById(R.id.question_body);
 
-            titleview.setText(question.getTitle());
+            titleView.setText(question.getTitle());
             // 文字数が多いと全文をそのまま表示するとよくないかも
-            bodyview.setText(question.getBody());
+            bodyView.setText(question.getBody());
 
             return convertView;
         }
