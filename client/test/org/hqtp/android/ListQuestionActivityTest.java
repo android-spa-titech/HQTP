@@ -35,7 +35,6 @@ public class ListQuestionActivityTest {
         activity.onCreate(null);
         Robolectric.runBackgroundTasks();
         Robolectric.runUiThreadTasks();
-
         Thread.sleep(100);
 
         verify(proxy).getQuestions();
@@ -60,7 +59,9 @@ public class ListQuestionActivityTest {
         Robolectric.runBackgroundTasks();
         Robolectric.runUiThreadTasks();
         Thread.sleep(100);
+
         activity.onCreate(null);
+        Thread.sleep(100);
 
         ListView listView = (ListView) activity.findViewById(R.id.listQuestion);
         assertThat(listView.getCount(), equalTo(1));

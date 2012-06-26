@@ -1,10 +1,10 @@
 package org.hqtp.android;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.google.inject.Inject;
-
+import roboguice.activity.RoboActivity;
+import roboguice.inject.InjectView;
+import roboguice.util.RoboAsyncTask;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,10 +16,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import roboguice.activity.RoboActivity;
 
-import roboguice.inject.InjectView;
-import roboguice.util.RoboAsyncTask;
+import com.google.inject.Inject;
 
 public class ListQuestionActivity extends RoboActivity {
 
@@ -29,7 +27,6 @@ public class ListQuestionActivity extends RoboActivity {
     @Inject
     HQTPProxy proxy;
 
-    private List<Question> questionList = new ArrayList<Question>();
     private QuestionAdapter adapter;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -37,7 +34,7 @@ public class ListQuestionActivity extends RoboActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list);
 
-        adapter = new QuestionAdapter(this, R.layout.question_item, questionList);
+        adapter = new QuestionAdapter(this, R.layout.question_item);
         questionListView.setAdapter(adapter);
 
         // リストの要素をクリックされたときの挙動
@@ -71,11 +68,15 @@ public class ListQuestionActivity extends RoboActivity {
             if (questions == null) {
                 showAlert("GetQuestion", "質問がありません。");
             } else {
-                questionList.clear();
-                questionList.addAll(questions);
+                adapter.clear();
+                // Robolectric does not implement addAll,
+                // so we use add method and a loop instead for the time being.
+                // https://github.com/pivotal/robolectric/issues/281
+                for (Question q : questions) {
+                    adapter.add(q);
+                }
+                adapter.notifyDataSetChanged();
             }
-
-            adapter.notifyDataSetChanged();
         }
     }
 
@@ -83,8 +84,8 @@ public class ListQuestionActivity extends RoboActivity {
 
         private int resourceId;
 
-        public QuestionAdapter(Context context, int resource, List<Question> questions) {
-            super(context, resource, questions);
+        public QuestionAdapter(Context context, int resource) {
+            super(context, resource);
             resourceId = resource;
         }
 
