@@ -15,7 +15,8 @@
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask"
+            android:noHistory="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,7 +32,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".HQTPActivity"></activity>
-        <activity android:name=".PostQuestionActivity"></activity>
+        <activity android:name=".PostQuestionActivity"
+            android:noHistory="true"></activity>
         <activity android:name=".ListQuestionActivity"></activity>
     </application>
 
