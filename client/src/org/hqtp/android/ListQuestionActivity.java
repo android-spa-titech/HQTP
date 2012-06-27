@@ -11,9 +11,11 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -23,6 +25,8 @@ public class ListQuestionActivity extends RoboActivity {
 
     @InjectView(R.id.listQuestion)
     ListView questionListView;
+    @InjectView(R.id.buttonUpdate)
+    Button updateButton;
 
     @Inject
     HQTPProxy proxy;
@@ -47,6 +51,17 @@ public class ListQuestionActivity extends RoboActivity {
             }
         });
 
+        updateButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                loadQuestion();
+            }
+        });
+
+        loadQuestion();
+    }
+
+    // 質問をリストに読み込み
+    private void loadQuestion() {
         GetQuestion gq = new GetQuestion();
         try {
             gq.execute();
