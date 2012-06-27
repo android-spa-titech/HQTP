@@ -63,11 +63,7 @@ public class ListQuestionActivity extends RoboActivity {
     // 質問をリストに読み込み
     private void loadQuestion() {
         GetQuestion gq = new GetQuestion();
-        try {
-            gq.execute();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        gq.execute();
     }
 
     private class GetQuestion extends RoboAsyncTask<List<Question>> {
