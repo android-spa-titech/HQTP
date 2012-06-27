@@ -12,6 +12,13 @@ class Question(models.Model):
     def __unicode__(self):
         return u'[%s] %s' % (self.title, self.body)
 
+    def to_dict(self):
+        return dict(id=self.pk,
+                    title=self.title,
+                    body=self.body,
+                    user=user_to_dict(self.added_by),
+                    time=self.posted_at.isoformat())
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
@@ -19,6 +26,11 @@ class UserProfile(models.Model):
     # Additional information about User
     screen_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
+
+
+def user_to_dict(user):
+    return dict(id=user.pk,
+                name=user.username)
 
 
 def create_user_profile(sender, instance, created, **kwargs):
