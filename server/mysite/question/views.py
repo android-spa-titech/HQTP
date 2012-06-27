@@ -112,7 +112,7 @@ def get_view(request):
         # get need auth
         return json_response_forbidden()
 
-    posts = [dict(title=q.title, body=q.body) for q in Question.objects.all()]
+    posts = [q.to_dict() for q in Question.objects.all()]
     context = dict(
        posts=posts
     )

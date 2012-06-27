@@ -118,7 +118,20 @@ def test_about_post():
     >>> jobj = access_get_view(c)
     >>> jobj['status'] == 'OK'
     True
-    >>> jobj['posts'] == [dict(title='after auth', body='can post')]
+    >>> post = jobj['posts'][0]
+    >>> 'id' in post
+    True
+    >>> post['title'] == 'after auth'
+    True
+    >>> post['body'] == 'can post'
+    True
+    >>> 'user' in post
+    True
+    >>> 'id' in post['user']
+    True
+    >>> 'name' in post['user']
+    True
+    >>> 'time' in post
     True
     """
     pass
@@ -186,7 +199,10 @@ def test_about_login():
     >>> j = access_get_view(c)
     >>> j['status'] == 'OK'
     True
-    >>> j['posts'] == [dict(title='test', body='hello world')]
+    >>> post = j['posts'][0]
+    >>> post['title'] == 'test'
+    True
+    >>> post['body'] == 'hello world'
     True
     """
 
