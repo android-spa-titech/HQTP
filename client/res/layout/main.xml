@@ -3,12 +3,6 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
-
-    <Button
-        android:id="@+id/authentication_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/verification" />
 
     <Button
         android:id="@+id/getallpost_button"

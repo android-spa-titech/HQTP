@@ -19,18 +19,18 @@ import com.xtremelabs.robolectric.shadows.ShadowIntent;
 @RunWith(HQTPActivityTestRunner.class)
 public class HQTPActivityTest {
 
-    @Inject HQTPActivity activity;
-    @Inject HQTPProxy proxy;
-    @InjectView(R.id.getallpost_button) Button getallpost_button;
-    @InjectView(R.id.post_button) Button post_button;
+    @Inject
+    HQTPActivity activity;
+    @Inject
+    HQTPProxy proxy;
+    @InjectView(R.id.getallpost_button)
+    Button getallpost_button;
+    @InjectView(R.id.post_button)
+    Button post_button;
 
     @Before
     public void setUp() throws Exception {
         activity.onCreate(null);
-    }
-
-    @Test
-    public void pressingTheButtonShouldAccessGetQuestion() throws Exception {
     }
 
     @Test
