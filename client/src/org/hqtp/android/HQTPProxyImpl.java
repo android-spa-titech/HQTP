@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
@@ -46,82 +47,61 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     @Override
-    public boolean authenticate(String access_token_key, String access_token_secret) {
+    public boolean authenticate(String access_token_key, String access_token_secret) throws IOException, JSONException,
+            HQTPAPIException {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("access_token_key", access_token_key);
         params.put("access_token_secret", access_token_secret);
-        boolean res = false;
-        try {
-            HttpResponse response = sendByGet("auth/", params);
-            JSONObject json = toJSON(response.getEntity());
-            if (json.getString("status") == "OK") {
-                res = true;
-            }
-        } catch (Exception e) {
-            // TODO: handle exception
-            e.printStackTrace();
+        HttpResponse response = sendByGet("auth/", params);
+        JSONObject json = toJSON(response.getEntity());
+        if (!json.getString("status").equals("OK")) {
+            throw new HQTPAPIException("Authentication failed. : /api/auth returned status='"
+                    + json.getString("status") + "'");
         }
-        return res;
+
+        return true;
     }
 
     @Override
-    public boolean postQuestion(String title, String body) {
+    public boolean postQuestion(String title, String body) throws JSONException, IOException, HQTPAPIException {
         HttpResponse response;
-        HashMap<String , String> params = new HashMap<String, String>();
+        HashMap<String, String> params = new HashMap<String, String>();
         params.put("title", title);
         params.put("body", body);
-        boolean res = false;
-        try{
-            response = sendByPost("post/", params);
-            JSONObject json = toJSON(response.getEntity());
-            Log.d("info", json.toString());
-            if(json.getString("status")=="OK"){
-                res = true;
-            }
-        }catch (Exception e) {
-            // TODO: handle exception
-            e.printStackTrace();
+        response = sendByPost("post/", params);
+        JSONObject json = toJSON(response.getEntity());
+        Log.d("info", json.toString());
+        if (!json.getString("status").equals("OK")) {
+            throw new HQTPAPIException("Post question failed. : /api/post returned status='"
+                    + json.getString("status") + "'");
         }
-        return res;
+
+        return true;
     }
 
     @Override
-    public List<Question> getQuestions() {
+    public List<Question> getQuestions() throws JSONException, IOException, HQTPAPIException {
         // ネットワークからの読込テスト
         JSONObject json;
-        try {
-            HttpResponse response = sendByGet("get/",null);
-            //TODO: ネットワークまわりの例外とレスポンスまわりの例外処理がごっちゃになってるのをどうにかしたい
-            json = toJSON(response.getEntity());
-            Log.d("info", json.toString());
-        } catch (Exception e1) {
-            //TODO: 真面目に例外処理しましょう
-            Log.d("err", e1.getMessage());
-            e1.printStackTrace();
-            return null;
-        }
+        HttpResponse response = sendByGet("get/", null);
+        json = toJSON(response.getEntity());
+        Log.d("info", json.toString());
 
-        try{
-            if(json.getString("status")!="OK"){
-                //TODO: エラー処理
-            }
-            JSONArray array = json.getJSONArray("posts");
-            ArrayList<Question> res = new ArrayList<Question>();
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject post = array.getJSONObject(i);
-                res.add(new Question(post.getString("title"), post.getString("body"), null));
-            }
-            return res;
-        }catch(JSONException e){
-            //TODO: JSONまわりのエラー対応
-            Log.d("err",e.getMessage());
-            e.printStackTrace();
-            return null;
+        if (!json.getString("status").equals("OK")) {
+            throw new HQTPAPIException("Getting questions failed. : /api/get returned status='"
+                    + json.getString("status") + "'");
         }
+        JSONArray array = json.getJSONArray("posts");
+        ArrayList<Question> res = new ArrayList<Question>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject post = array.getJSONObject(i);
+            res.add(new Question(post.getString("title"), post.getString("body"), null));
+        }
+        return res;
     }
 
     private HttpResponse sendByGet(String path, Map<String, String> params)
-            throws ClientProtocolException, IOException {
+            throws ClientProtocolException, IOException, HQTPAPIException {
         Uri.Builder builder = Uri.parse(api_gateway).buildUpon();
         builder.appendEncodedPath(path);
         if (params != null) {
@@ -134,7 +114,7 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     private HttpResponse sendByPost(String path, Map<String, String> params)
-            throws ClientProtocolException, IOException {
+            throws ClientProtocolException, IOException, HQTPAPIException {
         Uri.Builder builder = Uri.parse(api_gateway).buildUpon();
         builder.appendEncodedPath(path);
         HttpPost http_post = new HttpPost(builder.build().toString());
@@ -146,31 +126,36 @@ public class HQTPProxyImpl implements HQTPProxy {
             try {
                 http_post.setEntity(new UrlEncodedFormEntity(form_params, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();    // I think here is unreachable...
+                e.printStackTrace(); // I think here is unreachable...
             }
         }
         return send(http_post);
     }
-    
-    private HttpResponse send(HttpUriRequest request) throws ClientProtocolException, IOException
+
+    private HttpResponse send(HttpUriRequest request) throws ClientProtocolException, IOException, HQTPAPIException
     {
-        //TODO: Timeoutの設定をすべき？
+        // TODO: Timeoutの設定をすべき？
         DefaultHttpClient client = new DefaultHttpClient();
         HttpResponse response = null;
         client.setCookieStore(cookie_store);
         try {
             response = client.execute(request);
+            int status_code = response.getStatusLine().getStatusCode();
+            if (status_code != HttpStatus.SC_OK && status_code != HttpStatus.SC_CREATED) {
+                throw new HQTPAPIException("HTTP response returned failure. : return Http status code="
+                        + Integer.toString(status_code));
+            }
             this.cookie_store = client.getCookieStore();
         } finally {
             client.getConnectionManager().shutdown();
         }
         return response;
     }
-    
+
     private static JSONObject toJSON(HttpEntity entity) throws ParseException, IOException, JSONException
     {
         String response = EntityUtils.toString(entity);
-        entity.consumeContent();    //ここでconsumeするのはキモいのだろうか・・・
+        entity.consumeContent(); // ここでconsumeするのはキモいのだろうか・・・
         return new JSONObject(response);
     }
 }

@@ -19,7 +19,8 @@ import com.xtremelabs.robolectric.Robolectric;
 @RunWith(HQTPProxyImplTestRunner.class)
 public class HQTPProxyImplTest {
 
-    @Inject HQTPProxy proxy;
+    @Inject
+    HQTPProxy proxy;
 
     @Before
     public void setUp() throws Exception {
@@ -54,15 +55,17 @@ public class HQTPProxyImplTest {
         HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
         assertThat(sentHttpRequest.getURI(), equalTo(URI.create("http://www.hqtp.org/api/post/")));
         assertThat(sentHttpRequest.getMethod(), equalTo("POST"));
-        //TODO: パラメータについても検査したい
-        //Assert.assertTrue((EntityUtils.toString(((HttpPost)sentHttpRequest).getEntity())), false);
+        // TODO: パラメータについても検査したい
+        // Assert.assertTrue((EntityUtils.toString(((HttpPost)sentHttpRequest).getEntity())), false);
     }
 
     @Test
     public void getQuestionsShouldCallAPI() throws Exception {
         Robolectric.clearHttpResponseRules();
         Robolectric.clearPendingHttpResponses();
-        Robolectric.addPendingHttpResponse(200, "{\"status\":\"OK\",\"posts\":[{\"title\":\"title1\",\"body\":\"body1\"},{\"title\":\"title2\",\"body\":\"body2\"}]}");
+        Robolectric
+            .addPendingHttpResponse(200,
+                    "{\"status\":\"OK\",\"posts\":[{\"title\":\"title1\",\"body\":\"body1\"},{\"title\":\"title2\",\"body\":\"body2\"}]}");
 
         List<Question> res = proxy.getQuestions();
 
@@ -76,4 +79,30 @@ public class HQTPProxyImplTest {
         assertThat(res.get(1).getBody(), equalTo("body2"));
     }
 
+    @Test(expected = HQTPAPIException.class)
+    public void authenticateShouldThrowAPIException() throws Exception {
+        Robolectric.clearHttpResponseRules();
+        Robolectric.clearPendingHttpResponses();
+        Robolectric.addPendingHttpResponse(403, "{ \"status\": \"Forbidden\" }");
+
+        proxy.authenticate("DUMMY_ACCESS_TOKEN_KEY", "DUMMY_ACCESS_TOKEN_SECRET");
+    }
+
+    @Test(expected = HQTPAPIException.class)
+    public void postQuestionShouldThrowAPIException() throws Exception {
+        Robolectric.clearHttpResponseRules();
+        Robolectric.clearPendingHttpResponses();
+        Robolectric.addPendingHttpResponse(403, "{ \"status\": \"Forbidden\" }");
+
+        proxy.postQuestion("test title", "test body");
+    }
+
+    @Test(expected = HQTPAPIException.class)
+    public void getQuestionsShouldThrowAPIException() throws Exception {
+        Robolectric.clearHttpResponseRules();
+        Robolectric.clearPendingHttpResponses();
+        Robolectric.addPendingHttpResponse(403, "{ \"status\": \"Forbidden\" }");
+
+        proxy.getQuestions();
+    }
 }
