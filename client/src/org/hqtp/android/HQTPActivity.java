@@ -1,10 +1,7 @@
 package org.hqtp.android;
 
-import java.util.List;
-
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
-import roboguice.util.RoboAsyncTask;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,10 +14,14 @@ import com.google.inject.Inject;
 
 public class HQTPActivity extends RoboActivity implements OnClickListener {
 
-    @InjectView(R.id.authentication_button) Button authentication_button;
-    @InjectView(R.id.getallpost_button)     Button getallpost_button;
-    @InjectView(R.id.post_button)           Button post_button;
-    @Inject HQTPProxy proxy;
+    @InjectView(R.id.authentication_button)
+    Button authentication_button;
+    @InjectView(R.id.getallpost_button)
+    Button getallpost_button;
+    @InjectView(R.id.post_button)
+    Button post_button;
+    @Inject
+    HQTPProxy proxy;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,29 +62,6 @@ public class HQTPActivity extends RoboActivity implements OnClickListener {
                 public void onClick(DialogInterface dialog, int which) {
                 }
             }).show();
-    }
-
-    private class GetPostTask extends RoboAsyncTask<List<Question>> {
-        @Override
-        public List<Question> call() throws Exception {
-            return proxy.getQuestions();
-        }
-
-        @Override
-        protected void onSuccess(List<Question> questions) {
-            StringBuilder sb = new StringBuilder();
-            if (questions == null) {
-                sb.append("質問がありません＞＜");
-            } else {
-                for (Question q : questions) {
-                    sb.append(q.getTitle());
-                    sb.append("\n");
-                    sb.append(q.getBody());
-                    sb.append("\n");
-                }
-            }
-            showAlert("質問一覧", sb.toString());
-        }
     }
 
 }
