@@ -118,7 +118,9 @@ def test_about_post():
     >>> jobj = access_get_view(c)
     >>> jobj['status'] == 'OK'
     True
-    >>> jobj['posts'] == [dict(title='after auth', body='can post')]
+    >>> jobj['posts'][0]['title'] == 'after auth'
+    True
+    >>> jobj['posts'][0]['body'] == 'can post'
     True
     """
     pass
@@ -186,7 +188,9 @@ def test_about_login():
     >>> j = access_get_view(c)
     >>> j['status'] == 'OK'
     True
-    >>> j['posts'] == [dict(title='test', body='hello world')]
+    >>> j['posts'][0]['title'] == 'test'
+    True
+    >>> j['posts'][0]['body'] == 'hello world'
     True
     """
 
