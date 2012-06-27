@@ -114,6 +114,21 @@ def test_about_post():
     >>> jobj['status'] == 'OK'
     True
 
+    # 戻り値の検証
+    >>> post = jobj['post']
+    >>> post['title'] == 'after auth'
+    True
+    >>> post['body'] == 'can post'
+    True
+    >>> 'user' in post
+    True
+    >>> 'id' in post['user']
+    True
+    >>> 'name' in post['user']
+    True
+    >>> 'time' in post
+    True
+
     # getで確かめてみると、確かに投稿が反映されています。
     >>> jobj = access_get_view(c)
     >>> jobj['status'] == 'OK'

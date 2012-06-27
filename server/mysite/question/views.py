@@ -130,8 +130,8 @@ def post_view(request):
 
     added_by = request.user
     if added_by.is_authenticated():
-        Question.objects.create(title=title, body=body, added_by=added_by)
-        return json_response()
+        q = Question.objects.create(title=title, body=body, added_by=added_by)
+        return json_response(context=dict(post=q.to_dict()))
     else:
         return json_response_forbidden()
 
