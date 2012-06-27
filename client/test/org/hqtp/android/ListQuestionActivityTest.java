@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.google.inject.Inject;
@@ -65,5 +66,36 @@ public class ListQuestionActivityTest {
 
         ListView listView = (ListView) activity.findViewById(R.id.listQuestion);
         assertThat(listView.getCount(), equalTo(1));
+    }
+
+    @Test
+    public void updateButtonShoudUpdateQuestions() throws Exception {
+        List<Question> questions = new ArrayList<Question>();
+        questions.add(new Question("title", "body", "author"));
+        when(proxy.getQuestions()).thenReturn(questions);
+
+        ListQuestionActivity activity = new ListQuestionActivity();
+        injector.injectMembers(activity);
+        activity.onCreate(null);
+        Robolectric.runBackgroundTasks();
+        Robolectric.runUiThreadTasks();
+        Thread.sleep(100);
+
+        ListView listView = (ListView) activity.findViewById(R.id.listQuestion);
+        assertThat(listView.getCount(), equalTo(1));
+
+        List<Question> questions2 = new ArrayList<Question>();
+        questions2.add(new Question("title", "body", "author"));
+        questions2.add(new Question("title2", "body2", "author2"));
+        when(proxy.getQuestions()).thenReturn(questions2);
+
+        Button button = (Button) activity.findViewById(R.id.buttonUpdate);
+        button.performClick();
+
+        Robolectric.runBackgroundTasks();
+        Robolectric.runUiThreadTasks();
+        Thread.sleep(100);
+
+        assertThat(listView.getCount(), equalTo(2));
     }
 }
