@@ -17,7 +17,6 @@ import com.google.inject.Inject;
 
 public class HQTPActivity extends RoboActivity implements OnClickListener {
 
-    @InjectView(R.id.authentication_button) Button authentication_button;
     @InjectView(R.id.getallpost_button)     Button getallpost_button;
     @InjectView(R.id.post_button)           Button post_button;
     @Inject HQTPProxy proxy;
@@ -27,7 +26,6 @@ public class HQTPActivity extends RoboActivity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        authentication_button.setOnClickListener(this);
         getallpost_button.setOnClickListener(this);
         post_button.setOnClickListener(this);
     }
@@ -35,12 +33,6 @@ public class HQTPActivity extends RoboActivity implements OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-        case R.id.authentication_button:
-            showAlert("authentication", "authentication_button is clicked");
-            // TODO: アクセストークンを取得
-            // TODO: proxy.authenticate(access_token_key,access_token_secret);
-            // TODO: 戻り値に応じてダイアログ表示
-            break;
         case R.id.getallpost_button:
             startActivity(new Intent(this, ListQuestionActivity.class));
             break;
