@@ -118,9 +118,20 @@ def test_about_post():
     >>> jobj = access_get_view(c)
     >>> jobj['status'] == 'OK'
     True
-    >>> jobj['posts'][0]['title'] == 'after auth'
+    >>> post = jobj['posts'][0]
+    >>> 'id' in post
     True
-    >>> jobj['posts'][0]['body'] == 'can post'
+    >>> post['title'] == 'after auth'
+    True
+    >>> post['body'] == 'can post'
+    True
+    >>> 'user' in post
+    True
+    >>> 'id' in post['user']
+    True
+    >>> 'name' in post['user']
+    True
+    >>> 'time' in post
     True
     """
     pass
@@ -188,9 +199,10 @@ def test_about_login():
     >>> j = access_get_view(c)
     >>> j['status'] == 'OK'
     True
-    >>> j['posts'][0]['title'] == 'test'
+    >>> post = j['posts'][0]
+    >>> post['title'] == 'test'
     True
-    >>> j['posts'][0]['body'] == 'hello world'
+    >>> post['body'] == 'hello world'
     True
     """
 

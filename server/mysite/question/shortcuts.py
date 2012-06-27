@@ -82,9 +82,10 @@ def access_post_view(client, title=None, body=None):
     >>> jobj['status'] == 'OK'
     True
     >>> jobj = access_get_view(c)
-    >>> jobj['posts'][0]['title'] == 'Hello'
+    >>> post = jobj['posts'][0]
+    >>> post['title'] == 'Hello'
     True
-    >>> jobj['posts'][0]['body'] == 'World'
+    >>> post['body'] == 'World'
     True
     """
 
