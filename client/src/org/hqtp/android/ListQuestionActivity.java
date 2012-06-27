@@ -89,6 +89,11 @@ public class ListQuestionActivity extends RoboActivity {
                 adapter.notifyDataSetChanged();
             }
         }
+
+        @Override
+        protected void onException(Exception e) {
+            showAlert("GetQuestion", "サーバーとの通信に失敗しました。");
+        }
     }
 
     private class QuestionAdapter extends ArrayAdapter<Question> {
