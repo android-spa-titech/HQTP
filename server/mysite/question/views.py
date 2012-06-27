@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.utils.datastructures import MultiValueDictKeyError
 import json
-from mysite.question.models import Question
+from mysite.question.models import Question, user_to_dict
 
 
 def convert_context_to_json(context):
@@ -79,6 +79,7 @@ def auth_view(request):
             # Log in successful
             created = False
             login(request, auth_user)
+            user_info = user_to_dict(auth_user)
         else:
             # User is deleted
             return json_response_not_found()
@@ -102,8 +103,9 @@ def auth_view(request):
             created = True
             new_user = authenticate(username=user_name, password=secret)
             login(request, new_user)
+            user_info = user_to_dict(new_user)
 
-    context = dict(created=created)
+    context = dict(created=created, user=user_info)
     return json_response(context)
 
 
