@@ -36,6 +36,14 @@ def test_about_auth_view():
     >>> jobj['created']
     False
 
+    # test about user identifier (ID)
+    >>> 'user' in jobj
+    True
+    >>> 'name' in jobj['user']
+    True
+    >>> 'id' in jobj['user']
+    True
+
     # if send dummy access token, return Not Found
     >>> jobj = access_auth_view(c, key='dummy key', secret='dummy secret')
     >>> jobj['status'] == 'Not Found'
