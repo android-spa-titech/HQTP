@@ -117,6 +117,7 @@ public class LoginActivityTest {
                 equalTo(HQTPActivity.class.getName()));
     }
 
+    @Test
     public void returnedActivityShouldShowAlert() throws Exception {
         LoginActivity activity = new LoginActivity();
         injector.injectMembers(activity);
