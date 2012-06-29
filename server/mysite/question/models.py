@@ -30,7 +30,7 @@ class UserProfile(models.Model):
 
 def user_to_dict(user):
     return dict(id=user.pk,
-                name=user.username)
+                name=user.get_profile().screen_name)
 
 
 def create_user_profile(sender, instance, created, **kwargs):
