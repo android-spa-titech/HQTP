@@ -1,12 +1,11 @@
 package org.hqtp.android;
 
 import roboguice.activity.RoboActivity;
+import roboguice.inject.InjectView;
 import roboguice.util.SafeAsyncTask;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.OAuthAuthorization;
 import twitter4j.auth.RequestToken;
-import twitter4j.conf.Configuration;
-import twitter4j.conf.ConfigurationContext;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,7 +14,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import roboguice.inject.InjectView;
 
 import com.google.inject.Inject;
 
@@ -24,9 +22,10 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
     Button loginButton;
 
     private final String callback_url = "hqtp://request_callback/";
-    private OAuthAuthorization oauth;
     private RequestToken requestToken;
 
+    @Inject
+    OAuthAuthorization oauth;
     @Inject
     private HQTPProxy proxy;
 
@@ -35,9 +34,6 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
         loginButton.setOnClickListener(this);
-
-        Configuration config = ConfigurationContext.getInstance();
-        oauth = new OAuthAuthorization(config);
         oauth.setOAuthConsumer(getString(R.string.consumer_key), getString(R.string.consumer_secret));
 
         if (savedInstanceState != null && savedInstanceState.containsKey("REQUEST_TOKEN")) {
@@ -93,18 +89,23 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
         @Override
         protected void onSuccess(Void v) {
-            startActivity(new Intent(LoginActivity.this, HQTPActivity.class));
+            Intent intent = new Intent(LoginActivity.this, HQTPActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
         }
     }
 
-    private class TwitterAuthorizationTask extends SafeAsyncTask<Void>
+    private class TwitterAuthorizationTask extends SafeAsyncTask<Uri>
     {
         @Override
-        public Void call() throws Exception {
+        public Uri call() throws Exception {
             requestToken = oauth.getOAuthRequestToken(callback_url);
-            String uri = requestToken.getAuthorizationURL();
-            startActivity((new Intent(Intent.ACTION_VIEW, Uri.parse(uri))));
-            return null;
+            return Uri.parse(requestToken.getAuthorizationURL());
+        }
+
+        @Override
+        public void onSuccess(Uri uri) {
+            startActivity(new Intent(Intent.ACTION_VIEW, uri));
         }
 
         @Override
