@@ -6,5 +6,7 @@
     <string name="post">投稿</string>
     <string name="verification">認証</string>
     <string name="getallpost">投稿一覧</string>
+    <string name="authentication_failed_message">認証に失敗しました。再度認証をやり直して下さい。</string>
+    <string name="authentication_failed_title">認証失敗</string>
 
 </resources>

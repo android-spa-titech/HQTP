@@ -7,6 +7,8 @@ import twitter4j.auth.OAuthAuthorization;
 import twitter4j.auth.RequestToken;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationContext;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -45,7 +47,7 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.twitter_login){
+        if (v.getId() == R.id.twitter_login) {
             TwitterAuthorizationTask task = new TwitterAuthorizationTask();
             task.execute();
         }
@@ -85,7 +87,8 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
         @Override
         protected void onException(Exception e) {
-            // TODO: ここで上手く行かなかった場合の通知を行う。
+            showAlert(getString(R.string.authentication_failed_title),
+                    getString(R.string.authentication_failed_message));
         }
 
         @Override
@@ -94,7 +97,6 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
         }
     }
 
-    // TODO: onClickで呼ぶ
     private class TwitterAuthorizationTask extends SafeAsyncTask<Void>
     {
         @Override
@@ -107,7 +109,19 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
         @Override
         protected void onException(Exception e) {
-            // TODO: ここで上手く行かなかった場合の通知を行う。
+            showAlert(getString(R.string.authentication_failed_title),
+                    getString(R.string.authentication_failed_message));
         }
+    }
+
+    private void showAlert(String title, String message) {
+        new AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            }).show();
     }
 }
