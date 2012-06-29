@@ -31,7 +31,9 @@ public class HQTPActivity extends RoboActivity implements OnClickListener {
             startActivity(new Intent(this, ListQuestionActivity.class));
             break;
         case R.id.post_button:
-            startActivity(new Intent(this, PostQuestionActivity.class));
+            Intent intent = new Intent(this, PostQuestionActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            startActivity(intent);
             break;
         default:
             break;
