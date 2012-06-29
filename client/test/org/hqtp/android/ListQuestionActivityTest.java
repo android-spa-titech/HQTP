@@ -31,6 +31,16 @@ public class ListQuestionActivityTest {
     HQTPProxy proxy;
 
     @Test
+    public void activityShouldHaveComponents() throws Exception {
+        ListQuestionActivity activity = new ListQuestionActivity();
+        injector.injectMembers(activity);
+        activity.onCreate(null);
+
+        assertNotNull(activity.findViewById(R.id.listQuestion));
+        assertNotNull(activity.findViewById(R.id.buttonUpdate));
+    }
+
+    @Test
     public void loadingActivityShouldAccessGetQuestion() throws Exception {
         List<Question> questions = new ArrayList<Question>();
         questions.add(new Question("title", "body", "author"));
