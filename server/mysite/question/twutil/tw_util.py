@@ -19,11 +19,11 @@ def _get_vc(user_key, user_secret):
     """
     >>> import consumer_info as ci
     >>> vc=_get_vc(ci.spa_key,ci.spa_secret)
-    >>> vc['id']==580619600
+    >>> vc['id'] == ci.spa_id
     True
-    >>> vc['screen_name']==u'android_spa'
+    >>> vc['screen_name'] == ci.spa_screen_name
     True
-    >>> vc['name']==u'android_spa'
+    >>> vc['name'] == ci.spa_name
     True
     >>> vc=_get_vc('dummy key','dummy secret')
     >>> vc=={}
@@ -38,12 +38,9 @@ def _get_vc(user_key, user_secret):
     return ret
 
 
-def get_vc(user_key, user_secret):
+def get_vc_mock(user_key, user_secret):
     """
     Tweepy mock-up
-
-    if MOCK in /mysite/settings.py == True
-    then use mock-up, else use _get_vc()
 
     If you want to use more twitter users,
     please add user into twitter_database.
@@ -52,16 +49,16 @@ def get_vc(user_key, user_secret):
     1. If input key is in the database, and secret is correct
        then return user information
 
-    >>> from consumer_info import (spa_key, spa_secret, spa_id,
-    ...                            spa_screen_name, spa_name)
-    >>> vc = get_vc(spa_key, spa_secret)
-    >>> vc == dict(id=spa_id, screen_name=spa_screen_name, name=spa_name)
+    >>> import consumer_info as ci
+    >>> vc = get_vc(ci.spa_key, ci.spa_secret)
+    >>> vc == dict(id=ci.spa_id, screen_name=ci.spa_screen_name,
+    ...            name=ci.spa_name)
     True
 
     2. If input key is in the database, but secret is wrong
        then return empty dictionary (and server return not found)
 
-    >>> vc = get_vc(spa_key, 'egg')
+    >>> vc = get_vc(ci.spa_key, 'egg')
     >>> vc == {}
     True
 
@@ -72,18 +69,14 @@ def get_vc(user_key, user_secret):
     Traceback (most recent call last):
         ...
     TypeError: character mapping must return integer, None or unicode
-    """
-    from mysite.settings import MOCK
-    if not MOCK:
-        return _get_vc(user_key, user_secret)
 
-    from consumer_info import (spa_key, spa_secret, spa_id,
-                               spa_screen_name, spa_name)
+    """
+    import consumer_info as ci
     twitter_database = {
-        spa_key: dict(secret=spa_secret,
-                      vc=dict(id=spa_id,
-                              screen_name=spa_screen_name,
-                              name=spa_name)
+        ci.spa_key: dict(secret=ci.spa_secret,
+                      vc=dict(id=ci.spa_id,
+                              screen_name=ci.spa_screen_name,
+                              name=ci.spa_name)
                       )
         }
     not_found_keys = set(['dummy key'])
@@ -99,6 +92,23 @@ def get_vc(user_key, user_secret):
     else:
         raise TypeError(('character mapping must return integer, '
                          'None or unicode'))
+
+
+def get_vc(user_key, user_secret):
+    u"""
+    "Regardless of the value of the DEBUG setting in mysite/settings.py,
+     all Django tests run with DEBUG=False."
+
+    Djangoの公式ドキュメントに書いてあるこの条件を利用して、
+    DEBUGの値がFalseならtestの実行中と判断し、
+    DEBUGの値がTrueならrunserverまたはshellの実行中と判定している
+    mysite/settings.pyのDEBUGの値はFalseにしないでください
+    """
+    from django.conf.global_settings import DEBUG
+    if DEBUG:
+        return _get_vc(user_key, user_secret)
+    else:
+        return get_vc_mock(user_key, user_secret)
 
 
 def _test():

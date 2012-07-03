@@ -1,7 +1,6 @@
 # Django settings for mysite project.
 import os
 
-MOCK = True
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
