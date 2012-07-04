@@ -63,6 +63,7 @@ def auth_view(request):
         return json_response_bad_request()
 
     try:
+        # get twitter account by key and secret
         vc = get_vc(key, secret)
     except TypeError:
         # Error reason is not well known
@@ -70,6 +71,7 @@ def auth_view(request):
         return json_response_server_error()
 
     if vc == {}:
+        # 正しいアクセストークンキー、シークレットでなかった場合 など
         return json_response_not_found()
     user_name = vc['id']
 
@@ -77,11 +79,13 @@ def auth_view(request):
     # どちらもパスワードとしてtemp_passwordを設定する
     temp_password = User.objects.make_random_password()
     try:
+        # HQTP user exists
         user = User.objects.get(username=user_name)
         user.set_password(temp_password)
         user.save()
         created = False
     except User.DoesNotExist:
+        # User has twitter account, but doesn't have HQTP account
         # create new user
         user = User.objects.create_user(user_name, '', temp_password)
         profile = user.get_profile()

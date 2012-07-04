@@ -31,7 +31,7 @@ def _get_vc(user_key, user_secret):
     """
     api = make_api(user_key, user_secret)
     vc = api.verify_credentials()
-    if vc is False:
+    if not vc:
         # 正しいアクセストークンキー、シークレットでなかった場合
         return {}
     ret = dict(id=vc.id, screen_name=vc.screen_name, name=vc.name)
