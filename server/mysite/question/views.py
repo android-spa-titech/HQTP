@@ -63,6 +63,7 @@ def auth_view(request):
         return json_response_bad_request()
 
     try:
+        # get twitter account by key and secret
         vc = get_vc(key, secret)
     except TypeError:
         # Error reason is not well known
@@ -70,40 +71,44 @@ def auth_view(request):
         return json_response_server_error()
 
     if vc == {}:
+        # 正しいアクセストークンキー、シークレットでなかった場合 など
         return json_response_not_found()
     user_name = vc['id']
 
-    auth_user = authenticate(username=user_name, password=secret)
+    # 新規に作成されたユーザーも、登録済みだったユーザーも
+    # どちらもパスワードとしてtemp_passwordを設定する
+    temp_password = User.objects.make_random_password()
+    try:
+        # HQTP user exists
+        user = User.objects.get(username=user_name)
+        user.set_password(temp_password)
+        user.save()
+        created = False
+    except User.DoesNotExist:
+        # User has twitter account, but doesn't have HQTP account
+        # create new user
+        user = User.objects.create_user(user_name, '', temp_password)
+        profile = user.get_profile()
+        profile.screen_name = vc['screen_name']
+        profile.name = vc['name']
+        profile.save()
+        created = True
+
+    auth_user = authenticate(username=user_name, password=temp_password)
+    # セキュリティのために、パスワード認証ができないようにします
+    # アクセストークンKEY、SECRETによる認証しか行いません
+    auth_user.set_unusable_password()
     if auth_user is not None:
         if auth_user.is_active:
             # Log in successful
-            created = False
             login(request, auth_user)
             user_info = user_to_dict(auth_user)
         else:
             # User is deleted
             return json_response_not_found()
     else:
-        # Log in failed
-        try:
-            # Password is incorrect
-            User.objects.get(username=user_name)
-            return json_response_forbidden()
-        except User.DoesNotExist:
-            # User not found
-            # create a new user and new user profile in database
-            new_user = User.objects.create_user(user_name, '', secret)
-
-            # set profile twitter screen_name and name
-            profile = new_user.get_profile()
-            profile.screen_name = vc['screen_name']
-            profile.name = vc['name']
-            profile.save()
-
-            created = True
-            new_user = authenticate(username=user_name, password=secret)
-            login(request, new_user)
-            user_info = user_to_dict(new_user)
+        # 新規作成・パスワードの設定を行っているのでここにはこないはず
+        return json_response_server_error()
 
     context = dict(created=created, user=user_info)
     return json_response(context)
