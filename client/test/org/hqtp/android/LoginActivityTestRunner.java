@@ -6,6 +6,7 @@ import org.junit.runners.model.InitializationError;
 
 import roboguice.application.RoboApplication;
 import roboguice.config.AbstractAndroidModule;
+import twitter4j.auth.OAuthAuthorization;
 import android.app.Application;
 
 import com.google.inject.Injector;
@@ -15,9 +16,10 @@ import com.xtremelabs.robolectric.RobolectricTestRunner;
 
 import static org.mockito.Mockito.mock;
 
-public class HQTPActivityTestRunner extends RobolectricTestRunner {
+public class LoginActivityTestRunner extends RobolectricTestRunner {
 
-    public HQTPActivityTestRunner(Class<?> testClass) throws InitializationError {
+    public LoginActivityTestRunner(Class<?> testClass)
+            throws InitializationError {
         super(testClass);
     }
 
@@ -30,6 +32,7 @@ public class HQTPActivityTestRunner extends RobolectricTestRunner {
                     @Override
                     protected void configure() {
                         bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
+                        bind(OAuthAuthorization.class).toInstance(mock(OAuthAuthorization.class));
                     }
                 });
             }
