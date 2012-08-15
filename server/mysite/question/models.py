@@ -3,6 +3,19 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 
 
+class Lecture(models.Model):
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return u'[%s] %s' % (self.code, self.name)
+
+    def to_dict(self):
+        return dict(id=self.pk,
+                    name=self.name,
+                    code=self.code)
+
+
 class Question(models.Model):
     title = models.CharField(max_length=255)
     body = models.TextField()
@@ -48,16 +61,3 @@ def create_user_profile(sender, instance, created, **kwargs):
         UserProfile.objects.create(user=instance)
 
 post_save.connect(create_user_profile, sender=User)
-
-
-class Lecture(models.Model):
-    name = models.CharField(max_length=255)
-    code = models.CharField(max_length=255)
-
-    def __unicode__(self):
-        return u'[%s] %s' % (self.code, self.name)
-
-    def to_dict(self):
-        return dict(id=self.pk,
-                    name=self.name,
-                    code=self.code)
