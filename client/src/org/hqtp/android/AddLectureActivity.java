@@ -40,8 +40,8 @@ public class AddLectureActivity extends RoboActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
         case R.id.lecture_add_button:
-            PostAddLecture lecture = new PostAddLecture();
-            lecture.execute();
+            PostAddLecture addlecture = new PostAddLecture();
+            addlecture.execute();
             break;
         case R.id.lecture_add_cancel_button:
             finish();
@@ -63,12 +63,12 @@ public class AddLectureActivity extends RoboActivity implements
         @Override
         protected void onSuccess(Void t) throws Exception {
             // 成功したら講義TLへ遷移
+            // すでに存在する講義を入力していたらアラートを提示
         }
 
         @Override
         protected void onException(Exception e) {
             // 通信エラー
-            // すでにある講義を入力していたらアラート
         }
     }
 }
