@@ -101,7 +101,7 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     @Override
-    public List<Post> getTimeline() {
+    public List<Post> getTimeline(String lectureId) {
         // TODO Auto-generated method stub
         return null;
     }

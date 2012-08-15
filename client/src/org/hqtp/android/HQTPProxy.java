@@ -19,7 +19,7 @@ public interface HQTPProxy {
     @Deprecated
     public abstract List<Question> getQuestions() throws JSONException, IOException, HQTPAPIException;
 
-    public abstract List<Post> getTimeline();
+    public abstract List<Post> getTimeline(String lectureId);
 
     public abstract Post postTimeline(String body, String lectureId, String prevVirtualTimestamp,
             String nextVirtualTimestamp);
