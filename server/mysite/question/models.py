@@ -26,11 +26,13 @@ class UserProfile(models.Model):
     # Additional information about User
     screen_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
+    icon_url = models.CharField(max_length=255)
 
 
 def user_to_dict(user):
     return dict(id=user.pk,
-                name=user.get_profile().screen_name)
+                name=user.get_profile().screen_name,
+                icon_url=user.get_profile().icon_url)
 
 
 def create_user_profile(sender, instance, created, **kwargs):
