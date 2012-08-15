@@ -21,6 +21,7 @@ class Question(models.Model):
     body = models.TextField()
     added_by = models.ForeignKey(User, null=True, blank=True)
     posted_at = models.DateTimeField(auto_now_add=True)
+    lecture = models.ForeignKey(Lecture, null=True, blank=True)
 
     def __unicode__(self):
         return u'[%s] %s' % (self.title, self.body)
@@ -30,7 +31,8 @@ class Question(models.Model):
                     title=self.title,
                     body=self.body,
                     user=user_to_dict(self.added_by),
-                    time=self.posted_at.isoformat())
+                    time=self.posted_at.isoformat(),
+                    lecture=self.lecture.to_dict())
 
 
 class UserProfile(models.Model):
