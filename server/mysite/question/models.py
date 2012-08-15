@@ -46,3 +46,16 @@ def create_user_profile(sender, instance, created, **kwargs):
         UserProfile.objects.create(user=instance)
 
 post_save.connect(create_user_profile, sender=User)
+
+
+class Lecture(models.Model):
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return u'[%s] %s' % (self.code, self.name)
+
+    def to_dict(self):
+        return dict(id=self.pk,
+                    name=self.name,
+                    code=self.code)
