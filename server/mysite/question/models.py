@@ -17,7 +17,6 @@ class Lecture(models.Model):
 
 
 class Question(models.Model):
-    title = models.CharField(max_length=255)
     body = models.TextField()
     added_by = models.ForeignKey(User, null=True, blank=True)
     posted_at = models.DateTimeField(auto_now_add=True)
@@ -25,11 +24,10 @@ class Question(models.Model):
     virtual_ts = models.BigIntegerField()
 
     def __unicode__(self):
-        return u'[%s] %s' % (self.title, self.body)
+        return self.body
 
     def to_dict(self):
         return dict(id=self.pk,
-                    title=self.title,
                     body=self.body,
                     user=user_to_dict(self.added_by),
                     time=self.posted_at.isoformat(),
