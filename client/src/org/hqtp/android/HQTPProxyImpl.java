@@ -100,6 +100,18 @@ public class HQTPProxyImpl implements HQTPProxy {
         return res;
     }
 
+    @Override
+    public List<Post> getTimeline() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Post postTimeline(String body, String lectureId, String prevVirtualTimestamp, String nextVirtualTimestamp) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     private HttpResponse sendByGet(String path, Map<String, String> params)
             throws ClientProtocolException, IOException, HQTPAPIException {
         Uri.Builder builder = Uri.parse(api_gateway).buildUpon();
@@ -158,4 +170,5 @@ public class HQTPProxyImpl implements HQTPProxy {
         entity.consumeContent(); // ここでconsumeするのはキモいのだろうか・・・
         return new JSONObject(response);
     }
+
 }
