@@ -54,7 +54,7 @@ public class HQTPProxyImpl implements HQTPProxy {
         params.put("access_token_secret", access_token_secret);
         HttpResponse response = sendByGet("auth/", params);
         JSONObject json = toJSON(response.getEntity());
-        if (!json.getString("status").equals("OK")) {
+        if (!isStatusOK(json)) {
             throw new HQTPAPIException("Authentication failed. : /api/auth returned status='"
                     + json.getString("status") + "'");
         }
@@ -71,7 +71,7 @@ public class HQTPProxyImpl implements HQTPProxy {
         response = sendByPost("post/", params);
         JSONObject json = toJSON(response.getEntity());
         Log.d("info", json.toString());
-        if (!json.getString("status").equals("OK")) {
+        if (!isStatusOK(json)) {
             throw new HQTPAPIException("Post question failed. : /api/post returned status='"
                     + json.getString("status") + "'");
         }
@@ -87,7 +87,7 @@ public class HQTPProxyImpl implements HQTPProxy {
         json = toJSON(response.getEntity());
         Log.d("info", json.toString());
 
-        if (!json.getString("status").equals("OK")) {
+        if (!isStatusOK(json)) {
             throw new HQTPAPIException("Getting questions failed. : /api/get returned status='"
                     + json.getString("status") + "'");
         }
@@ -101,9 +101,22 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     @Override
-    public List<Post> getTimeline(String lectureId) {
-        // TODO Auto-generated method stub
-        return null;
+    public List<Post> getTimeline(String lectureId) throws IOException, HQTPAPIException, JSONException,
+            java.text.ParseException {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("id", lectureId);
+        HttpResponse response = sendByGet("lecture/timeline/", params);
+        JSONObject json = toJSON(response.getEntity());
+        ArrayList<Post> posts = new ArrayList<Post>();
+        if (!isStatusOK(json)) {
+            throw new HQTPAPIException("Getting timeline failed. : GET /api/lecture/timeline/?id=" + lectureId
+                    + " returned status=" + json.getString("status"));
+        }
+        JSONArray array = json.getJSONArray("posts");
+        for (int i = 0, length = array.length(); i < length; i++) {
+            posts.add(Post.fromJSON(array.getJSONObject(i)));
+        }
+        return posts;
     }
 
     @Override
@@ -171,4 +184,8 @@ public class HQTPProxyImpl implements HQTPProxy {
         return new JSONObject(response);
     }
 
+    private static boolean isStatusOK(JSONObject json) throws JSONException
+    {
+        return json.has("status") && json.getString("status").equals("OK");
+    }
 }

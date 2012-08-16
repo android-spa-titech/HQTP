@@ -105,4 +105,30 @@ public class HQTPProxyImplTest {
 
         proxy.getQuestions();
     }
+
+    @Test
+    public void getTimelineShouldCallAPI() throws Exception
+    {
+        Robolectric.clearHttpResponseRules();
+        Robolectric.clearPendingHttpResponses();
+        Robolectric.addPendingHttpResponse(200, "{\"status\":\"OK\",\"posts\":[" +
+                "{\"id\":\"1\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
+                "\"body\":\"test content\"," +
+                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"time\":\"2012-06-22T17:44:23.092839\"," +
+                "\"virtual_ts\":\"1234567890\"}," +
+                "{\"id\":\"2\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
+                "\"body\":\"test content\"," +
+                "\"user\":{\"id\":\"2\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"time\":\"2012-06-22T17:44:23.092839\",\"virtual_ts\":\"1234568890\"}" +
+                "]}");
+
+        List<Post> res = proxy.getTimeline("1");
+
+        HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
+        assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
+        assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/lecture/timeline/"));
+        Assert.assertNotNull(res);
+        Assert.assertEquals(2, res.size());
+    }
 }

@@ -1,6 +1,7 @@
 package org.hqtp.android;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 
 import org.json.JSONException;
@@ -19,7 +20,7 @@ public interface HQTPProxy {
     @Deprecated
     public abstract List<Question> getQuestions() throws JSONException, IOException, HQTPAPIException;
 
-    public abstract List<Post> getTimeline(String lectureId);
+    public abstract List<Post> getTimeline(String lectureId) throws IOException, HQTPAPIException, JSONException, ParseException;
 
     public abstract Post postTimeline(String body, String lectureId, String prevVirtualTimestamp,
             String nextVirtualTimestamp);
