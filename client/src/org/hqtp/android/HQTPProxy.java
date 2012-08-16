@@ -23,5 +23,5 @@ public interface HQTPProxy {
     public abstract List<Post> getTimeline(String lectureId) throws IOException, HQTPAPIException, JSONException, ParseException;
 
     public abstract Post postTimeline(String body, String lectureId, String prevVirtualTimestamp,
-            String nextVirtualTimestamp);
+            String nextVirtualTimestamp) throws IOException, HQTPAPIException, JSONException, ParseException;
 }

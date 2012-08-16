@@ -120,9 +120,24 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     @Override
-    public Post postTimeline(String body, String lectureId, String prevVirtualTimestamp, String nextVirtualTimestamp) {
-        // TODO Auto-generated method stub
-        return null;
+    public Post postTimeline(String body, String lectureId, String prevVirtualTimestamp, String nextVirtualTimestamp)
+            throws IOException, HQTPAPIException, JSONException, java.text.ParseException {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("id", lectureId);
+        params.put("body", body);
+        if (prevVirtualTimestamp != null) {
+            params.put("before_virtual_ts", prevVirtualTimestamp);
+        }
+        if (nextVirtualTimestamp != null) {
+            params.put("after_virtual_ts", nextVirtualTimestamp);
+        }
+        HttpResponse response = sendByPost("lecture/timeline/", params);
+        JSONObject json = toJSON(response.getEntity());
+        if (!isStatusOK(json)) {
+            throw new HQTPAPIException("Posting to timeline failed. : POST /api/lecture/timeline/ returned status="
+                    + json.getString("status"));
+        }
+        return Post.fromJSON(json.getJSONObject("post"));
     }
 
     private HttpResponse sendByGet(String path, Map<String, String> params)
