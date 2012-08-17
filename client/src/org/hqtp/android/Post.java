@@ -9,7 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Post {
-    private String id;
+    private int id;
     private String body;
     private Date time;
     private String virtualTimestamp;
@@ -18,7 +18,7 @@ public class Post {
     // private Lecture lecture;
     // private User user;
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
@@ -37,7 +37,7 @@ public class Post {
 
     public static Post fromJSON(JSONObject json) throws JSONException, ParseException {
         Post post = new Post();
-        post.id = json.getString("id");
+        post.id = json.getInt("id");
         post.body = json.getString("body");
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         post.time = df.parse(json.getString("time"));

@@ -123,7 +123,7 @@ public class HQTPProxyImplTest {
                 "\"time\":\"2012-06-22T17:44:23.092839\",\"virtual_ts\":\"1234568890\"}" +
                 "]}");
 
-        List<Post> res = proxy.getTimeline("1");
+        List<Post> res = proxy.getTimeline(1);
 
         HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
         assertThat(sentHttpRequest.getMethod(), equalTo("GET"));
@@ -145,7 +145,7 @@ public class HQTPProxyImplTest {
                 "\"time\":\"2012-06-22T17:44:23.092839\"," +
                 "\"virtual_ts\":\"1234567890\"}}");
 
-        Post res = proxy.postTimeline("test content", "1", "1234567890", "1234568910");
+        Post res = proxy.postTimeline("test content", 1, "1234567890", "1234568910");
 
         HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
         assertThat(sentHttpRequest.getMethod(), equalTo("POST"));

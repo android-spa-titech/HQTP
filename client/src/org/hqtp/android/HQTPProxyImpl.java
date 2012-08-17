@@ -101,10 +101,10 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     @Override
-    public List<Post> getTimeline(String lectureId) throws IOException, HQTPAPIException, JSONException,
+    public List<Post> getTimeline(int lectureId) throws IOException, HQTPAPIException, JSONException,
             java.text.ParseException {
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put("id", lectureId);
+        params.put("id", Integer.toString(lectureId));
         HttpResponse response = sendByGet("lecture/timeline/", params);
         JSONObject json = toJSON(response.getEntity());
         ArrayList<Post> posts = new ArrayList<Post>();
@@ -120,10 +120,10 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     @Override
-    public Post postTimeline(String body, String lectureId, String prevVirtualTimestamp, String nextVirtualTimestamp)
+    public Post postTimeline(String body, int lectureId, String prevVirtualTimestamp, String nextVirtualTimestamp)
             throws IOException, HQTPAPIException, JSONException, java.text.ParseException {
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put("id", lectureId);
+        params.put("id", Integer.toString(lectureId));
         params.put("body", body);
         if (prevVirtualTimestamp != null) {
             params.put("before_virtual_ts", prevVirtualTimestamp);
