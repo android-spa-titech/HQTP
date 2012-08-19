@@ -12,7 +12,7 @@ public class Post {
     private int id;
     private String body;
     private Date time;
-    private String virtualTimestamp;
+    private long virtualTimestamp;
 
     // TODO: toggle comment
     // private Lecture lecture;
@@ -30,7 +30,7 @@ public class Post {
         return time;
     }
 
-    public String getVirtualTimestamp()
+    public long getVirtualTimestamp()
     {
         return virtualTimestamp;
     }
@@ -41,7 +41,7 @@ public class Post {
         post.body = json.getString("body");
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         post.time = df.parse(json.getString("time"));
-        post.virtualTimestamp = json.getString("virtual_ts");
+        post.virtualTimestamp = json.getLong("virtual_ts");
         // TODO: toggle comment
         // post.user = User.fromJSON(json.getString("user"));
         // post.lecture = Lecture.fromJSON(json.getString("lecture"));

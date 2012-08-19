@@ -23,6 +23,17 @@ public interface HQTPProxy {
     public abstract List<Post> getTimeline(int lectureId) throws IOException, HQTPAPIException, JSONException,
             ParseException;
 
-    public abstract Post postTimeline(String body, int lectureId, String prevVirtualTimestamp,
-            String nextVirtualTimestamp) throws IOException, HQTPAPIException, JSONException, ParseException;
+    /**
+     * @param body 送信する投稿本文
+     * @param lectureId 授業ID
+     * @param prevVirtualTimestamp 挿入したい時間の前の投稿。指定しない場合は負数を指定する
+     * @param nextVirtualTimestamp 挿入したい時間の次の投稿。指定しない場合は負数を指定する
+     * @return 投稿したPostを返す
+     * @throws IOException
+     * @throws HQTPAPIException
+     * @throws JSONException
+     * @throws ParseException
+     */
+    public abstract Post postTimeline(String body, int lectureId, long prevVirtualTimestamp,
+            long nextVirtualTimestamp) throws IOException, HQTPAPIException, JSONException, ParseException;
 }

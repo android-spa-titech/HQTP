@@ -145,13 +145,13 @@ public class HQTPProxyImplTest {
                 "\"time\":\"2012-06-22T17:44:23.092839\"," +
                 "\"virtual_ts\":\"1234567890\"}}");
 
-        Post res = proxy.postTimeline("test content", 1, "1234567890", "1234568910");
+        Post res = proxy.postTimeline("test content", 1, 1234567890, 1234568910);
 
         HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
         assertThat(sentHttpRequest.getMethod(), equalTo("POST"));
         assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
         assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/lecture/timeline/"));
-        //TODO: クエリパラメータの検査もしたい
+        // TODO: クエリパラメータの検査もしたい
         Assert.assertNotNull(res);
     }
 }
