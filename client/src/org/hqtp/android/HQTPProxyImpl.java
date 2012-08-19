@@ -54,7 +54,7 @@ public class HQTPProxyImpl implements HQTPProxy {
         params.put("access_token_secret", access_token_secret);
         HttpResponse response = sendByGet("auth/", params);
         JSONObject json = toJSON(response.getEntity());
-        if (!json.getString("status").equals("OK")) {
+        if (!isStatusOK(json)) {
             throw new HQTPAPIException("Authentication failed. : /api/auth returned status='"
                     + json.getString("status") + "'");
         }
@@ -71,7 +71,7 @@ public class HQTPProxyImpl implements HQTPProxy {
         response = sendByPost("post/", params);
         JSONObject json = toJSON(response.getEntity());
         Log.d("info", json.toString());
-        if (!json.getString("status").equals("OK")) {
+        if (!isStatusOK(json)) {
             throw new HQTPAPIException("Post question failed. : /api/post returned status='"
                     + json.getString("status") + "'");
         }
@@ -87,7 +87,7 @@ public class HQTPProxyImpl implements HQTPProxy {
         json = toJSON(response.getEntity());
         Log.d("info", json.toString());
 
-        if (!json.getString("status").equals("OK")) {
+        if (!isStatusOK(json)) {
             throw new HQTPAPIException("Getting questions failed. : /api/get returned status='"
                     + json.getString("status") + "'");
         }
@@ -98,6 +98,46 @@ public class HQTPProxyImpl implements HQTPProxy {
             res.add(new Question(post.getString("title"), post.getString("body"), null));
         }
         return res;
+    }
+
+    @Override
+    public List<Post> getTimeline(int lectureId) throws IOException, HQTPAPIException, JSONException,
+            java.text.ParseException {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("id", Integer.toString(lectureId));
+        HttpResponse response = sendByGet("lecture/timeline/", params);
+        JSONObject json = toJSON(response.getEntity());
+        ArrayList<Post> posts = new ArrayList<Post>();
+        if (!isStatusOK(json)) {
+            throw new HQTPAPIException("Getting timeline failed. : GET /api/lecture/timeline/?id=" + lectureId
+                    + " returned status=" + json.getString("status"));
+        }
+        JSONArray array = json.getJSONArray("posts");
+        for (int i = 0, length = array.length(); i < length; i++) {
+            posts.add(Post.fromJSON(array.getJSONObject(i)));
+        }
+        return posts;
+    }
+
+    @Override
+    public Post postTimeline(String body, int lectureId, long prevVirtualTimestamp, long nextVirtualTimestamp)
+            throws IOException, HQTPAPIException, JSONException, java.text.ParseException {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("id", Integer.toString(lectureId));
+        params.put("body", body);
+        if (prevVirtualTimestamp >= 0) {
+            params.put("before_virtual_ts", Long.toString(prevVirtualTimestamp));
+        }
+        if (nextVirtualTimestamp >= 0) {
+            params.put("after_virtual_ts", Long.toString(nextVirtualTimestamp));
+        }
+        HttpResponse response = sendByPost("lecture/timeline/", params);
+        JSONObject json = toJSON(response.getEntity());
+        if (!isStatusOK(json)) {
+            throw new HQTPAPIException("Posting to timeline failed. : POST /api/lecture/timeline/ returned status="
+                    + json.getString("status"));
+        }
+        return Post.fromJSON(json.getJSONObject("post"));
     }
 
     private HttpResponse sendByGet(String path, Map<String, String> params)
@@ -157,5 +197,10 @@ public class HQTPProxyImpl implements HQTPProxy {
         String response = EntityUtils.toString(entity);
         entity.consumeContent(); // ここでconsumeするのはキモいのだろうか・・・
         return new JSONObject(response);
+    }
+
+    private static boolean isStatusOK(JSONObject json) throws JSONException
+    {
+        return json.has("status") && json.getString("status").equals("OK");
     }
 }
