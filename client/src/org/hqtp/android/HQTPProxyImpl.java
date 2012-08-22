@@ -47,7 +47,7 @@ public class HQTPProxyImpl implements HQTPProxy {
     }
 
     @Override
-    public boolean authenticate(String access_token_key, String access_token_secret) throws IOException, JSONException,
+    public User authenticate(String access_token_key, String access_token_secret) throws IOException, JSONException,
             HQTPAPIException {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("access_token_key", access_token_key);
@@ -59,7 +59,7 @@ public class HQTPProxyImpl implements HQTPProxy {
                     + json.getString("status") + "'");
         }
 
-        return true;
+        return User.fromJSON(json.getJSONObject("user"));
     }
 
     @Override
