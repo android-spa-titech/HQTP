@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+
 from mysite.question.twutil.consumer_info import spa_key, spa_secret
 from django.test.client import Client
 import json
@@ -46,6 +48,10 @@ def access_auth_view(client, key=None, secret=None):
 
 def access_get_view(client):
     """
+    This test is old.
+    /api/getは使われていない
+    """
+    """
     >>> from mysite.question.tests import clean_questions
     >>> clean_questions()
 
@@ -68,6 +74,10 @@ def access_get_view(client):
 
 
 def access_post_view(client, title=None, body=None):
+    """
+    This test is old.
+    /api/postは使われていない
+    """
     """
     >>> from mysite.question.tests import clean_questions
     >>> clean_questions()

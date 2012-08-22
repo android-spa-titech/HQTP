@@ -61,6 +61,10 @@ def test_about_auth_view():
 
 def test_about_get_view():
     """
+    This test is old.
+    /api/getは使われていない
+    """
+    """
     # getが認証しないとできないことを確かめるテスト
     # authする前にgetをするとForbiddenが返る
     # authした後にgetをするとOKが返る
@@ -93,6 +97,10 @@ def test_about_get_view():
 
 
 def test_about_post():
+    """
+    This test is old.
+    /api/postは使われていない
+    """
     """
     # postが認証しないとできないことを確かめるテスト
     # authする前にpostをするとForbiddenが返る
@@ -162,6 +170,10 @@ def test_about_post():
 
 def test_about_csrf():
     """
+    This test is old.
+    /api/postは使われていない
+    """
+    """
     >>> clean_questions()
 
     >>> from django.test.client import Client
@@ -200,6 +212,10 @@ def test_about_csrf():
 
 def test_about_login():
     """
+    This test is old.
+    /api/[get|post]は使われていない
+    """
+    """
     >>> clean_questions()
     >>> from mysite.question.shortcuts import (make_client,
     ...                                        access_auth_view,
@@ -231,6 +247,10 @@ def test_about_login():
 
 
 def test_about_bad_request():
+    """
+    This test is old.
+    /api/postは使われていない
+    """
     """
     >>> from mysite.question.shortcuts import (make_client,
     ...                                        access_auth_view)
