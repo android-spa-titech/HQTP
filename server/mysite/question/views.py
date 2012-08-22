@@ -10,7 +10,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.utils.datastructures import MultiValueDictKeyError
 import json
-from mysite.question.models import Question, user_to_dict
+from mysite.question.models import (Question,
+                                    user_to_dict,
+                                    Lecture)
 
 
 def convert_context_to_json(context):
@@ -139,6 +141,34 @@ def post_view(request):
     if added_by.is_authenticated():
         q = Question.objects.create(title=title, body=body, added_by=added_by)
         return json_response(context=dict(post=q.to_dict()))
+    else:
+        return json_response_forbidden()
+
+
+def lecture_get_view(request):
+    if not request.user.is_authenticated():
+        # get need auth
+        return json_response_forbidden()
+
+    lecs = [lec.to_dict() for lec in Lecture.objects.all()]
+    context = dict(
+       lectures=lecs
+    )
+    return json_response(context)
+
+
+@csrf_exempt
+def lecture_add_view(request):
+    try:
+        code = request.POST['code']
+        name = request.POST['name']
+    except MultiValueDictKeyError:
+        return json_response_bad_request()
+
+    added_by = request.user
+    if added_by.is_authenticated():
+        lec = Lecture.objects.create(code=code, name=name)
+        return json_response(context=dict(lec.to_dict()))
     else:
         return json_response_forbidden()
 
