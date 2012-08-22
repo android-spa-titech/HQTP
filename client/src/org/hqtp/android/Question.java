@@ -1,5 +1,6 @@
 package org.hqtp.android;
 
+@Deprecated
 public class Question {
     private String title;
     private String body;
