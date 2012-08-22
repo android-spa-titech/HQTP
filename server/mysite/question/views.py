@@ -165,8 +165,7 @@ def lecture_add_view(request):
     except MultiValueDictKeyError:
         return json_response_bad_request()
 
-    added_by = request.user
-    if added_by.is_authenticated():
+    if request.user.is_authenticated():
         lec = Lecture.objects.create(code=code, name=name)
         return json_response(context=dict(lec.to_dict()))
     else:
