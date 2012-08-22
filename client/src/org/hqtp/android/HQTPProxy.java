@@ -10,7 +10,7 @@ public interface HQTPProxy {
 
     // Instance methods
     // TODO: 認証の成否は例外によって知られるべき。何を戻り値にするか検討が必要。
-    public abstract boolean authenticate(String access_token_key, String access_token_secret) throws IOException,
+    public abstract User authenticate(String access_token_key, String access_token_secret) throws IOException,
             JSONException, HQTPAPIException;
 
     // TODO: 質問投稿の成否は例外によって知られるべき。戻り値としてはおそらく投稿IDが妥当と考えられる。
