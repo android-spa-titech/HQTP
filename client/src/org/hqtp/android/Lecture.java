@@ -1,17 +1,17 @@
 package org.hqtp.android;
 
 public class Lecture {
-    private String id;
+    private int id;
     private String name;
     private String code;
 
-    public Lecture(String id, String name, String code) {
+    public Lecture(int id, String name, String code) {
         this.id = id;
         this.name = name;
         this.code = code;
     }
 
-    public String getId() {
+    public int getId() {
         return this.id;
     }
 

@@ -56,19 +56,19 @@ public class AddLectureActivity extends RoboActivity implements
         public Void call() throws Exception {
             String lectureCode = lectureCodeText.getText().toString();
             String lectureName = lectureNameText.getText().toString();
-            // APIでリクエスト
+            // TODO:APIリクエスト
             return null;
         }
 
         @Override
         protected void onSuccess(Void t) throws Exception {
-            // 成功したら講義TLへ遷移
-            // すでに存在する講義を入力していたらアラートを提示
+            // TODO:成功したら講義TLへ遷移
+            // TODO:すでに存在する講義を入力していたらアラートを提示
         }
 
         @Override
         protected void onException(Exception e) {
-            // 通信エラー
+            // TODO:通信エラー処理
         }
     }
 }

@@ -15,6 +15,8 @@
         android:id="@+id/lecture_code_text"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
+        android:hint="授業コード"
+        android:inputType="number"
         android:ems="10" >
 
         <requestFocus />
@@ -31,6 +33,8 @@
         android:id="@+id/lecture_name_text"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
+        android:hint="授業名"
+        android:inputType="text"
         android:ems="10" />
 
     <Button
