@@ -30,9 +30,10 @@ public class HQTPProxyImplTest {
     public void authenticateShouldCallAPI() throws Exception {
         Robolectric.clearHttpResponseRules();
         Robolectric.clearPendingHttpResponses();
-        Robolectric.addPendingHttpResponse(200, "{ \"status\": \"OK\" }");
+        Robolectric.addPendingHttpResponse(200, "{\"status\":\"OK\",\"created\":false," +
+                "\"user\":{\"id\":12,\"name\":\"test user\",\"icon_url\":\"http://example.com/test.png\"}}");
 
-        proxy.authenticate("DUMMY_ACCESS_TOKEN_KEY", "DUMMY_ACCESS_TOKEN_SECRET");
+        User res = proxy.authenticate("DUMMY_ACCESS_TOKEN_KEY", "DUMMY_ACCESS_TOKEN_SECRET");
 
         HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
         assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
@@ -42,6 +43,10 @@ public class HQTPProxyImplTest {
                 Arrays.asList(queries).contains("access_token_key=DUMMY_ACCESS_TOKEN_KEY"));
         Assert.assertTrue("queries contains access_token_secret",
                 Arrays.asList(queries).contains("access_token_secret=DUMMY_ACCESS_TOKEN_SECRET"));
+        Assert.assertNotNull(res);
+        assertThat(res.getId(), equalTo(12));
+        assertThat(res.getName(), equalTo("test user"));
+        assertThat(res.getIconURL(), equalTo("http://example.com/test.png"));
     }
 
     @Test
