@@ -24,4 +24,28 @@
             android:text="twitter.com" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" >
+
+        <EditText
+            android:id="@+id/endpointText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:ems="10"
+            android:text="http://10.0.2.2:8000/api/" >
+
+            <requestFocus />
+        </EditText>
+
+        <Button
+            android:id="@+id/changeEndpointButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="change endpoint" />
+    </LinearLayout>
+
 </RelativeLayout>
