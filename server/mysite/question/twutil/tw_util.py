@@ -104,8 +104,8 @@ def get_vc(user_key, user_secret):
     DEBUGの値がTrueならrunserverまたはshellの実行中と判定している
     mysite/settings.pyのDEBUGの値はFalseにしないでください
     """
-    from django.conf.global_settings import DEBUG
-    if DEBUG:
+    from django.conf import settings
+    if settings.DEBUG:
         return _get_vc(user_key, user_secret)
     else:
         return get_vc_mock(user_key, user_secret)
