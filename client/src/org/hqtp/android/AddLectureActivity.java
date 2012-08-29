@@ -3,6 +3,8 @@ package org.hqtp.android;
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
 import roboguice.util.RoboAsyncTask;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -40,8 +42,17 @@ public class AddLectureActivity extends RoboActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
         case R.id.lecture_add_button:
-            PostAddLecture addlecture = new PostAddLecture();
-            addlecture.execute();
+            String lectureName = lectureNameText.getText().toString();
+            String lectureCode = lectureCodeText.getText().toString();
+            if (lectureName.isEmpty()) {
+                showAlert("AddLectureActivity", "授業名を入力してください。");
+            }
+            else if (lectureCode.isEmpty()) {
+                showAlert("AddLectureActivity", "授業コードを入力してください。");
+            } else {
+                PostAddLecture addlecture = new PostAddLecture();
+                addlecture.execute();
+            }
             break;
         case R.id.lecture_add_cancel_button:
             finish();
@@ -51,24 +62,47 @@ public class AddLectureActivity extends RoboActivity implements
         }
     }
 
-    private class PostAddLecture extends RoboAsyncTask<Void> {
+    private class PostAddLecture extends RoboAsyncTask<Lecture> {
+
         @Override
-        public Void call() throws Exception {
-            String lectureCode = lectureCodeText.getText().toString();
-            String lectureName = lectureNameText.getText().toString();
+        public Lecture call() throws Exception {
+
+            Lecture lecture = new Lecture(
+                    0,
+                    lectureNameText.getText().toString(),
+                    lectureCodeText.getText().toString()
+                    );
+
             // TODO:APIリクエスト
-            return null;
+            // return proxy.addLecture( lecture );
+            return lecture;
         }
 
         @Override
-        protected void onSuccess(Void t) throws Exception {
-            // TODO:成功したら講義TLへ遷移
-            // TODO:すでに存在する講義を入力していたらアラートを提示
+        protected void onSuccess(Lecture lecture) throws Exception {
+            // TODO:成功したら講義コードをつけて講義TLアクティビティへ遷移
+            /*
+             * Intent intent = new Intent( addLectureActivity.this, ****.class );
+             * intent.putExtra("lectureCode", lectureCode);
+             * startActivity( intent );
+             */
         }
 
         @Override
         protected void onException(Exception e) {
+            // TODO:すでに存在する講義を入力していたらアラートを提示
             // TODO:通信エラー処理
         }
+    }
+
+    private void showAlert(String title, String message) {
+        new AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            }).show();
     }
 }
