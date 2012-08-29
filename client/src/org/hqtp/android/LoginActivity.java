@@ -14,12 +14,17 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.inject.Inject;
 
 public class LoginActivity extends RoboActivity implements OnClickListener {
     @InjectView(R.id.twitter_login)
     Button loginButton;
+    @InjectView(R.id.changeEndpointButton)
+    Button changeEndpointButton;
+    @InjectView(R.id.endpointText)
+    TextView endpointText;
 
     private final String callback_url = "hqtp://request_callback/";
     private RequestToken requestToken;
@@ -34,6 +39,7 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
         loginButton.setOnClickListener(this);
+        changeEndpointButton.setOnClickListener(this);
         oauth.setOAuthConsumer(getString(R.string.consumer_key), getString(R.string.consumer_secret));
 
         if (savedInstanceState != null && savedInstanceState.containsKey("REQUEST_TOKEN")) {
@@ -46,6 +52,11 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
         if (v.getId() == R.id.twitter_login) {
             TwitterAuthorizationTask task = new TwitterAuthorizationTask();
             task.execute();
+        } else if (v.getId() == R.id.changeEndpointButton) {// DEBUG: change endpoint(for local test)
+            String new_endpoint = endpointText.getText().toString();
+            if (!new_endpoint.isEmpty()) {
+                ((HQTPProxyImpl) proxy).setEndpoint(new_endpoint);
+            }
         }
     }
 
@@ -83,6 +94,7 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
         @Override
         protected void onException(Exception e) {
+            e.printStackTrace();
             showAlert(getString(R.string.authentication_failed_title),
                     getString(R.string.authentication_failed_message));
         }

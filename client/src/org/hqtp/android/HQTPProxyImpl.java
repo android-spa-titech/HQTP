@@ -37,13 +37,19 @@ import com.google.inject.name.Named;
 @Singleton
 public class HQTPProxyImpl implements HQTPProxy {
 
-    private final String api_gateway;
+    private String api_gateway;
     private CookieStore cookie_store = null;
 
     @Inject
     public HQTPProxyImpl(@Named("HQTP API Endpoint URL") String api_gateway) {
         super();
         this.api_gateway = api_gateway;
+    }
+
+    //DEBUG: デバッグ用のエンドポイント切り替え
+    public void setEndpoint(String endpoint)
+    {
+        this.api_gateway = endpoint;
     }
 
     @Override
@@ -54,6 +60,7 @@ public class HQTPProxyImpl implements HQTPProxy {
         params.put("access_token_secret", access_token_secret);
         HttpResponse response = sendByGet("auth/", params);
         JSONObject json = toJSON(response.getEntity());
+        Log.d("json",json.toString());
         if (!isStatusOK(json)) {
             throw new HQTPAPIException("Authentication failed. : /api/auth returned status='"
                     + json.getString("status") + "'");
