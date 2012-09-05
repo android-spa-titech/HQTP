@@ -41,10 +41,11 @@ public class ListQuestionActivityTest {
     }
 
     @Test
-    public void loadingActivityShouldAccessGetQuestion() throws Exception {
-        List<Question> questions = new ArrayList<Question>();
-        questions.add(new Question("title", "body", "author"));
-        when(proxy.getQuestions()).thenReturn(questions);
+    public void loadingActivityShouldAccessGetTimeline() throws Exception {
+        int lectureId = 1;
+        List<Post> posts = new ArrayList<Post>();
+        posts.add(new Post());//TODO: Postの詳細
+        when(proxy.getTimeline(lectureId)).thenReturn(posts);
 
         ListQuestionActivity activity = new ListQuestionActivity();
         injector.injectMembers(activity);
@@ -53,16 +54,17 @@ public class ListQuestionActivityTest {
         Robolectric.runUiThreadTasks();
         Thread.sleep(100);
 
-        verify(proxy).getQuestions();
+        verify(proxy).getTimeline(lectureId);
         ListView listView = (ListView) activity.findViewById(R.id.listQuestion);
         assertThat(listView.getCount(), equalTo(1));
     }
 
     @Test
-    public void repeatedlyLoadingActivityShouldHaveValidQuestions() throws Exception {
-        List<Question> questions = new ArrayList<Question>();
-        questions.add(new Question("title", "body", "author"));
-        when(proxy.getQuestions()).thenReturn(questions);
+    public void repeatedlyLoadingActivityShouldHaveValidPosts() throws Exception {
+        int lectureId = 1;
+        List<Post> posts = new ArrayList<Post>();
+        posts.add(new Post());//TODO: Postの詳細
+        when(proxy.getTimeline(lectureId)).thenReturn(posts);
 
         ListQuestionActivity activity = new ListQuestionActivity();
         injector.injectMembers(activity);
@@ -84,10 +86,11 @@ public class ListQuestionActivityTest {
     }
 
     @Test
-    public void updateButtonShoudUpdateQuestions() throws Exception {
-        List<Question> questions = new ArrayList<Question>();
-        questions.add(new Question("title", "body", "author"));
-        when(proxy.getQuestions()).thenReturn(questions);
+    public void updateButtonShoudUpdateTimeline() throws Exception {
+        int lectureId = 1;
+        List<Post> posts = new ArrayList<Post>();
+        posts.add(new Post());//TODO: Postの詳細
+        when(proxy.getTimeline(lectureId)).thenReturn(posts);
 
         ListQuestionActivity activity = new ListQuestionActivity();
         injector.injectMembers(activity);
@@ -99,10 +102,10 @@ public class ListQuestionActivityTest {
         ListView listView = (ListView) activity.findViewById(R.id.listQuestion);
         assertThat(listView.getCount(), equalTo(1));
 
-        List<Question> questions2 = new ArrayList<Question>();
-        questions2.add(new Question("title", "body", "author"));
-        questions2.add(new Question("title2", "body2", "author2"));
-        when(proxy.getQuestions()).thenReturn(questions2);
+        List<Post> posts2 = new ArrayList<Post>();
+        posts2.add(new Post());
+        posts2.add(new Post());
+        when(proxy.getTimeline(lectureId)).thenReturn(posts2);
 
         Button button = (Button) activity.findViewById(R.id.buttonUpdate);
         button.performClick();
@@ -116,7 +119,8 @@ public class ListQuestionActivityTest {
 
     @Test
     public void activityShouldShowAlertWhenFailed() throws Exception {
-        when(proxy.getQuestions()).thenThrow(new HQTPAPIException("Cannot get questions"));
+        int lectureId = 1;
+        when(proxy.getTimeline(lectureId)).thenThrow(new HQTPAPIException("Cannot get timeline"));
 
         ListQuestionActivity activity = new ListQuestionActivity();
         injector.injectMembers(activity);
@@ -133,8 +137,9 @@ public class ListQuestionActivityTest {
     }
 
     @Test
-    public void activityShouldShowAlertWhenNoQuestions() throws Exception {
-        when(proxy.getQuestions()).thenReturn(null);
+    public void activityShouldShowAlertWhenNoPosts() throws Exception {
+        int lectureId = 1;
+        when(proxy.getTimeline(lectureId)).thenReturn(null);
 
         ListQuestionActivity activity = new ListQuestionActivity();
         injector.injectMembers(activity);
