@@ -37,13 +37,19 @@ import com.google.inject.name.Named;
 @Singleton
 public class HQTPProxyImpl implements HQTPProxy {
 
-    private final String api_gateway;
+    private String api_gateway;
     private CookieStore cookie_store = null;
 
     @Inject
     public HQTPProxyImpl(@Named("HQTP API Endpoint URL") String api_gateway) {
         super();
         this.api_gateway = api_gateway;
+    }
+
+    //DEBUG: デバッグ用のエンドポイント切り替え
+    public void setEndpoint(String endpoint)
+    {
+        this.api_gateway = endpoint;
     }
 
     @Override
