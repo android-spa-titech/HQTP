@@ -88,6 +88,9 @@ def access_lecture_add_view(client, name, code):
 
 
 def access_timeline_get_view(client, id):
+    """
+    This test will be added
+    """
     u"""
     >>> name = 'Arch1'
     >>> code = 't001'
@@ -114,6 +117,9 @@ def access_timeline_get_view(client, id):
 
 def access_timeline_post_view(client, id, body,
                               before_virtual_ts=None, after_virtual_ts=None):
+    """
+    This test will be added
+    """
     u"""
     >>> name = 'Arch1'
     >>> code = 't001'
