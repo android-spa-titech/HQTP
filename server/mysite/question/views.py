@@ -166,8 +166,16 @@ def lecture_add_view(request):
         return json_response_bad_request()
 
     if request.user.is_authenticated():
-        lec = Lecture.objects.create(code=code, name=name)
-        return json_response(context=dict(lec.to_dict()))
+        for lec in Lecture.objects.all():
+            # 授業コードが登録済み
+            if code == lec.code:
+                return json_response(context=dict(created=False,
+                                                  lecture=lec.to_dict()))
+        # 授業を新規登録
+        new_lec = Lecture.objects.create(code=code, name=name)
+        return json_response(context=dict(created=True,
+                                          lecture=new_lec.to_dict()))
+
     else:
         return json_response_forbidden()
 

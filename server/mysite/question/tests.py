@@ -174,8 +174,8 @@ def test_about_lecture():
     # lecture/getで確認してみます
     >>> jobj4b = access_lecture_get_view(c)
     >>> lectures = jobj4b['lectures']
-    >>> len(lectures) == 1
-    True
+    >>> len(lectures)
+    1
 
     # 他の授業も追加してみる
     >>> jobj5a = access_lecture_add_view(c, name=name2, code=code2)
@@ -185,8 +185,8 @@ def test_about_lecture():
     # lecture/getで確認してみます
     >>> jobj5b = access_lecture_get_view(c)
     >>> lectures = jobj5b['lectures']
-    >>> len(lectures) == 2
-    True
+    >>> len(lectures)
+    2
     """
 
 
