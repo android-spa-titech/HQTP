@@ -46,8 +46,8 @@ public class ListQuestionActivity extends RoboActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ListView listView = (ListView) parent;
-                Question q = (Question) listView.getItemAtPosition(position);
-                showAlert(q.getTitle(), q.getBody());
+                Post p = (Post) listView.getItemAtPosition(position);
+                showAlert("投稿", p.getBody()); //TODO: おそらくは投稿者の名前をタイトルに表示すべき
             }
         });
 
@@ -62,29 +62,29 @@ public class ListQuestionActivity extends RoboActivity {
 
     // 質問をリストに読み込み
     private void loadTimeline() {
-        GetTimeline gt = new GetTimeline();
+        GetTimeline gt = new GetTimeline();//TODO: 講義IDを指定する
         gt.execute();
     }
 
-    private class GetTimeline extends RoboAsyncTask<List<Question>> {
+    private class GetTimeline extends RoboAsyncTask<List<Post>> {
 
         @Override
-        public List<Question> call() throws Exception {
-            return proxy.getQuestions();
+        public List<Post> call() throws Exception {
+            return proxy.getTimeline(1);//TODO: 講義IDを指定する
         }
 
         @Override
-        protected void onSuccess(List<Question> questions) {
+        protected void onSuccess(List<Post> posts) {
 
-            if (questions == null) {
-                showAlert("GetQuestion", "質問がありません。");
+            if (posts == null) {
+                showAlert("GetTimeline", "質問がありません。");
             } else {
                 adapter.clear();
-                // Robolectric does not implement addAll,
+                // Robolectric dopostes not implement addAll,
                 // so we use add method and a loop instead for the time being.
                 // https://github.com/pivotal/robolectric/issues/281
-                for (Question q : questions) {
-                    adapter.add(q);
+                for (Post p : posts) {
+                    adapter.add(p);
                 }
                 adapter.notifyDataSetChanged();
             }
@@ -92,11 +92,12 @@ public class ListQuestionActivity extends RoboActivity {
 
         @Override
         protected void onException(Exception e) {
-            showAlert("GetQuestion", "サーバーとの通信に失敗しました。");
+            e.printStackTrace();
+            showAlert("GetTimeline", "サーバーとの通信に失敗しました。");
         }
     }
 
-    private class TimelineAdapter extends ArrayAdapter<Question> {
+    private class TimelineAdapter extends ArrayAdapter<Post> {
 
         private int resourceId;
 
@@ -114,14 +115,15 @@ public class ListQuestionActivity extends RoboActivity {
                 convertView = inflater.inflate(resourceId, null);
             }
 
-            Question question = (Question) getItem(position);
+            Post post = (Post) getItem(position);
+            //TODO: post-item.xmlに合わせる
 
             TextView titleView = (TextView) convertView.findViewById(R.id.question_title);
             TextView bodyView = (TextView) convertView.findViewById(R.id.question_body);
 
-            titleView.setText(question.getTitle());
+            titleView.setText("title");//TODO: 件名のかわりに何か表示
             // 文字数が多いと全文をそのまま表示するとよくないかも
-            bodyView.setText(question.getBody());
+            bodyView.setText(post.getBody());
 
             return convertView;
         }
