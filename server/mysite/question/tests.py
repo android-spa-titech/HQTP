@@ -30,6 +30,7 @@ def test_about_auth():
 
 
     >>> c = make_client()
+
     # create user first time
     >>> jobj1 = access_auth_view(c)
     >>> jobj1['status'] == 'OK'
@@ -123,10 +124,11 @@ def test_about_lecture():
     >>> clean_lectures()
     >>> from mysite.question.shortcuts import (make_client,
     ...                                        access_auth_view,
-    ...                                        access_lecture_get_view
+    ...                                        access_lecture_get_view,
     ...                                        access_lecture_add_view)
 
     >>> c = make_client()
+
     # authします
     >>> jobj1 = access_auth_view(c)
     >>> jobj1['status'] == 'OK'
@@ -134,7 +136,7 @@ def test_about_lecture():
 
     # 最初は何も授業がありません
     >>> jobj2 = access_lecture_get_view(c)
-    >>> jojb2['status'] == 'OK'
+    >>> jobj2['status'] == 'OK'
     True
     >>> jobj2['lectures'] == []
     True
@@ -152,7 +154,7 @@ def test_about_lecture():
 
     # lecture/getで確認してみます
     >>> jobj3b = access_lecture_get_view(c)
-    >>> jojb3b['status'] == 'OK'
+    >>> jobj3b['status'] == 'OK'
     True
     >>> lectures = jobj3b['lectures']
     >>> len(lectures) == 1
@@ -190,9 +192,12 @@ def test_about_lecture():
 
 def test_about_lecture__forbidden():
     u"""
+    >>> name = 'Programming 1'
+    >>> code = '0X123456789'
+
     >>> from mysite.question.shortcuts import (make_client,
     ...                                        access_auth_view,
-    ...                                        access_lecture_get_view
+    ...                                        access_lecture_get_view,
     ...                                        access_lecture_add_view)
 
     >>> c = make_client()
@@ -212,7 +217,7 @@ def test_about_lecture__forbidden():
 
     # authして初めてlecture/getできます
     >>> jobj3 = access_lecture_get_view(c)
-    >>> jojb3['status'] == 'OK'
+    >>> jobj3['status'] == 'OK'
     True
 
     # authをして初めてlecture/addできます
@@ -281,7 +286,7 @@ def test_about_timeline():
     >>> jobj4 = access_timeline_post_view(c, id=lecture_id, body=u'おすし',
     ...                                   before_virtual_ts=0,
     ...                                   after_virtual_ts=post1_vts)
-    >>> jojb4['status'] == 'OK'
+    >>> jobj4['status'] == 'OK'
     True
     >>> post = jobj4['post']
     >>> post2_id = post['id']
@@ -300,7 +305,7 @@ def test_about_timeline():
     >>> jobj5 = access_timeline_post_view(c, id=lecture_id, body=u'しかえし',
     ...                                   before_virtual_ts=post2_vts,
     ...                                   after_virtual_ts=post1_vts)
-    >>> jojb5['status'] == 'OK'
+    >>> jobj5['status'] == 'OK'
     True
     >>> post = jobj5['post']
     >>> post3_id = post['id']
@@ -436,6 +441,7 @@ def test_about_timeline__notfound():
 
 
     >>> c = make_client()
+
     # authをします
     >>> jobj1 = access_auth_view(c)
     >>> jobj1['status'] == 'OK'
@@ -456,10 +462,14 @@ def test_about_timeline__notfound():
 def test_about_csrf():
     """
     >>> from django.test.client import Client
+    >>> from mysite.question.shortcuts import (access_auth_view,
+    ...                                        access_lecture_add_view,
+    ...                                        access_timeline_post_view)
+
 
     # don't use csrf checking
     >>> c1 = Client()
-    >>> jobj1 = access_auth_view(c1, spa_key, spa_secret)
+    >>> jobj1 = access_auth_view(c1)
 
     >>> jobj2a = access_lecture_add_view(c1, name='hoge', code='foo')
     >>> jobj2a['status'] == 'OK'
