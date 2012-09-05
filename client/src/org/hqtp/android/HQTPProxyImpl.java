@@ -60,7 +60,6 @@ public class HQTPProxyImpl implements HQTPProxy {
         params.put("access_token_secret", access_token_secret);
         HttpResponse response = sendByGet("auth/", params);
         JSONObject json = toJSON(response.getEntity());
-        Log.d("json",json.toString());
         if (!isStatusOK(json)) {
             throw new HQTPAPIException("Authentication failed. : /api/auth returned status='"
                     + json.getString("status") + "'");

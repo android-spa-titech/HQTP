@@ -94,7 +94,6 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
         @Override
         protected void onException(Exception e) {
-            e.printStackTrace();
             showAlert(getString(R.string.authentication_failed_title),
                     getString(R.string.authentication_failed_message));
         }
