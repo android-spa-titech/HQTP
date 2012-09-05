@@ -24,25 +24,25 @@ import com.google.inject.Inject;
 public class ListQuestionActivity extends RoboActivity {
 
     @InjectView(R.id.listQuestion)
-    ListView questionListView;
+    ListView timelineListView;
     @InjectView(R.id.buttonUpdate)
     Button updateButton;
 
     @Inject
     HQTPProxy proxy;
 
-    private QuestionAdapter adapter;
+    private TimelineAdapter adapter;
 
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list);
 
-        adapter = new QuestionAdapter(this, R.layout.question_item);
-        questionListView.setAdapter(adapter);
+        adapter = new TimelineAdapter(this, R.layout.question_item);
+        timelineListView.setAdapter(adapter);
 
         // リストの要素をクリックされたときの挙動
-        questionListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        timelineListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ListView listView = (ListView) parent;
@@ -53,20 +53,20 @@ public class ListQuestionActivity extends RoboActivity {
 
         updateButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                loadQuestion();
+                loadTimeline();
             }
         });
 
-        loadQuestion();
+        loadTimeline();
     }
 
     // 質問をリストに読み込み
-    private void loadQuestion() {
-        GetQuestion gq = new GetQuestion();
-        gq.execute();
+    private void loadTimeline() {
+        GetTimeline gt = new GetTimeline();
+        gt.execute();
     }
 
-    private class GetQuestion extends RoboAsyncTask<List<Question>> {
+    private class GetTimeline extends RoboAsyncTask<List<Question>> {
 
         @Override
         public List<Question> call() throws Exception {
@@ -96,11 +96,11 @@ public class ListQuestionActivity extends RoboActivity {
         }
     }
 
-    private class QuestionAdapter extends ArrayAdapter<Question> {
+    private class TimelineAdapter extends ArrayAdapter<Question> {
 
         private int resourceId;
 
-        public QuestionAdapter(Context context, int resource) {
+        public TimelineAdapter(Context context, int resource) {
             super(context, resource);
             resourceId = resource;
         }
