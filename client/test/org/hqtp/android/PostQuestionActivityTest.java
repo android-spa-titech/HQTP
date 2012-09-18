@@ -69,7 +69,7 @@ public class PostQuestionActivityTest {
         assertNotNull(startedIntent);
         ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
         assertThat(shadowIntent.getComponent().getClassName(),
-                equalTo(ListQuestionActivity.class.getName()));
+                equalTo(TimelineActivity.class.getName()));
     }
 
     @Test

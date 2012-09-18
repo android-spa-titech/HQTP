@@ -65,7 +65,7 @@ public class PostQuestionActivity extends RoboActivity implements
             super.onSuccess(t);
             startActivity(new Intent(
                     PostQuestionActivity.this,
-                    ListQuestionActivity.class));
+                    TimelineActivity.class));
         }
 
         @Override

@@ -27,14 +27,19 @@ public class HQTPActivity extends RoboActivity implements OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-        case R.id.getallpost_button:
-            startActivity(new Intent(this, ListQuestionActivity.class));
+        case R.id.getallpost_button: {
+            Intent intent = new Intent(this, TimelineActivity.class);
+            // TODO(draftcode): Should put a valid lecture id.
+            intent.putExtra(TimelineActivity.LECTURE_ID, 0);
+            startActivity(intent);
             break;
-        case R.id.post_button:
+        }
+        case R.id.post_button: {
             Intent intent = new Intent(this, PostQuestionActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(intent);
             break;
+        }
         default:
             break;
         }

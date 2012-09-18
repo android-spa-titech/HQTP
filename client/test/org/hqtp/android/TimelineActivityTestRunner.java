@@ -9,15 +9,16 @@ import org.junit.runners.model.InitializationError;
 import roboguice.application.RoboApplication;
 import roboguice.config.AbstractAndroidModule;
 import android.app.Application;
+import android.content.Intent;
 
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.RobolectricTestRunner;
 
-public class ListQuestionActivityTestRunner extends RobolectricTestRunner {
+public class TimelineActivityTestRunner extends RobolectricTestRunner {
 
-    public ListQuestionActivityTestRunner(Class<?> testClass)
+    public TimelineActivityTestRunner(Class<?> testClass)
             throws InitializationError {
         super(testClass);
     }
@@ -31,6 +32,14 @@ public class ListQuestionActivityTestRunner extends RobolectricTestRunner {
                     @Override
                     protected void configure() {
                         bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
+
+                        TimelineActivity activity = new TimelineActivity();
+                        Intent intent = new Intent();
+                        intent.putExtra(
+                                TimelineActivity.LECTURE_ID,
+                                TimelineActivityTest.LECTURE_ID);
+                        activity.setIntent(intent);
+                        bind(TimelineActivity.class).toInstance(activity);
                     }
                 });
             }

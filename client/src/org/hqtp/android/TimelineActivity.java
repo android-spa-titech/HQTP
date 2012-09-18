@@ -21,70 +21,74 @@ import android.widget.TextView;
 
 import com.google.inject.Inject;
 
-public class ListQuestionActivity extends RoboActivity {
+public class TimelineActivity extends RoboActivity {
 
-    @InjectView(R.id.listQuestion)
-    ListView questionListView;
+    @InjectView(R.id.listPost)
+    ListView postListView;
     @InjectView(R.id.buttonUpdate)
     Button updateButton;
-
     @Inject
     HQTPProxy proxy;
 
-    private QuestionAdapter adapter;
+    public static final String LECTURE_ID = "LECTURE_ID";
+
+    private int lectureId;
+    private PostAdapter adapter;
 
     public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.list);
+        setContentView(R.layout.timeline);
 
-        adapter = new QuestionAdapter(this, R.layout.question_item);
-        questionListView.setAdapter(adapter);
+        lectureId = getIntent().getIntExtra(LECTURE_ID, -1);
+        assert lectureId != -1;
+
+        adapter = new PostAdapter(this, R.layout.post_item);
+        postListView.setAdapter(adapter);
 
         // リストの要素をクリックされたときの挙動
-        questionListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        postListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ListView listView = (ListView) parent;
-                Question q = (Question) listView.getItemAtPosition(position);
-                showAlert(q.getTitle(), q.getBody());
+                Post p = (Post) listView.getItemAtPosition(position);
+                // TODO(draftcode): Should show something.
+                showAlert("", p.getBody());
             }
         });
 
         updateButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                loadQuestion();
+                loadPost();
             }
         });
 
-        loadQuestion();
+        loadPost();
     }
 
-    // 質問をリストに読み込み
-    private void loadQuestion() {
-        GetQuestion gq = new GetQuestion();
+    private void loadPost() {
+        GetPost gq = new GetPost();
         gq.execute();
     }
 
-    private class GetQuestion extends RoboAsyncTask<List<Question>> {
+    private class GetPost extends RoboAsyncTask<List<Post>> {
 
         @Override
-        public List<Question> call() throws Exception {
-            return proxy.getQuestions();
+        public List<Post> call() throws Exception {
+            return proxy.getTimeline(lectureId);
         }
 
         @Override
-        protected void onSuccess(List<Question> questions) {
+        protected void onSuccess(List<Post> posts) {
 
-            if (questions == null) {
-                showAlert("GetQuestion", "質問がありません。");
+            if (posts == null) {
+                showAlert("GetPost", "投稿がありません。");
             } else {
                 adapter.clear();
                 // Robolectric does not implement addAll,
                 // so we use add method and a loop instead for the time being.
                 // https://github.com/pivotal/robolectric/issues/281
-                for (Question q : questions) {
-                    adapter.add(q);
+                for (Post p : posts) {
+                    adapter.add(p);
                 }
                 adapter.notifyDataSetChanged();
             }
@@ -92,36 +96,32 @@ public class ListQuestionActivity extends RoboActivity {
 
         @Override
         protected void onException(Exception e) {
-            showAlert("GetQuestion", "サーバーとの通信に失敗しました。");
+            showAlert("GetPost", "サーバーとの通信に失敗しました。");
         }
     }
 
-    private class QuestionAdapter extends ArrayAdapter<Question> {
+    private class PostAdapter extends ArrayAdapter<Post> {
 
         private int resourceId;
 
-        public QuestionAdapter(Context context, int resource) {
+        public PostAdapter(Context context, int resource) {
             super(context, resource);
             resourceId = resource;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-
             // メモリを無駄に使わないように
             if (convertView == null) {
                 LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 convertView = inflater.inflate(resourceId, null);
             }
 
-            Question question = (Question) getItem(position);
+            Post post = (Post) getItem(position);
+            TextView bodyView = (TextView) convertView.findViewById(R.id.postContent);
 
-            TextView titleView = (TextView) convertView.findViewById(R.id.question_title);
-            TextView bodyView = (TextView) convertView.findViewById(R.id.question_body);
-
-            titleView.setText(question.getTitle());
             // 文字数が多いと全文をそのまま表示するとよくないかも
-            bodyView.setText(question.getBody());
+            bodyView.setText(post.getBody());
 
             return convertView;
         }

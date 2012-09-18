@@ -59,6 +59,8 @@ public class HQTPActivityTest {
         Intent startedIntent = shadowActivity.getNextStartedActivity();
         ShadowIntent shadowIntent = shadowOf(startedIntent);
         assertThat(shadowIntent.getComponent().getClassName(),
-                equalTo(ListQuestionActivity.class.getName()));
+                equalTo(TimelineActivity.class.getName()));
+        assertThat(shadowIntent.getIntExtra(TimelineActivity.LECTURE_ID, -1),
+                equalTo(0));
     }
 }
