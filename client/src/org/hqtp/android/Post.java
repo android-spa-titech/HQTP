@@ -35,13 +35,21 @@ public class Post {
         return virtualTimestamp;
     }
 
+    public Post(int id, String body, Date time, long virtualTimestamp) {
+        this.id = id;
+        this.body = body;
+        this.time = time;
+        this.virtualTimestamp = virtualTimestamp;
+    }
+
     public static Post fromJSON(JSONObject json) throws JSONException, ParseException {
-        Post post = new Post();
-        post.id = json.getInt("id");
-        post.body = json.getString("body");
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-        post.time = df.parse(json.getString("time"));
-        post.virtualTimestamp = json.getLong("virtual_ts");
+        Post post = new Post(
+                json.getInt("id"),
+                json.getString("body"),
+                df.parse(json.getString("time")),
+                json.getLong("virtual_ts")
+                );
         // TODO: toggle comment
         // post.user = User.fromJSON(json.getString("user"));
         // post.lecture = Lecture.fromJSON(json.getString("lecture"));
