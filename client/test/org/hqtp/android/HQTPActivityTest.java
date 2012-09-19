@@ -1,44 +1,34 @@
 package org.hqtp.android;
 
+import static com.xtremelabs.robolectric.Robolectric.shadowOf;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import roboguice.inject.InjectView;
 import android.content.Intent;
+import android.widget.Button;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.xtremelabs.robolectric.shadows.ShadowActivity;
 import com.xtremelabs.robolectric.shadows.ShadowIntent;
-
-import static com.xtremelabs.robolectric.Robolectric.shadowOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 
 @RunWith(HQTPActivityTestRunner.class)
 public class HQTPActivityTest {
 
     @Inject
-    Injector injector;
-
-    @Test
-    public void activityShouldHaveTwitterButtons() {
-        HQTPActivity activity = new HQTPActivity();
-        injector.injectMembers(activity);
-        activity.onCreate(null);
-
-        assertNotNull(activity.findViewById(R.id.post_button));
-        assertNotNull(activity.findViewById(R.id.getallpost_button));
-    }
+    HQTPActivity activity;
+    @InjectView(R.id.post_button)
+    Button postButton;
+    @InjectView(R.id.getallpost_button)
+    Button getAllPostButton;
 
     @Test
     public void pressingThePostButtonShouldCallActivity() throws Exception {
-        HQTPActivity activity = new HQTPActivity();
-        injector.injectMembers(activity);
         activity.onCreate(null);
-
-        activity.findViewById(R.id.post_button).performClick();
+        postButton.performClick();
 
         ShadowActivity shadowActivity = shadowOf(activity);
         Intent startedIntent = shadowActivity.getNextStartedActivity();
@@ -49,11 +39,8 @@ public class HQTPActivityTest {
 
     @Test
     public void pressingTheAllPostButtonShouldCallActivity() throws Exception {
-        HQTPActivity activity = new HQTPActivity();
-        injector.injectMembers(activity);
         activity.onCreate(null);
-
-        activity.findViewById(R.id.getallpost_button).performClick();
+        getAllPostButton.performClick();
 
         ShadowActivity shadowActivity = shadowOf(activity);
         Intent startedIntent = shadowActivity.getNextStartedActivity();
