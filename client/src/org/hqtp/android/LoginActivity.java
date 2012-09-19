@@ -110,6 +110,9 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
     {
         @Override
         public Uri call() throws Exception {
+            // #135のバグ回避のための措置
+            // AccessTokenを一端クリアすることで再認証時にgetOAuthRequestToken()が失敗しないようにする
+            oauth.setOAuthAccessToken(null);
             requestToken = oauth.getOAuthRequestToken(callback_url);
             return Uri.parse(requestToken.getAuthorizationURL());
         }
