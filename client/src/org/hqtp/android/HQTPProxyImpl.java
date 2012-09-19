@@ -1,63 +1,38 @@
 package org.hqtp.android;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.net.Uri;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
-//HQTPサーバーとの通信をラップするクラス
-//とりあえずSingletonにしておきます
 @Singleton
 public class HQTPProxyImpl implements HQTPProxy {
-
-    private String api_gateway;
-    private CookieStore cookie_store = null;
-
     @Inject
-    public HQTPProxyImpl(@Named("HQTP API Endpoint URL") String api_gateway) {
-        super();
-        this.api_gateway = api_gateway;
-    }
+    APIRequestBuilder builder;
 
     // DEBUG: デバッグ用のエンドポイント切り替え
-    public void setEndpoint(String endpoint)
-    {
-        this.api_gateway = endpoint;
+    public void setEndpoint(String api_gateway) {
+        builder.setEndpoint(api_gateway);
     }
 
     @Override
-    public User authenticate(String access_token_key, String access_token_secret) throws IOException, JSONException,
-            HQTPAPIException {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("access_token_key", access_token_key);
-        params.put("access_token_secret", access_token_secret);
-        HttpResponse response = sendByGet("auth/", params);
+    public User authenticate(String access_token_key, String access_token_secret) throws HQTPAPIException, IOException,
+            JSONException {
+        HttpResponse response = builder.get("auth/")
+            .param("access_token_key", access_token_key)
+            .param("access_token_secret", access_token_secret)
+            .send();
+
         JSONObject json = toJSON(response.getEntity());
         if (!isStatusOK(json)) {
             throw new HQTPAPIException("Authentication failed. : /api/auth returned status='"
@@ -70,9 +45,9 @@ public class HQTPProxyImpl implements HQTPProxy {
     @Override
     public List<Post> getTimeline(int lectureId) throws IOException, HQTPAPIException, JSONException,
             java.text.ParseException {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("id", Integer.toString(lectureId));
-        HttpResponse response = sendByGet("lecture/timeline/", params);
+        HttpResponse response = builder.get("lecture/timeline/")
+            .param("id", lectureId)
+            .send();
         JSONObject json = toJSON(response.getEntity());
         ArrayList<Post> posts = new ArrayList<Post>();
         if (!isStatusOK(json)) {
@@ -88,75 +63,24 @@ public class HQTPProxyImpl implements HQTPProxy {
 
     @Override
     public Post postTimeline(String body, int lectureId, long prevVirtualTimestamp, long nextVirtualTimestamp)
-            throws IOException, HQTPAPIException, JSONException, java.text.ParseException {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("id", Integer.toString(lectureId));
-        params.put("body", body);
+            throws HQTPAPIException, IOException, JSONException, java.text.ParseException {
+        APIRequestBuilder.APIRequest request = builder.post("lecture/timeline/")
+            .param("id", lectureId)
+            .param("body", body);
         if (prevVirtualTimestamp >= 0) {
-            params.put("before_virtual_ts", Long.toString(prevVirtualTimestamp));
+            request.param("before_virtual_ts", prevVirtualTimestamp);
         }
         if (nextVirtualTimestamp >= 0) {
-            params.put("after_virtual_ts", Long.toString(nextVirtualTimestamp));
+            request.param("after_virtual_ts", nextVirtualTimestamp);
         }
-        HttpResponse response = sendByPost("lecture/timeline/", params);
+        HttpResponse response = request.send();
+
         JSONObject json = toJSON(response.getEntity());
         if (!isStatusOK(json)) {
             throw new HQTPAPIException("Posting to timeline failed. : POST /api/lecture/timeline/ returned status="
                     + json.getString("status"));
         }
         return Post.fromJSON(json.getJSONObject("post"));
-    }
-
-    private HttpResponse sendByGet(String path, Map<String, String> params)
-            throws ClientProtocolException, IOException, HQTPAPIException {
-        Uri.Builder builder = Uri.parse(api_gateway).buildUpon();
-        builder.appendEncodedPath(path);
-        if (params != null) {
-            for (Map.Entry<String, String> param : params.entrySet()) {
-                builder.appendQueryParameter(param.getKey(), param.getValue());
-            }
-        }
-        HttpGet http_get = new HttpGet(builder.build().toString());
-        return send(http_get);
-    }
-
-    private HttpResponse sendByPost(String path, Map<String, String> params)
-            throws ClientProtocolException, IOException, HQTPAPIException {
-        Uri.Builder builder = Uri.parse(api_gateway).buildUpon();
-        builder.appendEncodedPath(path);
-        HttpPost http_post = new HttpPost(builder.build().toString());
-        if (params != null) {
-            List<NameValuePair> form_params = new ArrayList<NameValuePair>();
-            for (Map.Entry<String, String> param : params.entrySet()) {
-                form_params.add(new BasicNameValuePair(param.getKey(), param.getValue()));
-            }
-            try {
-                http_post.setEntity(new UrlEncodedFormEntity(form_params, "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace(); // I think here is unreachable...
-            }
-        }
-        return send(http_post);
-    }
-
-    private HttpResponse send(HttpUriRequest request) throws ClientProtocolException, IOException, HQTPAPIException
-    {
-        // TODO: Timeoutの設定をすべき？
-        DefaultHttpClient client = new DefaultHttpClient();
-        HttpResponse response = null;
-        client.setCookieStore(cookie_store);
-        try {
-            response = client.execute(request);
-            int status_code = response.getStatusLine().getStatusCode();
-            if (status_code != HttpStatus.SC_OK && status_code != HttpStatus.SC_CREATED) {
-                throw new HQTPAPIException("HTTP response returned failure. : return Http status code="
-                        + Integer.toString(status_code));
-            }
-            this.cookie_store = client.getCookieStore();
-        } finally {
-            client.getConnectionManager().shutdown();
-        }
-        return response;
     }
 
     private static JSONObject toJSON(HttpEntity entity) throws ParseException, IOException, JSONException
