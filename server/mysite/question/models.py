@@ -39,11 +39,11 @@ class Question(models.Model):
                     virtual_ts=self.virtual_ts)
 
     @classmethod
-    def time2virtualts(cls, t):
+    def time_to_vts(cls, t):
         """
         >>> from time import time
         >>> t = time()
-        >>> vts = Question.time2virtualts(t)
+        >>> vts = Question.time_to_vts(t)
         """
         s = repr(t)  # 精度を保ったまま文字列にする
         splits = s.split('.')  # 小数点で分割(小数点以下は6桁)

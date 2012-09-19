@@ -13,6 +13,7 @@ import json
 from mysite.question.models import (Question,
                                     user_to_dict,
                                     Lecture)
+from time import time
 
 
 def convert_context_to_json(context):
@@ -178,6 +179,62 @@ def lecture_add_view(request):
 
     else:
         return json_response_forbidden()
+
+
+def lecture_timeline_view(request):
+    if not request.user.is_authenticated():
+        # get need auth
+        return json_response_forbidden()
+
+    if request.method == 'GET':
+        try:
+            # get timeline
+            code = request.GET['id']
+        except MultiValueDictKeyError:
+            # key 'id' is not requested
+            return json_response_bad_request()
+
+        if not Lecture.objects.exists(code=code):
+            # invalid lecture ID
+            return json_response_not_found()
+
+        else:
+            # successfully get timeline
+            posts = [q.to_dict for q in Question.objects.all()
+                     if q.code == code]
+            return json_response(dict(posts=posts))
+
+    elif request.method == 'POST':
+        try:
+            id = request.POST['id']
+            body = request.POST['body']
+        except MultiValueDictKeyError:
+            return json_response_bad_request()
+
+        if ('before_virtual_ts' not in request.POST
+            and 'after_virtual_ts' not in request.POST):
+            # post to latest
+            t = time()
+            q = Question.objects.create(body=body,
+                                        added_by=request.user,
+                                        lecture=id,
+                                        virtual_ts=Question.time_to_vts(t))
+            return json_response(dict(post=q.to_dict()))
+
+        elif ('before_virtual_ts' in request.POST
+              and 'after_virtual_ts' in request.POST):
+            # post to between 2 lectures
+            t = Question.calc_mid(request.POST['before_virtual_ts'],
+                                  request.POST['after_virtual_ts'])
+            q = Question.objects.create(body=body,
+                                        added_by=request.user,
+                                        lecture=id,
+                                        virtual_ts=t)
+            return json_response(dict(post=q.to_dict))
+
+        else:
+            # only one is requested and the other one is not
+            return json_response_bad_request()
 
 
 def _test():

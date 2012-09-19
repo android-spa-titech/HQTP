@@ -231,9 +231,6 @@ def test_about_lecture__forbidden():
 # /api/lecture/timeline/ [GET|POST]に関するテスト
 ###############################################################################
 def test_about_timeline():
-    """
-    This test will be added
-    """
     u"""
     何も投稿されていない授業のタイムラインを取得
     その授業のタイムラインに投稿
@@ -255,10 +252,11 @@ def test_about_timeline():
     # 下準備（授業の作成）
     >>> c0 = make_client()
     >>> jobj0a = access_auth_view(c0)
-    >>> jobj0b = access_lecture_add_view(c, name=name, code=code)
+    >>> jobj0b = access_lecture_add_view(c0, name=name, code=code)
     >>> lecture_id = jobj0b['lecture']['id']
 
     >>> c = make_client()
+
     # authをします
     >>> jobj1 = access_auth_view(c)
     >>> jobj1['status'] == 'OK'
