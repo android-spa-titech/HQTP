@@ -24,7 +24,7 @@ import com.google.inject.Inject;
 public class TimelineActivity extends RoboActivity {
 
     @InjectView(R.id.listPost)
-    ListView postListView;
+    ListView timelineListView;
     @InjectView(R.id.buttonUpdate)
     Button updateButton;
     @Inject
@@ -33,7 +33,7 @@ public class TimelineActivity extends RoboActivity {
     public static final String LECTURE_ID = "LECTURE_ID";
 
     private int lectureId;
-    private PostAdapter adapter;
+    private TimelineAdapter adapter;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,35 +42,35 @@ public class TimelineActivity extends RoboActivity {
         lectureId = getIntent().getIntExtra(LECTURE_ID, -1);
         assert lectureId != -1;
 
-        adapter = new PostAdapter(this, R.layout.post_item);
-        postListView.setAdapter(adapter);
+        adapter = new TimelineAdapter(this, R.layout.post_item);
+        timelineListView.setAdapter(adapter);
 
         // リストの要素をクリックされたときの挙動
-        postListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        timelineListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ListView listView = (ListView) parent;
                 Post p = (Post) listView.getItemAtPosition(position);
-                // TODO(draftcode): Should show something.
-                showAlert("", p.getBody());
+                // TODO(draftcode): Should show something. おそらくは投稿者の名前をタイトルに表示すべき
+                showAlert("投稿", p.getBody());
             }
         });
 
         updateButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                loadPost();
+                loadTimeline();
             }
         });
 
-        loadPost();
+        loadTimeline();
     }
 
-    private void loadPost() {
-        GetPost gq = new GetPost();
-        gq.execute();
+    private void loadTimeline() {
+        GetTimeline gt = new GetTimeline();
+        gt.execute();
     }
 
-    private class GetPost extends RoboAsyncTask<List<Post>> {
+    private class GetTimeline extends RoboAsyncTask<List<Post>> {
 
         @Override
         public List<Post> call() throws Exception {
@@ -81,7 +81,7 @@ public class TimelineActivity extends RoboActivity {
         protected void onSuccess(List<Post> posts) {
 
             if (posts == null) {
-                showAlert("GetPost", "投稿がありません。");
+                showAlert("GetTimeline", "投稿がありません。");
             } else {
                 adapter.clear();
                 // Robolectric does not implement addAll,
@@ -96,15 +96,16 @@ public class TimelineActivity extends RoboActivity {
 
         @Override
         protected void onException(Exception e) {
-            showAlert("GetPost", "サーバーとの通信に失敗しました。");
+            e.printStackTrace();
+            showAlert("GetTimeline", "サーバーとの通信に失敗しました。");
         }
     }
 
-    private class PostAdapter extends ArrayAdapter<Post> {
+    private class TimelineAdapter extends ArrayAdapter<Post> {
 
         private int resourceId;
 
-        public PostAdapter(Context context, int resource) {
+        public TimelineAdapter(Context context, int resource) {
             super(context, resource);
             resourceId = resource;
         }
