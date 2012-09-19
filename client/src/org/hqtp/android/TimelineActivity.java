@@ -4,9 +4,7 @@ import java.util.List;
 
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +22,8 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
     ListView timelineListView;
     @Inject
     TimelineRecurringUpdater updater;
+    @Inject
+    Alerter alerter;
 
     public static final String LECTURE_ID = "LECTURE_ID";
 
@@ -50,7 +50,7 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
                 ListView listView = (ListView) parent;
                 Post p = (Post) listView.getItemAtPosition(position);
                 // TODO(draftcode): Should show something. おそらくは投稿者の名前をタイトルに表示すべき
-                showAlert("投稿", p.getBody());
+                alerter.alert("投稿", p.getBody());
             }
         });
 
@@ -117,16 +117,5 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
 
             return convertView;
         }
-    }
-
-    private void showAlert(String title, String message) {
-        new AlertDialog.Builder(this)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                }
-            }).show();
     }
 }

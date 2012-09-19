@@ -6,8 +6,6 @@ import roboguice.util.SafeAsyncTask;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.OAuthAuthorization;
 import twitter4j.auth.RequestToken;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -33,6 +31,8 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
     OAuthAuthorization oauth;
     @Inject
     private HQTPProxy proxy;
+    @Inject
+    Alerter alerter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -94,7 +94,7 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
         @Override
         protected void onException(Exception e) {
-            showAlert(getString(R.string.authentication_failed_title),
+            alerter.alert(getString(R.string.authentication_failed_title),
                     getString(R.string.authentication_failed_message));
         }
 
@@ -127,19 +127,8 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
         @Override
         protected void onException(Exception e) {
-            showAlert(getString(R.string.authentication_failed_title),
+            alerter.alert(getString(R.string.authentication_failed_title),
                     getString(R.string.authentication_failed_message));
         }
-    }
-
-    private void showAlert(String title, String message) {
-        new AlertDialog.Builder(this)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                }
-            }).show();
     }
 }
