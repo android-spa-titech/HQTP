@@ -553,6 +553,7 @@ import mysite.question.shortcuts as shortcuts
 
 
 def load_tests(loader, tests, ignore):
+    tw_util.get_vc = tw_util.get_vc_mock
     tests.addTests(doctest.DocTestSuite(tw_util))
     tests.addTests(doctest.DocTestSuite(views))
     tests.addTests(doctest.DocTestSuite(admin))
