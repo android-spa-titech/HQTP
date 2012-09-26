@@ -88,9 +88,6 @@ def access_lecture_add_view(client, name, code):
 
 
 def access_timeline_get_view(client, id):
-    """
-    This test will be added
-    """
     u"""
     >>> name = 'Arch1'
     >>> code = 't001'
@@ -98,7 +95,7 @@ def access_timeline_get_view(client, id):
     # 下準備（授業の作成）
     >>> c0 = make_client()
     >>> jobj0a = access_auth_view(c0)
-    >>> jobj0b = access_lecture_add_view(c, name=name, code=code)
+    >>> jobj0b = access_lecture_add_view(c0, name=name, code=code)
     >>> lecture_id = jobj0b['lecture']['id']
 
     >>> c = make_client()
