@@ -247,6 +247,7 @@ def test_about_timeline():
     ...                                        access_timeline_get_view,
     ...                                        access_timeline_post_view,
     ...                                        access_lecture_add_view)
+    >>> from time import sleep
 
 
     # 下準備（授業の作成）
@@ -285,6 +286,7 @@ def test_about_timeline():
 
     ---------------------------------------------------------------------------
     # 先ほどの投稿の直前に投稿を挿入
+    >>> sleep(1)
     >>> jobj4 = access_timeline_post_view(c, id=lecture_id, body=u'おすし',
     ...                                   before_virtual_ts=0,
     ...                                   after_virtual_ts=post1_vts)
@@ -305,6 +307,7 @@ def test_about_timeline():
 
     ---------------------------------------------------------------------------
     # post1, post2の間に投稿を挿入
+    >>> sleep(1)
     >>> jobj5 = access_timeline_post_view(c, id=lecture_id, body=u'しかえし',
     ...                                   before_virtual_ts=post2_vts,
     ...                                   after_virtual_ts=post1_vts)
@@ -325,6 +328,7 @@ def test_about_timeline():
 
     ---------------------------------------------------------------------------
     # before, afterをしていなければ最後尾に追加します
+    >>> sleep(1)
     >>> jobj6 = access_timeline_post_view(c, id=lecture_id, body=u'りんご')
     >>> jobj6['status'] == 'OK'
     True
