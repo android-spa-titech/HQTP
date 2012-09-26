@@ -326,7 +326,7 @@ def test_about_timeline():
     ---------------------------------------------------------------------------
     # before, afterをしていなければ最後尾に追加します
     >>> jobj6 = access_timeline_post_view(c, id=lecture_id, body=u'りんご')
-    >>> jboj6['status'] == 'OK'
+    >>> jobj6['status'] == 'OK'
     True
     >>> post = jobj6['post']
     >>> post4_id = post['id']
