@@ -448,9 +448,6 @@ def test_about_timeline__badrequest():
 
 
 def test_about_timeline__forbidden():
-    """
-    This test will be added
-    """
     u"""
     authしないでget/postした場合Forbiddenを返す
 
@@ -467,7 +464,7 @@ def test_about_timeline__forbidden():
     # 下準備（授業の作成）
     >>> c0 = make_client()
     >>> jobj0a = access_auth_view(c0)
-    >>> jobj0b = access_lecture_add_view(c, name=name, code=code)
+    >>> jobj0b = access_lecture_add_view(c0, name=name, code=code)
     >>> lecture_id = jobj0b['lecture']['id']
 
     >>> c = make_client()
