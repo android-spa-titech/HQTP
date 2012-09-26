@@ -19,6 +19,62 @@ def clean_lectures():
     Lecture.objects.all().delete()
 
 
+def get_vc_mock(user_key, user_secret):
+    """
+    Tweepy mock-up
+
+    If you want to use more twitter users,
+    please add user into twitter_database.
+
+    this method has 3 type behaviors
+    1. If input key is in the database, and secret is correct
+       then return user information
+
+    >>> import consumer_info as ci
+    >>> vc = get_vc(ci.spa_key, ci.spa_secret)
+    >>> vc == dict(id=ci.spa_id, screen_name=ci.spa_screen_name,
+    ...            name=ci.spa_name)
+    True
+
+    2. If input key is in the database, but secret is wrong
+       then return empty dictionary (and server return not found)
+
+    >>> vc = get_vc(ci.spa_key, 'egg')
+    >>> vc == {}
+    True
+
+    3. If input key isn't in the database
+       then return TypeError (and server return server error)
+
+    >>> vc = get_vc('spam', 'egg')
+    Traceback (most recent call last):
+        ...
+    TypeError: character mapping must return integer, None or unicode
+
+    """
+    import consumer_info as ci
+    twitter_database = {
+        ci.spa_key: dict(secret=ci.spa_secret,
+                      vc=dict(id=ci.spa_id,
+                              screen_name=ci.spa_screen_name,
+                              name=ci.spa_name)
+                      )
+        }
+    not_found_keys = set(['dummy key'])
+
+    if user_key in twitter_database:
+        user_info = twitter_database[user_key]
+        if user_secret == user_info['secret']:
+            return user_info['vc']
+        else:
+            return {}
+    elif user_key in not_found_keys:
+        return {}
+    else:
+        raise TypeError(('character mapping must return integer, '
+                         'None or unicode'))
+
+
 ###############################################################################
 # /api/auth/に関するテスト
 ###############################################################################
