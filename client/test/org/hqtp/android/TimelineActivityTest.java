@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.atLeast;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -108,5 +109,18 @@ public class TimelineActivityTest {
 
         AlertDialog alert = ShadowAlertDialog.getLatestAlertDialog();
         assertNotNull(alert);
+    }
+
+    @Test
+    public void activityShouldUpdateTimelineRepeatedly() throws Exception {
+        Post post1 = new Post(31, "body", new Date(), 1234);
+        List<Post> posts1 = new ArrayList<Post>();
+        posts1.add(post1);
+
+        when(proxy.getTimeline(LECTURE_ID)).thenReturn(posts1);
+        activity.onCreate(null);
+        //TODO: 定期的に実行するタイミングを指定する(例：1秒後から0.5秒ごとに実行)
+        Thread.sleep(3000);
+        verify(proxy, atLeast(3)).getTimeline(LECTURE_ID);
     }
 }
