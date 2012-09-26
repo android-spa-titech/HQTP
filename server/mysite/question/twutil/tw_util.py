@@ -15,7 +15,7 @@ def make_api(user_key, user_secret):
     return api
 
 
-def _get_vc(user_key, user_secret):
+def get_vc(user_key, user_secret):
     """
     >>> import consumer_info as ci
     >>> vc=_get_vc(ci.spa_key,ci.spa_secret)
@@ -92,23 +92,6 @@ def get_vc_mock(user_key, user_secret):
     else:
         raise TypeError(('character mapping must return integer, '
                          'None or unicode'))
-
-
-def get_vc(user_key, user_secret):
-    u"""
-    "Regardless of the value of the DEBUG setting in mysite/settings.py,
-     all Django tests run with DEBUG=False."
-
-    Djangoの公式ドキュメントに書いてあるこの条件を利用して、
-    DEBUGの値がFalseならtestの実行中と判断し、
-    DEBUGの値がTrueならrunserverまたはshellの実行中と判定している
-    mysite/settings.pyのDEBUGの値はFalseにしないでください
-    """
-    from django.conf import settings
-    if settings.DEBUG:
-        return _get_vc(user_key, user_secret)
-    else:
-        return get_vc_mock(user_key, user_secret)
 
 
 def _test():
