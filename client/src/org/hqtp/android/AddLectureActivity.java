@@ -5,6 +5,7 @@ import roboguice.inject.InjectView;
 import roboguice.util.RoboAsyncTask;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -66,26 +67,16 @@ public class AddLectureActivity extends RoboActivity implements
 
         @Override
         public Lecture call() throws Exception {
-
-            Lecture lecture = new Lecture(
-                    0,
-                    lectureNameText.getText().toString(),
-                    lectureCodeText.getText().toString()
-                    );
-
-            // TODO:APIリクエスト
-            // return proxy.addLecture( lecture );
-            return lecture;
+            return proxy.addLecture(
+                    lectureCodeText.getText().toString(),
+                    lectureNameText.getText().toString());
         }
 
         @Override
         protected void onSuccess(Lecture lecture) throws Exception {
-            // TODO:成功したら講義コードをつけて講義TLアクティビティへ遷移
-            /*
-             * Intent intent = new Intent( addLectureActivity.this, ****.class );
-             * intent.putExtra("lectureCode", lectureCode);
-             * startActivity( intent );
-             */
+            Intent intent = new Intent(AddLectureActivity.this, TimelineActivity.class);
+            intent.putExtra("lectureId", lecture.getId());
+            startActivity(intent);
         }
 
         @Override
