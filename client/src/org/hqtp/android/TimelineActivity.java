@@ -1,6 +1,9 @@
 package org.hqtp.android;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
@@ -35,6 +38,8 @@ public class TimelineActivity extends RoboActivity {
     private int lectureId;
     private TimelineAdapter adapter;
 
+    private ScheduledExecutorService timeline_thread;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.timeline);
@@ -63,11 +68,37 @@ public class TimelineActivity extends RoboActivity {
         });
 
         loadTimeline();
+        // recurring update
+        //TODO: 定期的なタイムライン更新を行うかどうかをテストケースで弄れるようにすべき。
+        timeline_thread = Executors.newSingleThreadScheduledExecutor();
+        timeline_thread.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    List<Post> posts = proxy.getTimeline(lectureId);
+                    updateTimelineAdaptor(posts);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 500, 500, TimeUnit.MILLISECONDS);// TODO: 定数に掃き出す
+
     }
 
     private void loadTimeline() {
         GetTimeline gt = new GetTimeline();
         gt.execute();
+    }
+
+    private void updateTimelineAdaptor(List<Post> posts) {
+        adapter.clear();
+        // Robolectric does not implement addAll,
+        // so we use add method and a loop instead for the time being.
+        // https://github.com/pivotal/robolectric/issues/281
+        for (Post p : posts) {
+            adapter.add(p);
+        }
+        adapter.notifyDataSetChanged();
     }
 
     private class GetTimeline extends RoboAsyncTask<List<Post>> {
@@ -83,14 +114,7 @@ public class TimelineActivity extends RoboActivity {
             if (posts == null) {
                 showAlert("GetTimeline", "投稿がありません。");
             } else {
-                adapter.clear();
-                // Robolectric does not implement addAll,
-                // so we use add method and a loop instead for the time being.
-                // https://github.com/pivotal/robolectric/issues/281
-                for (Post p : posts) {
-                    adapter.add(p);
-                }
-                adapter.notifyDataSetChanged();
+                updateTimelineAdaptor(posts);
             }
         }
 
