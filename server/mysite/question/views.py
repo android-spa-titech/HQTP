@@ -236,8 +236,8 @@ def lecture_timeline_view(request):
         elif ('before_virtual_ts' in request.POST
               and 'after_virtual_ts' in request.POST):
             # post to between 2 lectures
-            t = Question.calc_mid(request.POST['before_virtual_ts'],
-                                  request.POST['after_virtual_ts'])
+            t = Question.calc_mid(int(request.POST['before_virtual_ts']),
+                                  int(request.POST['after_virtual_ts']))
             post = lec.question_set.create(body=body,
                                            added_by=request.user,
                                            virtual_ts=t)
