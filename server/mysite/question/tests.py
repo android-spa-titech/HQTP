@@ -495,9 +495,6 @@ def test_about_timeline__forbidden():
 
 
 def test_about_timeline__notfound():
-    """
-    This test will be added
-    """
     u"""
     存在しない授業IDでget/postした場合はNot Foundを返す
 

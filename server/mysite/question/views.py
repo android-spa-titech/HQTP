@@ -225,7 +225,12 @@ def lecture_timeline_view(request):
             # get need auth
             return json_response_forbidden()
 
-        lec = Lecture.objects.get(pk=id)
+        try:
+            lec = Lecture.objects.get(pk=id)
+        except Lecture.DoesNotExist:
+            # invalid lecture ID
+            return json_response_not_found()
+
         if ('before_virtual_ts' not in request.POST
             and 'after_virtual_ts' not in request.POST):
             # post to latest
