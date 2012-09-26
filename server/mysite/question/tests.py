@@ -354,7 +354,6 @@ def test_about_timeline():
     ...  posts[2]['id'] == post1_id and
     ...  posts[3]['id'] == post4_id)
     True
-
     """
 
 

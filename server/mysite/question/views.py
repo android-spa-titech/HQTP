@@ -204,7 +204,8 @@ def lecture_timeline_view(request):
             return json_response_not_found()
         else:
             # successfully get timeline
-            posts = [q.to_dict() for q in lec.question_set.all()]
+            posts = [q.to_dict()
+                     for q in lec.question_set.order_by('virtual_ts')]
             return json_response(dict(posts=posts))
 
     elif request.method == 'POST':
