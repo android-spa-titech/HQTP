@@ -196,13 +196,13 @@ def lecture_timeline_view(request):
             # get need auth
             return json_response_forbidden()
 
-        if not Lecture.objects.exists(pk=id):
+        try:
+            lec = Lecture.objects.get(pk=id)
+        except Lecture.DoesNotExist:
             # invalid lecture ID
             return json_response_not_found()
-
         else:
             # successfully get timeline
-            lec = Lecture.objects.get(pk=id)
             posts = lec.question_set.all()
             return json_response(dict(posts=posts))
 
