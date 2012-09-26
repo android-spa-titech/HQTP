@@ -141,7 +141,7 @@ def test_about_auth__badrequest():
     """
 
 
-def teset_about_auth__notfound():
+def test_about_auth__notfound():
     u"""
     TwitterのOAuthの正しくないkey, secretの場合Not Foundを返す
 
@@ -495,7 +495,7 @@ def test_about_timeline__forbidden():
 
     # authして始めてpostできます
     >>> jobj4 = access_timeline_post_view(c, id=lecture_id, body=u'なるほど')
-    >>> jboj4['status'] == 'OK'
+    >>> jobj4['status'] == 'OK'
     True
     """
 
@@ -553,7 +553,7 @@ def test_about_csrf():
 
     # This test will be added
     # >>> jobj2b = access_timeline_post_view(c, id=lecture_id1, body='bar')
-    # >>> jboj2b['status'] == 'OK'
+    # >>> jobj2b['status'] == 'OK'
     # True
 
     # use csrf checking
@@ -566,7 +566,7 @@ def test_about_csrf():
 
     # This test will be added
     # >>> jobj4b = access_timeline_post_view(c, id=lecture_id2, body='bar2')
-    # >>> jboj4b['status'] == 'OK'
+    # >>> jobj4b['status'] == 'OK'
     # True
     """
 

@@ -57,8 +57,8 @@ def access_lecture_get_view(client):
     """
     url = '/api/lecture/get/'
     response = client.get(url)
-    jojb = json.loads(response.content)
-    return jojb
+    jobj = json.loads(response.content)
+    return jobj
 
 
 def access_lecture_add_view(client, name, code):
@@ -106,13 +106,13 @@ def access_timeline_get_view(client, id):
     >>> jobj = access_timeline_get_view(c, id=lecture_id)
     >>> jobj['status'] == 'OK'
     True
-    >>> 'posts' in jojb
+    >>> 'posts' in jobj
     True
     """
     url = '/api/lecture/timeline/?id=%s'
     response = client.get(url % id)
-    jojb = json.loads(response.content)
-    return jojb
+    jobj = json.loads(response.content)
+    return jobj
 
 
 def access_timeline_post_view(client, id, body,
@@ -138,7 +138,7 @@ def access_timeline_post_view(client, id, body,
     ...                                  after_virtual_ts=2000)
     >>> jobj['status'] == 'OK'
     True
-    >>> post = jojb['post']
+    >>> post = jobj['post']
     >>> 'id' in post
     True
 
