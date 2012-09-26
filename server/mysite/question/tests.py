@@ -23,6 +23,8 @@ def get_vc_mock(user_key, user_secret):
     """
     Tweepy mock-up
 
+    >>> from mysite.question.twutil.tw_util import get_vc
+
     If you want to use more twitter users,
     please add user into twitter_database.
 
@@ -30,7 +32,7 @@ def get_vc_mock(user_key, user_secret):
     1. If input key is in the database, and secret is correct
        then return user information
 
-    >>> import consumer_info as ci
+    >>> import mysite.question.twutil.consumer_info as ci
     >>> vc = get_vc(ci.spa_key, ci.spa_secret)
     >>> vc == dict(id=ci.spa_id, screen_name=ci.spa_screen_name,
     ...            name=ci.spa_name)
@@ -52,7 +54,7 @@ def get_vc_mock(user_key, user_secret):
     TypeError: character mapping must return integer, None or unicode
 
     """
-    import consumer_info as ci
+    import mysite.question.twutil.consumer_info as ci
     twitter_database = {
         ci.spa_key: dict(secret=ci.spa_secret,
                       vc=dict(id=ci.spa_id,
@@ -609,7 +611,7 @@ import mysite.question.shortcuts as shortcuts
 
 
 def load_tests(loader, tests, ignore):
-    tw_util.get_vc = tw_util.get_vc_mock  # switch mock
+    tw_util.get_vc = get_vc_mock  # switch mock
     tests.addTests(doctest.DocTestSuite(tw_util))
     tests.addTests(doctest.DocTestSuite(views))
     tests.addTests(doctest.DocTestSuite(admin))
