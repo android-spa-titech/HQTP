@@ -542,10 +542,9 @@ def test_about_csrf():
     True
     >>> lecture_id1 = jobj2a['lecture']['id']
 
-    # This test will be added
-    # >>> jobj2b = access_timeline_post_view(c, id=lecture_id1, body='bar')
-    # >>> jobj2b['status'] == 'OK'
-    # True
+    >>> jobj2b = access_timeline_post_view(c1, id=lecture_id1, body='bar')
+    >>> jobj2b['status'] == 'OK'
+    True
 
     # use csrf checking
     >>> c2 = Client(enforce_csrf_checks=True)
@@ -555,10 +554,9 @@ def test_about_csrf():
     True
     >>> lecture_id2 = jobj4a['lecture']['id']
 
-    # This test will be added
-    # >>> jobj4b = access_timeline_post_view(c, id=lecture_id2, body='bar2')
-    # >>> jobj4b['status'] == 'OK'
-    # True
+    >>> jobj4b = access_timeline_post_view(c2, id=lecture_id2, body='bar2')
+    >>> jobj4b['status'] == 'OK'
+    True
     """
 
     # もしviews.pyのlecture_add_view, lecture_timeline_viewに
