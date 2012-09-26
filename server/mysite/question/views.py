@@ -118,6 +118,7 @@ def auth_view(request):
 
 
 def get_view(request):
+    # this method is no longer used
     if not request.user.is_authenticated():
         # get need auth
         return json_response_forbidden()
@@ -131,6 +132,7 @@ def get_view(request):
 
 @csrf_exempt
 def post_view(request):
+    # this method is no longer used
     try:
         title = request.POST['title']
         body = request.POST['body']
@@ -182,26 +184,26 @@ def lecture_add_view(request):
 
 
 def lecture_timeline_view(request):
-    if not request.user.is_authenticated():
-        # get need auth
-        return json_response_forbidden()
-
     if request.method == 'GET':
         try:
             # get timeline
-            code = request.GET['id']
+            id = request.GET['id']
         except MultiValueDictKeyError:
             # key 'id' is not requested
             return json_response_bad_request()
 
-        if not Lecture.objects.exists(code=code):
+        if not request.user.is_authenticated():
+            # get need auth
+            return json_response_forbidden()
+
+        if not Lecture.objects.exists(pk=id):
             # invalid lecture ID
             return json_response_not_found()
 
         else:
             # successfully get timeline
-            posts = [q.to_dict for q in Question.objects.all()
-                     if q.code == code]
+            lec = Lecture.objects.get(pk=id)
+            posts = lec.question_set.all()
             return json_response(dict(posts=posts))
 
     elif request.method == 'POST':
@@ -211,30 +213,31 @@ def lecture_timeline_view(request):
         except MultiValueDictKeyError:
             return json_response_bad_request()
 
+        lec = Lecture.objects.get(pk=id)
         if ('before_virtual_ts' not in request.POST
             and 'after_virtual_ts' not in request.POST):
             # post to latest
             t = time()
-            q = Question.objects.create(body=body,
-                                        added_by=request.user,
-                                        lecture=id,
-                                        virtual_ts=Question.time_to_vts(t))
-            return json_response(dict(post=q.to_dict()))
+            post = lec.question_set.create(body=body,
+                                           added_by=request.user,
+                                           lecture=id,
+                                           virtual_ts=Question.time_to_vts(t))
 
         elif ('before_virtual_ts' in request.POST
               and 'after_virtual_ts' in request.POST):
             # post to between 2 lectures
             t = Question.calc_mid(request.POST['before_virtual_ts'],
                                   request.POST['after_virtual_ts'])
-            q = Question.objects.create(body=body,
-                                        added_by=request.user,
-                                        lecture=id,
-                                        virtual_ts=t)
-            return json_response(dict(post=q.to_dict))
+            post = lec.question_set.create(body=body,
+                                           added_by=request.user,
+                                           lecture=id,
+                                           virtual_ts=t)
 
         else:
             # only one is requested and the other one is not
             return json_response_bad_request()
+
+        return json_response(post=post)
 
 
 def _test():
