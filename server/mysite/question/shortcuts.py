@@ -159,18 +159,12 @@ def access_timeline_post_view(client, id, body,
     >>> 'virtual_ts' in post
     True
     """
-    # check parameter
-    cnd = (before_virtual_ts is None and after_virtual_ts is None
-           or before_virtual_ts is not None and after_virtual_ts is not None)
-    msg = 'Bad Request'
-    assert cnd, msg
-
     url = '/api/lecture/timeline/'
-    if before_virtual_ts is None:  # after_virtual_ts is None too.
-        response = client.post(url, dict(id=id, body=body))
-    else:
-        response = client.post(url, dict(id=id, body=body,
-                                         before_virtual_ts=before_virtual_ts,
-                                         after_virtual_ts=after_virtual_ts))
+    dic = dict(id=id, body=body)
+    if before_virtual_ts is not None:
+        dic['before_virtual_ts'] = before_virtual_ts
+    if after_virtual_ts is not None:
+        dic['after_virtual_ts'] = after_virtual_ts
+    response = client.post(url, dic)
     jobj = json.loads(response.content)
     return jobj

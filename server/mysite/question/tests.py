@@ -420,9 +420,6 @@ def test_about_timeline():
 
 
 def test_about_timeline__badrequest():
-    """
-    This test will be added
-    """
     u"""
     (注)Bad Request判定はForbidden, Not Found判定より先に行われるので
     認証や授業の作成は要らない
