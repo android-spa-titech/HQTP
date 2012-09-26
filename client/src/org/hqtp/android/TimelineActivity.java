@@ -39,6 +39,8 @@ public class TimelineActivity extends RoboActivity {
     private TimelineAdapter adapter;
 
     private ScheduledExecutorService timeline_thread;
+    private final long timeline_update_initial_delay = 500;
+    private final long timeline_update_period = 500;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,21 +70,7 @@ public class TimelineActivity extends RoboActivity {
         });
 
         loadTimeline();
-        // recurring update
-        //TODO: 定期的なタイムライン更新を行うかどうかをテストケースで弄れるようにすべき。
-        timeline_thread = Executors.newSingleThreadScheduledExecutor();
-        timeline_thread.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    List<Post> posts = proxy.getTimeline(lectureId);
-                    updateTimelineAdaptor(posts);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }, 500, 500, TimeUnit.MILLISECONDS);// TODO: 定数に掃き出す
-
+        startRecurringUpdateTimeline();
     }
 
     private void loadTimeline() {
@@ -99,6 +87,23 @@ public class TimelineActivity extends RoboActivity {
             adapter.add(p);
         }
         adapter.notifyDataSetChanged();
+    }
+
+    private void startRecurringUpdateTimeline() {
+        // recurring update
+        // TODO: 定期的なタイムライン更新を行うかどうかをテストケースで弄れるようにすべき。
+        timeline_thread = Executors.newSingleThreadScheduledExecutor();
+        timeline_thread.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    List<Post> posts = proxy.getTimeline(lectureId);
+                    updateTimelineAdaptor(posts);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, timeline_update_initial_delay, timeline_update_period, TimeUnit.MILLISECONDS);
     }
 
     private class GetTimeline extends RoboAsyncTask<List<Post>> {

@@ -118,8 +118,9 @@ public class TimelineActivityTest {
         posts1.add(post1);
 
         when(proxy.getTimeline(LECTURE_ID)).thenReturn(posts1);
+        // BUG: 定期的にタイムラインを更新する操作に関して上記のモックが動いてない？proxy.getTimelineを呼ぶ度に例外が発生している
         activity.onCreate(null);
-        //TODO: 定期的に実行するタイミングを指定する(例：1秒後から0.5秒ごとに実行)
+        // TODO: 定期的に実行するタイミングを指定する(例：1秒後から0.5秒ごとに実行)
         Thread.sleep(3000);
         verify(proxy, atLeast(3)).getTimeline(LECTURE_ID);
     }
