@@ -183,6 +183,7 @@ def lecture_add_view(request):
         return json_response_forbidden()
 
 
+@csrf_exempt
 def lecture_timeline_view(request):
     if request.method == 'GET':
         try:
@@ -213,6 +214,16 @@ def lecture_timeline_view(request):
         except MultiValueDictKeyError:
             return json_response_bad_request()
 
+        if (('before_virtual_ts' in request.POST)
+            ^ ('after_virtual_ts' in request.POST)):
+            # only one is requested and the other one is not
+            # NOTE: ^ is logical exclusive-or
+            return json_response_bad_request()
+
+        if not request.user.is_authenticated():
+            # get need auth
+            return json_response_forbidden()
+
         lec = Lecture.objects.get(pk=id)
         if ('before_virtual_ts' not in request.POST
             and 'after_virtual_ts' not in request.POST):
@@ -220,7 +231,6 @@ def lecture_timeline_view(request):
             t = time()
             post = lec.question_set.create(body=body,
                                            added_by=request.user,
-                                           lecture=id,
                                            virtual_ts=Question.time_to_vts(t))
 
         elif ('before_virtual_ts' in request.POST
@@ -230,14 +240,8 @@ def lecture_timeline_view(request):
                                   request.POST['after_virtual_ts'])
             post = lec.question_set.create(body=body,
                                            added_by=request.user,
-                                           lecture=id,
                                            virtual_ts=t)
-
-        else:
-            # only one is requested and the other one is not
-            return json_response_bad_request()
-
-        return json_response(post=post)
+        return json_response(dict(post=post.to_dict()))
 
 
 def _test():

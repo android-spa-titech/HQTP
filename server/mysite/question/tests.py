@@ -273,10 +273,11 @@ def test_about_timeline():
     # before, afterをしていなければ最後尾に追加します
     # 今回はタイムラインが空なので指定してもしなくても一緒です
     >>> jobj3 = access_timeline_post_view(c, id=lecture_id, body=u'しりとり')
-    >>> jboj3['status'] == 'OK'
+    >>> jobj3['status'] == 'OK'
     True
 
     >>> post = jobj3['post']
+
     # あとで使うのでID、実時間、仮想時間を保存
     >>> post1_id = post['id']
     >>> post1_time = post['time']
@@ -464,7 +465,7 @@ def test_about_timeline__notfound():
 
     # 存在しないID(1)でpostします
     >>> jobj3 = access_timeline_post_view(c, id=1, body=u'なるほど')
-    >>> jboj3['status'] == 'Not Found'
+    >>> jobj3['status'] == 'Not Found'
     True
     """
 
