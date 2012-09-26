@@ -109,8 +109,8 @@ def access_timeline_get_view(client, id):
     >>> 'posts' in jojb
     True
     """
-    url = '/api/lecture/timeline/'
-    response = client.get(url)
+    url = '/api/lecture/timeline/?id=%s'
+    response = client.get(url % id)
     jojb = json.loads(response.content)
     return jojb
 
