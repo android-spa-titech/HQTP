@@ -168,19 +168,15 @@ def lecture_add_view(request):
     except MultiValueDictKeyError:
         return json_response_bad_request()
 
-    if request.user.is_authenticated():
-        for lec in Lecture.objects.all():
-            # 授業コードが登録済み
-            if code == lec.code:
-                return json_response(context=dict(created=False,
-                                                  lecture=lec.to_dict()))
-        # 授業を新規登録
-        new_lec = Lecture.objects.create(code=code, name=name)
-        return json_response(context=dict(created=True,
-                                          lecture=new_lec.to_dict()))
-
-    else:
+    if not request.user.is_authenticated():
+        # add need auth
         return json_response_forbidden()
+
+    # get_or_create(): 新規作成したらcreated = True
+    lec, created = Lecture.objects.get_or_create(
+        code=code, defaults=dict(name=name))
+    return json_response(context=dict(created=created,
+                                      lecture=lec.to_dict()))
 
 
 @csrf_exempt
@@ -231,22 +227,21 @@ def lecture_timeline_view(request):
             # invalid lecture ID
             return json_response_not_found()
 
-        if ('before_virtual_ts' not in request.POST
-            and 'after_virtual_ts' not in request.POST):
+        if 'before_virtual_ts' not in request.POST:
+            # 'after_virtual_ts' is not in request.POST, too.
             # post to latest
-            t = time()
+            vts = Question.time_to_vts(time())
             post = lec.question_set.create(body=body,
                                            added_by=request.user,
-                                           virtual_ts=Question.time_to_vts(t))
-
-        elif ('before_virtual_ts' in request.POST
-              and 'after_virtual_ts' in request.POST):
+                                           virtual_ts=vts)
+        else:
+            # both 'before_virtual_ts' and 'after_virtual_ts' in request.POST
             # post to between 2 lectures
-            t = Question.calc_mid(int(request.POST['before_virtual_ts']),
-                                  int(request.POST['after_virtual_ts']))
+            vts = Question.calc_mid(int(request.POST['before_virtual_ts']),
+                                    int(request.POST['after_virtual_ts']))
             post = lec.question_set.create(body=body,
                                            added_by=request.user,
-                                           virtual_ts=t)
+                                           virtual_ts=vts)
         return json_response(dict(post=post.to_dict()))
 
 
