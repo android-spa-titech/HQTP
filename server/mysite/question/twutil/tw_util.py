@@ -48,6 +48,34 @@ def get_vc(user_key, user_secret):
     return ret
 
 
+def save_img(screen_name, size='bigger'):
+    """
+    get user icon by using twitter official API
+    size is 'bigger'(73px), 'normal'(48px), 'mini'(24px), 'original'
+    """
+    url = ('http://api.twitter.com/1/users/profile_image'
+           '?screen_name=%s&size=%s'
+           % (screen_name, size))
+
+    # calc save directory (dirname = HQTP/server/media/twicon)
+    import os
+    dirname = os.path.join(
+        os.path.dirname(os.getcwd()), 'media', 'twicon')
+
+    import urllib
+    f = urllib.urlopen(url)
+    src = f.read()
+    f.close()
+    if src.find('<!DOCTYPE html>') != 0:
+        # image file (not error page)
+        out = open(os.path.join(dirname, screen_name), 'wb')
+        out.write(src)
+        out.close()
+        return url  # 暫定的に保存したファイルではなく取得元のリンクを返す
+    else:
+        return None
+
+
 def _test():
     import doctest
     doctest.testmod()
