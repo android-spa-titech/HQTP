@@ -19,15 +19,12 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
 
 @RunWith(TimelineActivityTestRunner.class)
 public class TimelineActivityTest {
     public static int LECTURE_ID = 47;
 
-    @Inject
-    Injector injector;
     @Inject
     HQTPProxy proxy;
     @Inject
