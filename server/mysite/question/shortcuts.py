@@ -30,13 +30,15 @@ def access_auth_view(client, key=None, secret=None):
     >>> 'icon_url' in user
     True
     """
+    # どちらもNoneかどちらもnot Noneでなければいけない
+    error_msg = 'Usage: access_auth_view({KEY}, {SECRET})'
+    assert not((key is None) ^ (secret is None)), error_msg
+
     # for convinient, key and secret are allowed blank
     # if blank then use android_spa's key and secret
-    if key is None and secret is None:
+    if key is None:  # secret is None, too.
         key = spa_key
         secret = spa_secret
-    elif key is None or secret is None:
-        raise Exception('Usage: access_auth_view({KEY}, {SECRET})')
 
     url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
     url = url_template % (key, secret)
