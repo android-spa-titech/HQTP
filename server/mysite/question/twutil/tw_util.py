@@ -21,6 +21,8 @@ def place_holder_func():
     このファイルのdocstringが0個になるのを防ぐために必要
     """
 
+    pass
+
 
 def get_vc(user_key, user_secret):
     """
@@ -39,6 +41,7 @@ def get_vc(user_key, user_secret):
     >>> vc=={}
     True
     """
+
     api = make_api(user_key, user_secret)
     vc = api.verify_credentials()
     if not vc:
@@ -53,32 +56,36 @@ def save_img(screen_name, size='bigger'):
     get user icon by using twitter official API
     size is 'bigger'(73px), 'normal'(48px), 'mini'(24px), 'original'
     """
-    url = ('http://api.twitter.com/1/users/profile_image'
-           '?screen_name=%s&size=%s'
-           % (screen_name, size))
 
-    # calc save directory (dirname = HQTP/server/media/twicon)
+    url = ('http://api.twitter.com/1/users/profile_image'
+           + '?screen_name=%s&size=%s' % (screen_name, size))
+
+    # calc save directory (dirname == "HQTP/server/media/twicon")
     import os
-    dirname = os.path.join(
-        os.path.dirname(os.getcwd()), 'media', 'twicon')
+    dirname = os.path.join(os.path.dirname(os.getcwdu()), 'media', 'twicon')
+    # memo
+    # os.getcwdu(): returns current directory in unicode
+    # os.path.join(path1[, path2[, ...]]): joins path in natural form
 
     import urllib
     f = urllib.urlopen(url)
-    src = f.read()
+    src = f.read()  # source string
     f.close()
-    if src.find('<!DOCTYPE html>') != 0:
+    if src.find('<!DOCTYPE html>') != 0:  # expected -1
         # image file (not error page)
         out = open(os.path.join(dirname, screen_name), 'wb')
-        out.write(src)
+        # 'out' is local directory
+        out.write(src)  # save icon image file from twitter server to local
         out.close()
-        return url  # 暫定的に保存したファイルではなく取得元のリンクを返す
-    else:
+        return url  # returns not local temporary file but icon URL
+    else:  # error page HTML
         return None
 
 
 def _test():
     import doctest
     doctest.testmod()
+
 
 if __name__ == "__main__":
     _test()

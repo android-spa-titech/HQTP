@@ -78,7 +78,8 @@ def auth_view(request):
         return json_response_not_found()
     user_name = vc['id']
 
-    # get twitter icon (暫定的に認証時に毎回アイコンを取得)
+    # get twitter icon URL and save icon image to local
+    # 暫定的に認証時に毎回アイコンを取得
     icon_url = save_img(vc['screen_name'])
 
     # 新規に作成されたユーザーも、登録済みだったユーザーも
@@ -99,6 +100,8 @@ def auth_view(request):
         profile.name = vc['name']
         if icon_url is not None:
             profile.icon_url = icon_url
+        else:
+            pass  # What happens?
         profile.save()
         created = True
 
