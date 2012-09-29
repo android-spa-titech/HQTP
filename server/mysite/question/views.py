@@ -106,17 +106,13 @@ def auth_view(request):
     # セキュリティのために、パスワード認証ができないようにします
     # アクセストークンKEY、SECRETによる認証しか行いません
     auth_user.set_unusable_password()
-    if auth_user is not None:
-        if auth_user.is_active:
-            # Log in successful
-            login(request, auth_user)
-            user_info = user_to_dict(auth_user)
-        else:
-            # User is deleted
-            return json_response_not_found()
+    if auth_user.is_active:
+        # Log in successful
+        login(request, auth_user)
+        user_info = user_to_dict(auth_user)
     else:
-        # 新規作成・パスワードの設定を行っているのでここにはこないはず
-        return json_response_server_error()
+        # User is deleted
+        return json_response_not_found()
 
     context = dict(created=created, user=user_info)
     return json_response(context)
