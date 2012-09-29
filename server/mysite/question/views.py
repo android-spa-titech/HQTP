@@ -118,6 +118,8 @@ def auth_view(request):
     return json_response(context)
 
 
+"""
+# these methods are no longer used
 def get_view(request):
     # this method is no longer used
     if not request.user.is_authenticated():
@@ -147,6 +149,7 @@ def post_view(request):
         return json_response(context=dict(post=q.to_dict()))
     else:
         return json_response_forbidden()
+"""
 
 
 def lecture_get_view(request):
