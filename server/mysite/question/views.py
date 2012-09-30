@@ -212,9 +212,9 @@ def lecture_timeline_view(request):
             return json_response_bad_request()
 
         if (('before_virtual_ts' in request.POST)
-            ^ ('after_virtual_ts' in request.POST)):
+            != ('after_virtual_ts' in request.POST)):
             # only one is requested and the other one is not
-            # NOTE: ^ is logical exclusive-or
+            # NOTE: != is logical exclusive-or
             return json_response_bad_request()
 
         if not request.user.is_authenticated():
