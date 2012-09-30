@@ -3,14 +3,14 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
-from mysite.question.models import Question, UserProfile
+from mysite.question.models import Post, UserProfile
 
 
-class QuestionAdmin(admin.ModelAdmin):
+class PostAdmin(admin.ModelAdmin):
     search_fields = ['title', 'body', 'added_by']
     date_hierarchy = 'posted_at'
 
-admin.site.register(Question, QuestionAdmin)
+admin.site.register(Post, PostAdmin)
 
 
 class UserProfileInline(admin.StackedInline):

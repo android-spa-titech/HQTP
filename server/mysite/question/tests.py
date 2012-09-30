@@ -3,8 +3,8 @@
 
 def clean_questions():
     """ before test, call this method for clear questions """
-    from mysite.question.models import Question
-    Question.objects.all().delete()
+    from mysite.question.models import Post
+    Post.objects.all().delete()
 
 
 def clean_users():

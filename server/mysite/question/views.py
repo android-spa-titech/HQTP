@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.utils.datastructures import MultiValueDictKeyError
 import json
-from mysite.question.models import (Question,
+from mysite.question.models import (Post,
                                     user_to_dict,
                                     Lecture)
 from time import time
@@ -132,7 +132,7 @@ def get_view(request):
         # get need auth
         return json_response_forbidden()
 
-    posts = [q.to_dict() for q in Question.objects.all()]
+    posts = [q.to_dict() for q in Post.objects.all()]
     context = dict(
        posts=posts
     )
@@ -151,7 +151,7 @@ def post_view(request):
 
     added_by = request.user
     if added_by.is_authenticated():
-        q = Question.objects.create(title=title, body=body, added_by=added_by)
+        q = Post.objects.create(title=title, body=body, added_by=added_by)
         return json_response(context=dict(post=q.to_dict()))
     else:
         return json_response_forbidden()
@@ -211,7 +211,7 @@ def lecture_timeline_view(request):
         else:
             # successfully get timeline
             posts = [q.to_dict()
-                     for q in lec.question_set.order_by('virtual_ts')]
+                     for q in lec.post_set.order_by('virtual_ts')]
             return json_response(dict(posts=posts))
 
     elif request.method == 'POST':
@@ -240,18 +240,18 @@ def lecture_timeline_view(request):
         if 'before_virtual_ts' not in request.POST:
             # 'after_virtual_ts' is not in request.POST, too.
             # post to latest
-            vts = Question.time_to_vts(time())
-            post = lec.question_set.create(body=body,
-                                           added_by=request.user,
-                                           virtual_ts=vts)
+            vts = Post.time_to_vts(time())
+            post = lec.post_set.create(body=body,
+                                       added_by=request.user,
+                                       virtual_ts=vts)
         else:
             # both 'before_virtual_ts' and 'after_virtual_ts' in request.POST
             # post to between 2 lectures
-            vts = Question.calc_mid(int(request.POST['before_virtual_ts']),
+            vts = Post.calc_mid(int(request.POST['before_virtual_ts']),
                                     int(request.POST['after_virtual_ts']))
-            post = lec.question_set.create(body=body,
-                                           added_by=request.user,
-                                           virtual_ts=vts)
+            post = lec.post_set.create(body=body,
+                                       added_by=request.user,
+                                       virtual_ts=vts)
         return json_response(dict(post=post.to_dict()))
 
 

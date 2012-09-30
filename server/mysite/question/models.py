@@ -18,7 +18,7 @@ class Lecture(models.Model):
                     code=self.code)
 
 
-class Question(models.Model):
+class Post(models.Model):
     body = models.TextField()
     added_by = models.ForeignKey(User, null=True, blank=True)
     posted_at = models.DateTimeField(auto_now_add=True)
@@ -44,14 +44,14 @@ class Question(models.Model):
         # how to use this method
         >>> from time import time
         >>> t = time()
-        >>> vts = Question.time_to_vts(t)
+        >>> vts = Post.time_to_vts(t)
 
         # test this method
         >>> import time
         >>> from datetime import date
         >>> d = date(2012, 9, 30)
         >>> t = time.mktime(d.timetuple())
-        >>> vts = Question.time_to_vts(t)
+        >>> vts = Post.time_to_vts(t)
         >>> vts
         134893080000000000L
         """
