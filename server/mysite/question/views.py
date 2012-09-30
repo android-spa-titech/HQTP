@@ -101,7 +101,10 @@ def auth_view(request):
         if icon_url is not None:
             profile.icon_url = icon_url
         else:
-            pass  # What happens?
+            # set default icon
+            # 暫定的にandroid_spaのアイコンを使用
+            from mysite.question.twutil.tw_util import PROFILE_IMAGE
+            profile.icon_url = PROFILE_IMAGE % ('android_spa', 'bigger')
         profile.save()
         created = True
 

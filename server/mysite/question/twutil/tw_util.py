@@ -4,6 +4,10 @@ import tweepy
 import consumer_info
 
 
+PROFILE_IMAGE = ('http://api.twitter.com/1/users/profile_image'
+                 + '?screen_name=%s&size=%s')
+
+
 def make_auth():
     return tweepy.OAuthHandler(consumer_info.key, consumer_info.secret)
 
@@ -57,8 +61,7 @@ def save_img(screen_name, size='bigger'):
     size is 'bigger'(73px), 'normal'(48px), 'mini'(24px), 'original'
     """
 
-    url = ('http://api.twitter.com/1/users/profile_image'
-           + '?screen_name=%s&size=%s' % (screen_name, size))
+    url = PROFILE_IMAGE % (screen_name, size)
 
     # calc save directory (dirname == "HQTP/server/media/twicon")
     import os
