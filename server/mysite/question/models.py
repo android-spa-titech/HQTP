@@ -41,9 +41,19 @@ class Question(models.Model):
     @classmethod
     def time_to_vts(cls, t):
         """
+        # how to use this method
         >>> from time import time
         >>> t = time()
         >>> vts = Question.time_to_vts(t)
+
+        # test this method
+        >>> import time
+        >>> from datetime import date
+        >>> d = date(2012, 9, 30)
+        >>> t = time.mktime(d.timetuple())
+        >>> vts = Question.time_to_vts(t)
+        >>> vts
+        134893080000000000L
         """
         s = repr(t)  # 精度を保ったまま文字列にする
         splits = s.split('.')  # 小数点で分割(小数点以下は6桁)
