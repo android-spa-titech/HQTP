@@ -34,14 +34,14 @@ def get_vc(user_key, user_secret):
     because replace this with get_vc_mock
 
     >>> import consumer_info as ci
-    >>> vc=_get_vc(ci.spa_key,ci.spa_secret)
+    >>> vc = get_vc(ci.spa_key,ci.spa_secret)
     >>> vc['id'] == ci.spa_id
     True
     >>> vc['screen_name'] == ci.spa_screen_name
     True
     >>> vc['name'] == ci.spa_name
     True
-    >>> vc=_get_vc('dummy key','dummy secret')
+    >>> vc = get_vc('dummy key','dummy secret')
     >>> vc=={}
     True
     """
