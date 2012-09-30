@@ -100,7 +100,13 @@ def test_about_auth():
     True
     >>> 'name' in user
     True
+
+    # Test about icon
     >>> 'icon_url' in user
+    True
+    >>> user['icon_url'].find('api.twitter.com/1/users/profile_image') != -1
+    True
+    >>> user['icon_url'].find(user['name']) != -1
     True
 
 

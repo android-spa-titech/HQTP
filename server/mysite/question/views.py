@@ -56,7 +56,7 @@ def json_response_server_error(context={}):
 
 
 def auth_view(request):
-    from twutil.tw_util import get_vc
+    from twutil.tw_util import get_vc, save_img
 
     try:
         key = request.GET['access_token_key']
@@ -78,6 +78,10 @@ def auth_view(request):
         return json_response_not_found()
     user_name = vc['id']
 
+    # get twitter icon URL and save icon image to local
+    # 暫定的に認証時に毎回アイコンを取得
+    icon_url = save_img(vc['screen_name'])
+
     # 新規に作成されたユーザーも、登録済みだったユーザーも
     # どちらもパスワードとしてtemp_passwordを設定する
     temp_password = User.objects.make_random_password()
@@ -94,6 +98,13 @@ def auth_view(request):
         profile = user.get_profile()
         profile.screen_name = vc['screen_name']
         profile.name = vc['name']
+        if icon_url is not None:
+            profile.icon_url = icon_url
+        else:
+            # set default icon
+            # 暫定的にandroid_spaのアイコンを使用
+            from mysite.question.twutil.tw_util import PROFILE_IMAGE
+            profile.icon_url = PROFILE_IMAGE % ('android_spa', 'bigger')
         profile.save()
         created = True
 
