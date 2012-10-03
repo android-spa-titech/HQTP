@@ -3,6 +3,7 @@ package org.hqtp.android;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import roboguice.activity.RoboActivity;
@@ -38,8 +39,7 @@ public class TimelineActivity extends RoboActivity {
     private int lectureId;
     private TimelineAdapter adapter;
 
-    private ScheduledExecutorService timeline_thread;
-    private final long timeline_update_initial_delay = 500;
+    private ScheduledFuture<?> scheduled_future;
     private final long timeline_update_period = 500;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -69,8 +69,13 @@ public class TimelineActivity extends RoboActivity {
             }
         });
 
-        loadTimeline();
         startRecurringUpdateTimeline();
+    }
+
+    @Override
+    protected void onStop() {
+        scheduled_future.cancel(true);
+        super.onStop();
     }
 
     private void loadTimeline() {
@@ -79,12 +84,14 @@ public class TimelineActivity extends RoboActivity {
     }
 
     private void updateTimelineAdaptor(List<Post> posts) {
-        adapter.clear();
         // Robolectric does not implement addAll,
         // so we use add method and a loop instead for the time being.
         // https://github.com/pivotal/robolectric/issues/281
-        for (Post p : posts) {
-            adapter.add(p);
+        adapter.clear();
+        if (posts != null) {
+            for (Post p : posts) {
+                adapter.add(p);
+            }
         }
         adapter.notifyDataSetChanged();
     }
@@ -92,18 +99,20 @@ public class TimelineActivity extends RoboActivity {
     private void startRecurringUpdateTimeline() {
         // recurring update
         // TODO: 定期的なタイムライン更新を行うかどうかをテストケースで弄れるようにすべき。
-        timeline_thread = Executors.newSingleThreadScheduledExecutor();
-        timeline_thread.scheduleWithFixedDelay(new Runnable() {
+        ScheduledExecutorService timeline_thread = Executors.newSingleThreadScheduledExecutor();
+        scheduled_future = timeline_thread.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
                 try {
                     List<Post> posts = proxy.getTimeline(lectureId);
-                    updateTimelineAdaptor(posts);
+                    if (!scheduled_future.isCancelled()) {
+                        updateTimelineAdaptor(posts);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        }, timeline_update_initial_delay, timeline_update_period, TimeUnit.MILLISECONDS);
+        }, 0, timeline_update_period, TimeUnit.MILLISECONDS);
     }
 
     private class GetTimeline extends RoboAsyncTask<List<Post>> {
@@ -125,7 +134,6 @@ public class TimelineActivity extends RoboActivity {
 
         @Override
         protected void onException(Exception e) {
-            e.printStackTrace();
             showAlert("GetTimeline", "サーバーとの通信に失敗しました。");
         }
     }

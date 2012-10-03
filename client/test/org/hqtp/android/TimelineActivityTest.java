@@ -1,26 +1,27 @@
 package org.hqtp.android;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.atLeast;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboguice.inject.InjectView;
-import android.app.AlertDialog;
 import android.widget.Button;
 import android.widget.ListView;
 
 import com.google.inject.Inject;
-import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
+import com.google.inject.Injector;
+
+import static org.hamcrest.core.IsEqual.equalTo;
+
+import static org.junit.Assert.assertThat;
+
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(TimelineActivityTestRunner.class)
 public class TimelineActivityTest {
@@ -34,6 +35,11 @@ public class TimelineActivityTest {
     ListView listView;
     @InjectView(R.id.buttonUpdate)
     Button updateButton;
+
+    @After
+    public void tearDown() {
+        activity.onStop();
+    }
 
     @Test
     public void loadingActivityShouldAccessGetTimeline() throws Exception {
@@ -85,30 +91,6 @@ public class TimelineActivityTest {
         Thread.sleep(100);
 
         assertThat(listView.getCount(), equalTo(2));
-    }
-
-    @Test
-    public void activityShouldShowAlertWhenFailed() throws Exception {
-        when(proxy.getTimeline(LECTURE_ID)).thenThrow(new HQTPAPIException("Cannot get posts"));
-
-        activity.onCreate(null);
-        Thread.sleep(100);
-        assertThat(listView.getCount(), equalTo(0));
-
-        AlertDialog alert = ShadowAlertDialog.getLatestAlertDialog();
-        assertNotNull(alert);
-    }
-
-    @Test
-    public void activityShouldShowAlertWhenNoPosts() throws Exception {
-        when(proxy.getTimeline(LECTURE_ID)).thenReturn(null);
-
-        activity.onCreate(null);
-        Thread.sleep(100);
-        assertThat(listView.getCount(), equalTo(0));
-
-        AlertDialog alert = ShadowAlertDialog.getLatestAlertDialog();
-        assertNotNull(alert);
     }
 
     @Test
