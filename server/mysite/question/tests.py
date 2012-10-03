@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
 
+from mysite.question.shortcuts import *
+
 
 def clean_questions():
     """ before test, call this method for clear questions """
@@ -76,6 +78,26 @@ def get_vc_mock(user_key, user_secret):
         raise TypeError(('character mapping must return integer, '
                          'None or unicode'))
 
+
+###############################################################################
+# /api/auth/のAPIに関するテスト
+###############################################################################
+def test_about_api_auth():
+    """
+    >>> c = make_client()
+    >>> jobj = access_auth_view(c)
+    >>> jobj['status'] == 'OK'
+    True
+    >>> 'created' in jobj
+    True
+    >>> user = jobj['user']
+    >>> 'id' in user
+    True
+    >>> 'name' in user
+    True
+    >>> 'icon_url' in user
+    True
+    """
 
 ###############################################################################
 # /api/auth/に関するテスト
@@ -171,6 +193,46 @@ def test_about_auth__servererror():
     >>> c = make_client()
     >>> jobj = access_auth_view(c, key='spam', secret='egg')
     >>> jobj['status'] == 'Server Error'
+    True
+    """
+
+
+###############################################################################
+# /api/lecture/getのAPIに関するテスト
+###############################################################################
+def test_about_api_lecture_get():
+    """
+    >>> c = make_client()
+    >>> jobj = access_auth_view(c)
+    >>> jobj = access_lecture_get_view(c)
+    >>> jobj['status'] == 'OK'
+    True
+    >>> 'lectures' in jobj
+    True
+    """
+
+
+###############################################################################
+# /api/lecture/addのAPIに関するテスト
+###############################################################################
+def test_about_api_lecture_add():
+    """
+    >>> name = 'Programming 1'
+    >>> code = '0B123456789'
+    >>> c = make_client()
+    >>> jobj = access_auth_view(c)
+    >>> jobj = access_lecture_add_view(c, name=name, code=code)
+    >>> jobj['status'] == 'OK'
+    True
+    >>> 'created' in jobj
+    True
+
+    >>> lecture = jobj['lecture']
+    >>> lecture['name'] == name
+    True
+    >>> lecture['code'] == code
+    True
+    >>> 'id' in lecture
     True
     """
 
@@ -287,6 +349,81 @@ def test_about_lecture__forbidden():
     # authをして初めてlecture/addできます
     >>> jobj4a = access_lecture_add_view(c, name=name, code=code)
     >>> jobj4a['status'] == 'OK'
+    True
+    """
+
+
+###############################################################################
+# /api/lecture/timeline/ GET APIに関するテスト
+###############################################################################
+def test_about_api_timeline_get():
+    u"""
+    >>> name = 'Arch1'
+    >>> code = 't001'
+
+    # 下準備（授業の作成）
+    >>> c0 = make_client()
+    >>> jobj0a = access_auth_view(c0)
+    >>> jobj0b = access_lecture_add_view(c0, name=name, code=code)
+    >>> lecture_id = jobj0b['lecture']['id']
+
+    >>> c = make_client()
+    >>> jobj = access_auth_view(c)
+    >>> jobj = access_timeline_get_view(c, id=lecture_id)
+    >>> jobj['status'] == 'OK'
+    True
+    >>> 'posts' in jobj
+    True
+    """
+
+
+###############################################################################
+# /api/lecture/timeline/ POST APIに関するテスト
+###############################################################################
+def test_about_api_timeline_post():
+    u"""
+    >>> name = 'Arch1'
+    >>> code = 't001'
+    >>> body = u'MIPSとは'
+
+    # 下準備（授業の作成）
+    >>> c0 = make_client()
+    >>> jobj0a = access_auth_view(c0)
+    >>> jobj0b = access_lecture_add_view(c0, name=name, code=code)
+    >>> lecture_id = jobj0b['lecture']['id']
+
+    >>> c = make_client()
+    >>> jobj = access_auth_view(c)
+    >>> jobj = access_timeline_post_view(c, id=lecture_id, body=body,
+    ...                                  before_virtual_ts=1000,
+    ...                                  after_virtual_ts=2000)
+    >>> jobj['status'] == 'OK'
+    True
+    >>> post = jobj['post']
+    >>> 'id' in post
+    True
+
+    # 追加先授業の情報は正しいか
+    >>> lecture = post['lecture']
+    >>> lecture['id'] == lecture_id
+    True
+    >>> lecture['name'] == name
+    True
+    >>> lecture['code'] == code
+    True
+
+    # 投稿内容の情報は正しいか
+    >>> post['body'] == body
+    True
+
+    # 投稿ユーザーの情報は正しいか
+    >>> user = post['user']
+    >>> 'id' in user and 'name' in user and 'icon_url' in user
+    True
+
+    >>> 'time' in post
+    True
+    >>> 'virtual_ts' in post
     True
     """
 

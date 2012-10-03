@@ -15,21 +15,6 @@ def make_client():
 
 
 def access_auth_view(client, key=None, secret=None):
-    """
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> 'created' in jobj
-    True
-    >>> user = jobj['user']
-    >>> 'id' in user
-    True
-    >>> 'name' in user
-    True
-    >>> 'icon_url' in user
-    True
-    """
     # どちらもNoneかどちらもnot Noneでなければいけない
     error_msg = 'Usage: access_auth_view({KEY}, {SECRET})'
     assert not((key is None) ^ (secret is None)), error_msg
@@ -48,15 +33,6 @@ def access_auth_view(client, key=None, secret=None):
 
 
 def access_lecture_get_view(client):
-    """
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
-    >>> jobj = access_lecture_get_view(c)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> 'lectures' in jobj
-    True
-    """
     url = '/api/lecture/get/'
     response = client.get(url)
     jobj = json.loads(response.content)
@@ -64,25 +40,6 @@ def access_lecture_get_view(client):
 
 
 def access_lecture_add_view(client, name, code):
-    """
-    >>> name = 'Programming 1'
-    >>> code = '0B123456789'
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
-    >>> jobj = access_lecture_add_view(c, name=name, code=code)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> 'created' in jobj
-    True
-
-    >>> lecture = jobj['lecture']
-    >>> lecture['name'] == name
-    True
-    >>> lecture['code'] == code
-    True
-    >>> 'id' in lecture
-    True
-    """
     url = '/api/lecture/add/'
     response = client.post(url, dict(name=name, code=code))
     jobj = json.loads(response.content)
@@ -90,24 +47,6 @@ def access_lecture_add_view(client, name, code):
 
 
 def access_timeline_get_view(client, id):
-    u"""
-    >>> name = 'Arch1'
-    >>> code = 't001'
-
-    # 下準備（授業の作成）
-    >>> c0 = make_client()
-    >>> jobj0a = access_auth_view(c0)
-    >>> jobj0b = access_lecture_add_view(c0, name=name, code=code)
-    >>> lecture_id = jobj0b['lecture']['id']
-
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
-    >>> jobj = access_timeline_get_view(c, id=lecture_id)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> 'posts' in jobj
-    True
-    """
     url = '/api/lecture/timeline/?id=%s'
     response = client.get(url % id)
     jobj = json.loads(response.content)
@@ -116,51 +55,6 @@ def access_timeline_get_view(client, id):
 
 def access_timeline_post_view(client, id, body,
                               before_virtual_ts=None, after_virtual_ts=None):
-    u"""
-    >>> name = 'Arch1'
-    >>> code = 't001'
-    >>> body = u'MIPSとは'
-
-    # 下準備（授業の作成）
-    >>> c0 = make_client()
-    >>> jobj0a = access_auth_view(c0)
-    >>> jobj0b = access_lecture_add_view(c0, name=name, code=code)
-    >>> lecture_id = jobj0b['lecture']['id']
-
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
-    >>> jobj = access_timeline_post_view(c, id=lecture_id, body=body,
-    ...                                  before_virtual_ts=1000,
-    ...                                  after_virtual_ts=2000)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> post = jobj['post']
-    >>> 'id' in post
-    True
-
-    # 追加先授業の情報は正しいか
-    >>> lecture = post['lecture']
-    >>> lecture['id'] == lecture_id
-    True
-    >>> lecture['name'] == name
-    True
-    >>> lecture['code'] == code
-    True
-
-    # 投稿内容の情報は正しいか
-    >>> post['body'] == body
-    True
-
-    # 投稿ユーザーの情報は正しいか
-    >>> user = post['user']
-    >>> 'id' in user and 'name' in user and 'icon_url' in user
-    True
-
-    >>> 'time' in post
-    True
-    >>> 'virtual_ts' in post
-    True
-    """
     url = '/api/lecture/timeline/'
     dic = dict(id=id, body=body)
     if before_virtual_ts is not None:
