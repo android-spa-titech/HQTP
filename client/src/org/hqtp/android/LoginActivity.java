@@ -101,8 +101,11 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
         @Override
         protected void onSuccess(Void v) {
             Intent intent = new Intent(LoginActivity.this, HQTPActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
+            // ログイン画面へのbackを無効にする(#93)ためにfinish()してアクティビティを無くしておく
+            // 参考：
+            // http://stackoverflow.com/questions/3473168/clear-the-entire-history-stack-and-start-a-new-activity-on-android/10015648#10015648
+            finish();
         }
     }
 
