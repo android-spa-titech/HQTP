@@ -209,4 +209,11 @@ public class HQTPProxyImpl implements HQTPProxy {
     {
         return json.has("status") && json.getString("status").equals("OK");
     }
+
+    @Override
+    public Lecture addLecture(String lectureCode, String lectureName) throws HQTPAPIException, IOException,
+            JSONException, java.text.ParseException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
