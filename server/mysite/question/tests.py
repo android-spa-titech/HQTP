@@ -105,10 +105,6 @@ def test_about_api_auth():
 def test_about_auth():
     u"""
     >>> clean_users()
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view)
-
-
     >>> c = make_client()
 
     # create user first time
@@ -146,10 +142,6 @@ def test_about_auth__badrequest():
     u"""
     access_token_key, access_token_secretが両方渡されないとBad Requestを返す
 
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view)
-
-
     >>> import json
     >>> from question.twutil.consumer_info import spa_key, spa_secret
 
@@ -173,9 +165,6 @@ def test_about_auth__notfound():
     u"""
     TwitterのOAuthの正しくないkey, secretの場合Not Foundを返す
 
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view)
-
     >>> c = make_client()
     >>> jobj = access_auth_view(c, key='dummy key', secret='dummy secret')
     >>> jobj['status'] == 'Not Found'
@@ -186,9 +175,6 @@ def test_about_auth__notfound():
 def test_about_auth__servererror():
     u"""
     key, sercretによってはServer Errorを返す
-
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view)
 
     >>> c = make_client()
     >>> jobj = access_auth_view(c, key='spam', secret='egg')
@@ -248,11 +234,6 @@ def test_about_lecture():
     >>> code2 = '0X123456790'
 
     >>> clean_lectures()
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view,
-    ...                                        access_lecture_get_view,
-    ...                                        access_lecture_add_view)
-
     >>> c = make_client()
 
     # authします
@@ -318,13 +299,10 @@ def test_about_lecture():
 
 def test_about_lecture__forbidden():
     u"""
+    authしないでget/addした場合Forbiddenを返す
+
     >>> name = 'Programming 1'
     >>> code = '0X123456789'
-
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view,
-    ...                                        access_lecture_get_view,
-    ...                                        access_lecture_add_view)
 
     >>> c = make_client()
 
@@ -443,11 +421,6 @@ def test_about_timeline():
     >>> clean_questions()
     >>> clean_lectures()
     >>> clean_users()
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view,
-    ...                                        access_timeline_get_view,
-    ...                                        access_timeline_post_view,
-    ...                                        access_lecture_add_view)
     >>> from time import sleep
 
 
@@ -571,9 +544,6 @@ def test_about_timeline__badrequest():
     指定した場合はBad Requestを返す
 
     >>> clean_lectures()
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_timeline_post_view)
-
     >>> c = make_client()
 
     # before_virtual_tsだけ指定します
@@ -596,13 +566,6 @@ def test_about_timeline__forbidden():
 
     >>> name = 'Arch1'
     >>> code = 't001'
-
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view,
-    ...                                        access_timeline_get_view,
-    ...                                        access_timeline_post_view,
-    ...                                        access_lecture_add_view)
-
 
     # 下準備（授業の作成）
     >>> c0 = make_client()
@@ -643,12 +606,6 @@ def test_about_timeline__notfound():
 
     >>> clean_questions()
     >>> clean_lectures()
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view,
-    ...                                        access_timeline_get_view,
-    ...                                        access_timeline_post_view)
-
-
     >>> c = make_client()
 
     # authをします
@@ -670,11 +627,14 @@ def test_about_timeline__notfound():
 
 def test_about_csrf():
     """
-    >>> from django.test.client import Client
-    >>> from mysite.question.shortcuts import (access_auth_view,
-    ...                                        access_lecture_add_view,
-    ...                                        access_timeline_post_view)
+    もしviews.pyのlecture_add_view, lecture_timeline_viewに
+    @csrf_exemptデコレーターをつけないと、
+    c2を使う2つ目のテストは失敗する
+    （response.status_codeが200ではなく403となるので）
+    一方c1を使う1つ目のテストは成功する。
+    なので、テストクライアントを作るときはenforce_csrf_checks=Trueを指定する
 
+    >>> from django.test.client import Client
 
     # don't use csrf checking
     >>> c1 = Client()
@@ -702,20 +662,12 @@ def test_about_csrf():
     True
     """
 
-    # もしviews.pyのlecture_add_view, lecture_timeline_viewに
-    # @csrf_exemptデコレーターをつけないと、
-    # c2を使う2つ目のテストは失敗する
-    # （response.status_codeが200ではなく403となるので）
-    # 一方c1を使う1つ目のテストは成功する。
-    # なので、テストクライアントを作るときはenforce_csrf_checks=Trueを指定する
-
 
 def test_about_user_profile():
     """
-    >>> clean_users()
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view)
+    UserProfileが正しく機能しているか確認
 
+    >>> clean_users()
     >>> from django.contrib.auth.models import User
 
 
@@ -736,7 +688,6 @@ def test_about_user_profile():
     >>> profile.name == 'android_spa'
     True
     """
-    # UserProfileが正しく機能しているか確認
 
 
 from django.test import TestCase
