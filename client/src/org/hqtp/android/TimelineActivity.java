@@ -1,46 +1,34 @@
 package org.hqtp.android;
 
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
-import roboguice.util.RoboAsyncTask;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.inject.Inject;
 
-public class TimelineActivity extends RoboActivity {
+public class TimelineActivity extends RoboActivity implements TimelineObserver {
 
     @InjectView(R.id.listPost)
     ListView timelineListView;
-    @InjectView(R.id.buttonUpdate)
-    Button updateButton;
     @Inject
-    HQTPProxy proxy;
+    TimelineRecurringUpdater updater;
 
     public static final String LECTURE_ID = "LECTURE_ID";
 
     private int lectureId;
     private TimelineAdapter adapter;
-
-    private ScheduledFuture<?> scheduled_future;
-    private final long timeline_update_period = 500;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +36,9 @@ public class TimelineActivity extends RoboActivity {
 
         lectureId = getIntent().getIntExtra(LECTURE_ID, -1);
         assert lectureId != -1;
+
+        updater.setLectureId(lectureId);
+        updater.registerTimelineObserver(this);
 
         adapter = new TimelineAdapter(this, R.layout.post_item);
         timelineListView.setAdapter(adapter);
@@ -63,78 +54,41 @@ public class TimelineActivity extends RoboActivity {
             }
         });
 
-        updateButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                loadTimeline();
-            }
-        });
-
-        startRecurringUpdateTimeline();
+        updater.startRecurringUpdateTimeline();
     }
 
     @Override
     protected void onStop() {
-        scheduled_future.cancel(true);
+        updater.unregisterTimelineObserver(this);
+        updater.stop();
         super.onStop();
     }
 
-    private void loadTimeline() {
-        GetTimeline gt = new GetTimeline();
-        gt.execute();
+    @Override
+    public void onUpdate(List<Post> posts) {
+        runOnUiThread(new TimelineUpdateTask(posts));
     }
 
-    private void updateTimelineAdaptor(List<Post> posts) {
-        // Robolectric does not implement addAll,
-        // so we use add method and a loop instead for the time being.
-        // https://github.com/pivotal/robolectric/issues/281
-        adapter.clear();
-        if (posts != null) {
-            for (Post p : posts) {
-                adapter.add(p);
-            }
+    private class TimelineUpdateTask implements Runnable {
+        private List<Post> posts;
+
+        TimelineUpdateTask(List<Post> posts) {
+            super();
+            this.posts = posts;
         }
-        adapter.notifyDataSetChanged();
-    }
 
-    private void startRecurringUpdateTimeline() {
-        // recurring update
-        // TODO: 定期的なタイムライン更新を行うかどうかをテストケースで弄れるようにすべき。
-        ScheduledExecutorService timeline_thread = Executors.newSingleThreadScheduledExecutor();
-        scheduled_future = timeline_thread.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    List<Post> posts = proxy.getTimeline(lectureId);
-                    if (!scheduled_future.isCancelled()) {
-                        updateTimelineAdaptor(posts);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+        @Override
+        public void run() {
+            // Robolectric does not implement addAll,
+            // so we use add method and a loop instead for the time being.
+            // https://github.com/pivotal/robolectric/issues/281
+            adapter.clear();
+            if (posts != null) {
+                for (Post p : posts) {
+                    adapter.add(p);
                 }
             }
-        }, 0, timeline_update_period, TimeUnit.MILLISECONDS);
-    }
-
-    private class GetTimeline extends RoboAsyncTask<List<Post>> {
-
-        @Override
-        public List<Post> call() throws Exception {
-            return proxy.getTimeline(lectureId);
-        }
-
-        @Override
-        protected void onSuccess(List<Post> posts) {
-
-            if (posts == null) {
-                showAlert("GetTimeline", "投稿がありません。");
-            } else {
-                updateTimelineAdaptor(posts);
-            }
-        }
-
-        @Override
-        protected void onException(Exception e) {
-            showAlert("GetTimeline", "サーバーとの通信に失敗しました。");
+            adapter.notifyDataSetChanged();
         }
     }
 

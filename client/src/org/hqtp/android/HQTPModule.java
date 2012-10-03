@@ -11,7 +11,9 @@ public class HQTPModule extends AbstractAndroidModule {
     @Override
     public void configure() {
         bind(HQTPProxy.class).to(HQTPProxyImpl.class);
+        bind(TimelineRecurringUpdater.class).to(TimelineRecurringUpdaterImpl.class);
         bind(String.class).annotatedWith(Names.named("HQTP API Endpoint URL")).toInstance("http://www.hqtp.org/api/");
+        bind(Long.class).annotatedWith(Names.named("TimelineUpdatePeriod")).toInstance(Long.valueOf(500));
 
         OAuthAuthorization oauth = new OAuthAuthorization(ConfigurationContext.getInstance());
         bind(OAuthAuthorization.class).toInstance(oauth);
