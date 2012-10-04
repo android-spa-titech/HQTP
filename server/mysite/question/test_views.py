@@ -1,22 +1,4 @@
 # -*- coding: utf-8 -*-
-from mysite.question.shortcuts import *
-
-def clean_questions():
-    """ before test, call this method for clear questions """
-    from mysite.question.models import Post
-    Post.objects.all().delete()
-
-
-def clean_users():
-    """ before test, call this method for clear users """
-    from django.contrib.auth.models import User
-    User.objects.all().delete()
-
-
-def clean_lectures():
-    """ before test, call this method for clear lectures """
-    from mysite.question.models import Lecture
-    Lecture.objects.all().delete()
 
 
 def get_vc_mock(user_key, user_secret):
@@ -82,8 +64,8 @@ def get_vc_mock(user_key, user_secret):
 ###############################################################################
 def test_about_api_auth():
     """
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
+    >>> c = shortcuts.make_client()
+    >>> jobj = shortcuts.access_auth_view(c)
     >>> jobj['status'] == 'OK'
     True
     >>> 'created' in jobj
@@ -100,13 +82,14 @@ def test_about_api_auth():
 ###############################################################################
 # /api/auth/に関するテスト
 ###############################################################################
+
+
 def test_about_auth():
     u"""
-    >>> clean_users()
-    >>> c = make_client()
+    >>> c = shortcuts.make_client()
 
     # create user first time
-    >>> jobj1 = access_auth_view(c)
+    >>> jobj1 = shortcuts.access_auth_view(c)
     >>> jobj1['status'] == 'OK'
     True
     >>> jobj1['created']
@@ -127,8 +110,8 @@ def test_about_auth():
 
 
     # user is crated only first time
-    >>> c2 = make_client()
-    >>> jobj2 = access_auth_view(c2)
+    >>> c2 = shortcuts.make_client()
+    >>> jobj2 = shortcuts.access_auth_view(c2)
     >>> jobj2['status'] == 'OK'
     True
     >>> jobj2['created']
@@ -143,7 +126,7 @@ def test_about_auth__badrequest():
     >>> import json
     >>> from question.twutil.consumer_info import spa_key, spa_secret
 
-    >>> c = make_client()
+    >>> c = shortcuts.make_client()
 
     >>> url1 = '/api/auth/?access_token_key=KEY'
     >>> response = c.get(url1)
@@ -163,8 +146,9 @@ def test_about_auth__notfound():
     u"""
     TwitterのOAuthの正しくないkey, secretの場合Not Foundを返す
 
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c, key='dummy key', secret='dummy secret')
+    >>> c = shortcuts.make_client()
+    >>> jobj = shortcuts.access_auth_view(
+    ...     c, key='dummy key', secret='dummy secret')
     >>> jobj['status'] == 'Not Found'
     True
     """
@@ -174,8 +158,8 @@ def test_about_auth__servererror():
     u"""
     key, sercretによってはServer Errorを返す
 
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c, key='spam', secret='egg')
+    >>> c = shortcuts.make_client()
+    >>> jobj = shortcuts.access_auth_view(c, key='spam', secret='egg')
     >>> jobj['status'] == 'Server Error'
     True
     """
@@ -186,9 +170,9 @@ def test_about_auth__servererror():
 ###############################################################################
 def test_about_api_lecture_get():
     """
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
-    >>> jobj = access_lecture_get_view(c)
+    >>> c = shortcuts.make_client()
+    >>> jobj = shortcuts.access_auth_view(c)
+    >>> jobj = shortcuts.access_lecture_get_view(c)
     >>> jobj['status'] == 'OK'
     True
     >>> 'lectures' in jobj
@@ -203,9 +187,9 @@ def test_about_api_lecture_add():
     """
     >>> name = 'Programming 1'
     >>> code = '0B123456789'
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
-    >>> jobj = access_lecture_add_view(c, name=name, code=code)
+    >>> c = shortcuts.make_client()
+    >>> jobj = shortcuts.access_auth_view(c)
+    >>> jobj = shortcuts.access_lecture_add_view(c, name=name, code=code)
     >>> jobj['status'] == 'OK'
     True
     >>> 'created' in jobj
@@ -231,23 +215,22 @@ def test_about_lecture():
     >>> name2 = u'並行システム論'
     >>> code2 = '0X123456790'
 
-    >>> clean_lectures()
-    >>> c = make_client()
+    >>> c = shortcuts.make_client()
 
     # authします
-    >>> jobj1 = access_auth_view(c)
+    >>> jobj1 = shortcuts.access_auth_view(c)
     >>> jobj1['status'] == 'OK'
     True
 
     # 最初は何も授業がありません
-    >>> jobj2 = access_lecture_get_view(c)
+    >>> jobj2 = shortcuts.access_lecture_get_view(c)
     >>> jobj2['status'] == 'OK'
     True
     >>> jobj2['lectures'] == []
     True
 
     # 授業を追加します
-    >>> jobj3a = access_lecture_add_view(c, name=name1, code=code1)
+    >>> jobj3a = shortcuts.access_lecture_add_view(c, name=name1, code=code1)
     >>> jobj3a['status'] == 'OK'
     True
     >>> jobj3a['created']
@@ -258,7 +241,7 @@ def test_about_lecture():
     >>> id1 = lecture1['id']
 
     # lecture/getで確認してみます
-    >>> jobj3b = access_lecture_get_view(c)
+    >>> jobj3b = shortcuts.access_lecture_get_view(c)
     >>> jobj3b['status'] == 'OK'
     True
     >>> lectures = jobj3b['lectures']
@@ -272,23 +255,23 @@ def test_about_lecture():
     True
 
     # 二度目の追加は新規作成されません
-    >>> jobj4a = access_lecture_add_view(c, name=name1, code=code1)
+    >>> jobj4a = shortcuts.access_lecture_add_view(c, name=name1, code=code1)
     >>> jobj4a['created']
     False
 
     # lecture/getで確認してみます
-    >>> jobj4b = access_lecture_get_view(c)
+    >>> jobj4b = shortcuts.access_lecture_get_view(c)
     >>> lectures = jobj4b['lectures']
     >>> len(lectures)
     1
 
     # 他の授業も追加してみる
-    >>> jobj5a = access_lecture_add_view(c, name=name2, code=code2)
+    >>> jobj5a = shortcuts.access_lecture_add_view(c, name=name2, code=code2)
     >>> jobj5a['created']
     True
 
     # lecture/getで確認してみます
-    >>> jobj5b = access_lecture_get_view(c)
+    >>> jobj5b = shortcuts.access_lecture_get_view(c)
     >>> lectures = jobj5b['lectures']
     >>> len(lectures)
     2
@@ -302,28 +285,28 @@ def test_about_lecture__forbidden():
     >>> name = 'Programming 1'
     >>> code = '0X123456789'
 
-    >>> c = make_client()
+    >>> c = shortcuts.make_client()
 
     # lecture/[get|add]はauthしていないとできません(Forbidden)
-    >>> jobj1a = access_lecture_get_view(c)
+    >>> jobj1a = shortcuts.access_lecture_get_view(c)
     >>> jobj1a['status'] == 'Forbidden'
     True
-    >>> jobj1b = access_lecture_add_view(c, name=name, code=code)
+    >>> jobj1b = shortcuts.access_lecture_add_view(c, name=name, code=code)
     >>> jobj1b['status'] == 'Forbidden'
     True
 
     # authします
-    >>> jobj2 = access_auth_view(c)
+    >>> jobj2 = shortcuts.access_auth_view(c)
     >>> jobj2['status'] == 'OK'
     True
 
     # authして初めてlecture/getできます
-    >>> jobj3 = access_lecture_get_view(c)
+    >>> jobj3 = shortcuts.access_lecture_get_view(c)
     >>> jobj3['status'] == 'OK'
     True
 
     # authをして初めてlecture/addできます
-    >>> jobj4a = access_lecture_add_view(c, name=name, code=code)
+    >>> jobj4a = shortcuts.access_lecture_add_view(c, name=name, code=code)
     >>> jobj4a['status'] == 'OK'
     True
     """
@@ -338,14 +321,14 @@ def test_about_api_timeline_get():
     >>> code = 't001'
 
     # 下準備（授業の作成）
-    >>> c0 = make_client()
-    >>> jobj0a = access_auth_view(c0)
-    >>> jobj0b = access_lecture_add_view(c0, name=name, code=code)
+    >>> c0 = shortcuts.make_client()
+    >>> jobj0a = shortcuts.access_auth_view(c0)
+    >>> jobj0b = shortcuts.access_lecture_add_view(c0, name=name, code=code)
     >>> lecture_id = jobj0b['lecture']['id']
 
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
-    >>> jobj = access_timeline_get_view(c, id=lecture_id)
+    >>> c = shortcuts.make_client()
+    >>> jobj = shortcuts.access_auth_view(c)
+    >>> jobj = shortcuts.access_timeline_get_view(c, id=lecture_id)
     >>> jobj['status'] == 'OK'
     True
     >>> 'posts' in jobj
@@ -363,16 +346,16 @@ def test_about_api_timeline_post():
     >>> body = u'MIPSとは'
 
     # 下準備（授業の作成）
-    >>> c0 = make_client()
-    >>> jobj0a = access_auth_view(c0)
-    >>> jobj0b = access_lecture_add_view(c0, name=name, code=code)
+    >>> c0 = shortcuts.make_client()
+    >>> jobj0a = shortcuts.access_auth_view(c0)
+    >>> jobj0b = shortcuts.access_lecture_add_view(c0, name=name, code=code)
     >>> lecture_id = jobj0b['lecture']['id']
 
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
-    >>> jobj = access_timeline_post_view(c, id=lecture_id, body=body,
-    ...                                  before_virtual_ts=1000,
-    ...                                  after_virtual_ts=2000)
+    >>> c = shortcuts.make_client()
+    >>> jobj = shortcuts.access_auth_view(c)
+    >>> jobj = shortcuts.access_timeline_post_view(c, id=lecture_id, body=body,
+    ...                                            before_virtual_ts=1000,
+    ...                                            after_virtual_ts=2000)
     >>> jobj['status'] == 'OK'
     True
     >>> post = jobj['post']
@@ -416,27 +399,24 @@ def test_about_timeline():
     >>> name = 'Arch1'
     >>> code = 't001'
 
-    >>> clean_questions()
-    >>> clean_lectures()
-    >>> clean_users()
     >>> from time import sleep
 
 
     # 下準備（授業の作成）
-    >>> c0 = make_client()
-    >>> jobj0a = access_auth_view(c0)
-    >>> jobj0b = access_lecture_add_view(c0, name=name, code=code)
+    >>> c0 = shortcuts.make_client()
+    >>> jobj0a = shortcuts.access_auth_view(c0)
+    >>> jobj0b = shortcuts.access_lecture_add_view(c0, name=name, code=code)
     >>> lecture_id = jobj0b['lecture']['id']
 
-    >>> c = make_client()
+    >>> c = shortcuts.make_client()
 
     # authをします
-    >>> jobj1 = access_auth_view(c)
+    >>> jobj1 = shortcuts.access_auth_view(c)
     >>> jobj1['status'] == 'OK'
     True
 
     # 最初は何も投稿がありません
-    >>> jobj2 = access_timeline_get_view(c, id=lecture_id)
+    >>> jobj2 = shortcuts.access_timeline_get_view(c, id=lecture_id)
     >>> jobj2['status'] == 'OK'
     True
     >>> jobj2['posts'] == []
@@ -445,7 +425,8 @@ def test_about_timeline():
     # タイムラインに投稿します
     # before, afterをしていなければ最後尾に追加します
     # 今回はタイムラインが空なので指定してもしなくても一緒です
-    >>> jobj3 = access_timeline_post_view(c, id=lecture_id, body=u'しりとり')
+    >>> jobj3 = shortcuts.access_timeline_post_view(c, id=lecture_id,
+    ...                                             body=u'しりとり')
     >>> jobj3['status'] == 'OK'
     True
 
@@ -459,9 +440,10 @@ def test_about_timeline():
     ---------------------------------------------------------------------------
     # 先ほどの投稿の直前に投稿を挿入
     >>> sleep(1)
-    >>> jobj4 = access_timeline_post_view(c, id=lecture_id, body=u'おすし',
-    ...                                   before_virtual_ts=0,
-    ...                                   after_virtual_ts=post1_vts)
+    >>> jobj4 = shortcuts.access_timeline_post_view(c, id=lecture_id,
+    ...                                             body=u'おすし',
+    ...                                             before_virtual_ts=0,
+    ...                                             after_virtual_ts=post1_vts)
     >>> jobj4['status'] == 'OK'
     True
     >>> post = jobj4['post']
@@ -480,9 +462,9 @@ def test_about_timeline():
     ---------------------------------------------------------------------------
     # post1, post2の間に投稿を挿入
     >>> sleep(1)
-    >>> jobj5 = access_timeline_post_view(c, id=lecture_id, body=u'しかえし',
-    ...                                   before_virtual_ts=post2_vts,
-    ...                                   after_virtual_ts=post1_vts)
+    >>> jobj5 = shortcuts.access_timeline_post_view(
+    ...     c, id=lecture_id, body=u'しかえし', before_virtual_ts=post2_vts,
+    ...     after_virtual_ts=post1_vts)
     >>> jobj5['status'] == 'OK'
     True
     >>> post = jobj5['post']
@@ -501,7 +483,8 @@ def test_about_timeline():
     ---------------------------------------------------------------------------
     # before, afterをしていなければ最後尾に追加します
     >>> sleep(1)
-    >>> jobj6 = access_timeline_post_view(c, id=lecture_id, body=u'りんご')
+    >>> jobj6 = shortcuts.access_timeline_post_view(c, id=lecture_id,
+    ...                                             body=u'りんご')
     >>> jobj6['status'] == 'OK'
     True
     >>> post = jobj6['post']
@@ -519,7 +502,7 @@ def test_about_timeline():
 
     ---------------------------------------------------------------------------
     # タイムラインは仮想時間でソートされている
-    >>> jobj7 = access_timeline_get_view(c, id=lecture_id)
+    >>> jobj7 = shortcuts.access_timeline_get_view(c, id=lecture_id)
     >>> jobj7['status'] == 'OK'
     True
     >>> posts = jobj7['posts']
@@ -541,18 +524,17 @@ def test_about_timeline__badrequest():
     before_virtual_ts, after_virtual_tsの片方だけ
     指定した場合はBad Requestを返す
 
-    >>> clean_lectures()
-    >>> c = make_client()
+    >>> c = shortcuts.make_client()
 
     # before_virtual_tsだけ指定します
-    >>> jobj1 = access_timeline_post_view(c, id=1, body=u'beforeだけ',
-    ...                                   before_virtual_ts=1000)
+    >>> jobj1 = shortcuts.access_timeline_post_view(
+    ...     c, id=1, body=u'beforeだけ', before_virtual_ts=1000)
     >>> jobj1['status'] == 'Bad Request'
     True
 
     # after_virtual_tsだけ指定します
-    >>> jobj2 = access_timeline_post_view(c, id=1, body=u'afterだけ',
-    ...                                   after_virtual_ts=1000)
+    >>> jobj2 = shortcuts.access_timeline_post_view(
+    ...     c, id=1, body=u'afterだけ', after_virtual_ts=1000)
     >>> jobj2['status'] == 'Bad Request'
     True
     """
@@ -566,33 +548,36 @@ def test_about_timeline__forbidden():
     >>> code = 't001'
 
     # 下準備（授業の作成）
-    >>> c0 = make_client()
-    >>> jobj0a = access_auth_view(c0)
-    >>> jobj0b = access_lecture_add_view(c0, name=name, code=code)
+    >>> c0 = shortcuts.make_client()
+    >>> jobj0a = shortcuts.access_auth_view(c0)
+    >>> jobj0b = shortcuts.access_lecture_add_view(c0, name=name, code=code)
     >>> lecture_id = jobj0b['lecture']['id']
 
-    >>> c = make_client()
+    >>> c = shortcuts.make_client()
 
-    # lecture/timeline/(method [get|post])はauthしていないとできません（Forbidden）
-    >>> jobj1a = access_timeline_get_view(c, id=lecture_id)
+    # lecture/timeline/(method [get|post])はauthしていないとできません
+    # (Forbidden)
+    >>> jobj1a = shortcuts.access_timeline_get_view(c, id=lecture_id)
     >>> jobj1a['status'] == 'Forbidden'
     True
-    >>> jobj1b = access_timeline_post_view(c, id=lecture_id, body=u'難しいな')
+    >>> jobj1b = shortcuts.access_timeline_post_view(c, id=lecture_id,
+    ...                                              body=u'難しいな')
     >>> jobj1b['status'] == 'Forbidden'
     True
 
     # authをします
-    >>> jobj2 = access_auth_view(c)
+    >>> jobj2 = shortcuts.access_auth_view(c)
     >>> jobj2['status'] == 'OK'
     True
 
     # authして始めてgetできます
-    >>> jobj3 = access_timeline_get_view(c, id=lecture_id)
+    >>> jobj3 = shortcuts.access_timeline_get_view(c, id=lecture_id)
     >>> jobj3['status'] == 'OK'
     True
 
     # authして始めてpostできます
-    >>> jobj4 = access_timeline_post_view(c, id=lecture_id, body=u'なるほど')
+    >>> jobj4 = shortcuts.access_timeline_post_view(c, id=lecture_id,
+    ...                                             body=u'なるほど')
     >>> jobj4['status'] == 'OK'
     True
     """
@@ -602,22 +587,20 @@ def test_about_timeline__notfound():
     u"""
     存在しない授業IDでget/postした場合はNot Foundを返す
 
-    >>> clean_questions()
-    >>> clean_lectures()
-    >>> c = make_client()
+    >>> c = shortcuts.make_client()
 
     # authをします
-    >>> jobj1 = access_auth_view(c)
+    >>> jobj1 = shortcuts.access_auth_view(c)
     >>> jobj1['status'] == 'OK'
     True
 
     # 存在しないID(1)でgetします
-    >>> jobj2 = access_timeline_get_view(c, id=1)
+    >>> jobj2 = shortcuts.access_timeline_get_view(c, id=1)
     >>> jobj2['status'] == 'Not Found'
     True
 
     # 存在しないID(1)でpostします
-    >>> jobj3 = access_timeline_post_view(c, id=1, body=u'なるほど')
+    >>> jobj3 = shortcuts.access_timeline_post_view(c, id=1, body=u'なるほど')
     >>> jobj3['status'] == 'Not Found'
     True
     """
@@ -636,26 +619,29 @@ def test_about_csrf():
 
     # don't use csrf checking
     >>> c1 = Client()
-    >>> jobj1 = access_auth_view(c1)
+    >>> jobj1 = shortcuts.access_auth_view(c1)
 
-    >>> jobj2a = access_lecture_add_view(c1, name='hoge', code='foo')
+    >>> jobj2a = shortcuts.access_lecture_add_view(c1, name='hoge', code='foo')
     >>> jobj2a['status'] == 'OK'
     True
     >>> lecture_id1 = jobj2a['lecture']['id']
 
-    >>> jobj2b = access_timeline_post_view(c1, id=lecture_id1, body='bar')
+    >>> jobj2b = shortcuts.access_timeline_post_view(c1, id=lecture_id1,
+    ...                                              body='bar')
     >>> jobj2b['status'] == 'OK'
     True
 
     # use csrf checking
     >>> c2 = Client(enforce_csrf_checks=True)
-    >>> jobj3 = access_auth_view(c2)
-    >>> jobj4a = access_lecture_add_view(c2, name='hoge2', code='foo2')
+    >>> jobj3 = shortcuts.access_auth_view(c2)
+    >>> jobj4a = shortcuts.access_lecture_add_view(
+    ...     c2, name='hoge2', code='foo2')
     >>> jobj4a['status'] == 'OK'
     True
     >>> lecture_id2 = jobj4a['lecture']['id']
 
-    >>> jobj4b = access_timeline_post_view(c2, id=lecture_id2, body='bar2')
+    >>> jobj4b = shortcuts.access_timeline_post_view(
+    ...     c2, id=lecture_id2, body='bar2')
     >>> jobj4b['status'] == 'OK'
     True
     """
@@ -665,12 +651,11 @@ def test_about_user_profile():
     """
     UserProfileが正しく機能しているか確認
 
-    >>> clean_users()
     >>> from django.contrib.auth.models import User
 
 
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
+    >>> c = shortcuts.make_client()
+    >>> jobj = shortcuts.access_auth_view(c)
     >>> jobj['status'] == 'OK'
     True
     >>> jobj['created']
@@ -690,13 +675,16 @@ def test_about_user_profile():
 from mysite.question.models import Lecture, Post
 from django.contrib.auth.models import User
 import mysite.question.twutil.tw_util as tw_util
+import mysite.question.shortcuts as shortcuts
+
 
 def setup(test):
     Post.objects.all().delete()
     Lecture.objects.all().delete()
     User.objects.all().delete()
 
-    test.globs['c'] = Client(enforce_csrf_checks=True)
+    test.globs['shortcuts'] = shortcuts
+
     test.globs['real_get_vc'] = tw_util.get_vc
     tw_util.get_vc = get_vc_mock
 
@@ -709,4 +697,3 @@ def load_tests(loader, tests, ignore):
     import doctest
     tests.addTests(doctest.DocTestSuite(setUp=setup, tearDown=teardown))
     return tests
-
