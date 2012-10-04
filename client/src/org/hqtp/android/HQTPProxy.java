@@ -13,13 +13,6 @@ public interface HQTPProxy {
     public abstract User authenticate(String access_token_key, String access_token_secret) throws IOException,
             JSONException, HQTPAPIException;
 
-    // TODO: 質問投稿の成否は例外によって知られるべき。戻り値としてはおそらく投稿IDが妥当と考えられる。
-    @Deprecated
-    public abstract boolean postQuestion(String title, String body) throws JSONException, IOException, HQTPAPIException;
-
-    @Deprecated
-    public abstract List<Question> getQuestions() throws JSONException, IOException, HQTPAPIException;
-
     public abstract List<Post> getTimeline(int lectureId) throws IOException, HQTPAPIException, JSONException,
             ParseException;
 
