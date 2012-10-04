@@ -48,6 +48,6 @@ public class HQTPActivityTest {
         assertThat(shadowIntent.getComponent().getClassName(),
                 equalTo(TimelineActivity.class.getName()));
         assertThat(shadowIntent.getIntExtra(TimelineActivity.LECTURE_ID, -1),
-                equalTo(0));
+                equalTo(1));
     }
 }
