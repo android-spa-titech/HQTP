@@ -13,8 +13,75 @@ def clean_users():
     User.objects.all().delete()
 
 
-def test_about_auth_view():
+def clean_lectures():
+    """ before test, call this method for clear lectures """
+    from mysite.question.models import Lecture
+    Lecture.objects.all().delete()
+
+
+def get_vc_mock(user_key, user_secret):
     """
+    Tweepy mock-up
+
+    >>> from mysite.question.twutil.tw_util import get_vc
+
+    If you want to use more twitter users,
+    please add user into twitter_database.
+
+    this method has 3 type behaviors
+    1. If input key is in the database, and secret is correct
+       then return user information
+
+    >>> import mysite.question.twutil.consumer_info as ci
+    >>> vc = get_vc(ci.spa_key, ci.spa_secret)
+    >>> vc == dict(id=ci.spa_id, screen_name=ci.spa_screen_name,
+    ...            name=ci.spa_name)
+    True
+
+    2. If input key is in the database, but secret is wrong
+       then return empty dictionary (and server return not found)
+
+    >>> vc = get_vc(ci.spa_key, 'egg')
+    >>> vc == {}
+    True
+
+    3. If input key isn't in the database
+       then return TypeError (and server return server error)
+
+    >>> vc = get_vc('spam', 'egg')
+    Traceback (most recent call last):
+        ...
+    TypeError: character mapping must return integer, None or unicode
+
+    """
+    import mysite.question.twutil.consumer_info as ci
+    twitter_database = {
+        ci.spa_key: dict(secret=ci.spa_secret,
+                      vc=dict(id=ci.spa_id,
+                              screen_name=ci.spa_screen_name,
+                              name=ci.spa_name)
+                      )
+        }
+    not_found_keys = set(['dummy key'])
+
+    if user_key in twitter_database:
+        user_info = twitter_database[user_key]
+        if user_secret == user_info['secret']:
+            return user_info['vc']
+        else:
+            return {}
+    elif user_key in not_found_keys:
+        return {}
+    else:
+        raise TypeError(('character mapping must return integer, '
+                         'None or unicode'))
+
+
+###############################################################################
+# /api/auth/に関するテスト
+###############################################################################
+def test_about_auth():
+    u"""
     >>> clean_users()
     >>> from mysite.question.shortcuts import (make_client,
     ...                                        access_auth_view)
@@ -23,215 +90,34 @@ def test_about_auth_view():
     >>> c = make_client()
 
     # create user first time
-    >>> jobj = access_auth_view(c)
-    >>> jobj['status'] == 'OK'
+    >>> jobj1 = access_auth_view(c)
+    >>> jobj1['status'] == 'OK'
     True
-    >>> jobj['created']
+    >>> jobj1['created']
     True
+    >>> user = jobj1['user']
+    >>> 'id' in user
+    True
+    >>> 'name' in user
+    True
+    >>> 'icon_url' in user
+    True
+
 
     # user is crated only first time
-    >>> jobj = access_auth_view(c)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> jobj['created']
-    False
-
-    # test about user identifier (ID)
-    >>> 'user' in jobj
-    True
-    >>> 'name' in jobj['user']
-    True
-    >>> 'id' in jobj['user']
-    True
-
-    # if send dummy access token, return Not Found
-    >>> jobj = access_auth_view(c, key='dummy key', secret='dummy secret')
-    >>> jobj['status'] == 'Not Found'
-    True
-
-    # some dummy access token, cause server error
-    # catch exception and return server error
-    >>> jobj = access_auth_view(c, key='spam', secret='egg')
-    >>> jobj['status'] == 'Server Error'
-    True
-    """
-
-    pass
-
-
-def test_about_get_view():
-    """
-    # getが認証しないとできないことを確かめるテスト
-    # authする前にgetをするとForbiddenが返る
-    # authした後にgetをするとOKが返る
-
-    >>> clean_questions()
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view,
-    ...                                        access_get_view)
-
-
-    >>> c = make_client()
-
-    # getはauthしていないとできません（Forbidden）
-    >>> jobj1 = access_get_view(c)
-    >>> jobj1['status'] == 'Forbidden'
-    True
-
-    # authをします
-    >>> jobj2 = access_auth_view(c)
+    >>> c2 = make_client()
+    >>> jobj2 = access_auth_view(c2)
     >>> jobj2['status'] == 'OK'
     True
-
-    # authして始めてgetできます
-    >>> jobj3 = access_get_view(c)
-    >>> jobj3['status'] == 'OK'
-    True
-    >>> 'posts' in jobj3
-    True
+    >>> jobj2['created']
+    False
     """
 
 
-def test_about_post():
-    """
-    # postが認証しないとできないことを確かめるテスト
-    # authする前にpostをするとForbiddenが返る
-    # authした後にpostをするとOKが返る
+def test_about_auth__badrequest():
+    u"""
+    access_token_key, access_token_secretが両方渡されないとBad Requestを返す
 
-    >>> clean_questions()
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view,
-    ...                                        access_get_view,
-    ...                                        access_post_view)
-
-
-    >>> c = make_client()
-
-    # postはauthしていないとできません（Forbidden）
-    >>> jobj = access_post_view(c, title='before login', body='cannot post')
-    >>> jobj['status'] == 'Forbidden'
-    True
-
-    # authをします
-    >>> jobj = access_auth_view(c)
-    >>> jobj['status'] == 'OK'
-    True
-
-    # authして始めてpostできます
-    >>> jobj = access_post_view(c, title='after auth', body='can post')
-    >>> jobj['status'] == 'OK'
-    True
-
-    # 戻り値の検証
-    >>> post = jobj['post']
-    >>> post['title'] == 'after auth'
-    True
-    >>> post['body'] == 'can post'
-    True
-    >>> 'user' in post
-    True
-    >>> 'id' in post['user']
-    True
-    >>> 'name' in post['user']
-    True
-    >>> 'time' in post
-    True
-
-    # getで確かめてみると、確かに投稿が反映されています。
-    >>> jobj = access_get_view(c)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> post = jobj['posts'][0]
-    >>> 'id' in post
-    True
-    >>> post['title'] == 'after auth'
-    True
-    >>> post['body'] == 'can post'
-    True
-    >>> 'user' in post
-    True
-    >>> 'id' in post['user']
-    True
-    >>> 'name' in post['user']
-    True
-    >>> 'time' in post
-    True
-    """
-    pass
-
-
-def test_about_csrf():
-    """
-    >>> clean_questions()
-
-    >>> from django.test.client import Client
-    >>> from mysite.question.twutil.consumer_info import spa_key, spa_secret
-    >>> import json
-
-    >>> url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
-    >>> url = url_template % (spa_key, spa_secret)
-
-    # don't use csrf checking
-    >>> c1 = Client()
-    >>> response = c1.get(url)
-    >>> response = c1.post('/api/post/',
-    ...                    dict(title='csrf test2',body='this pass'))
-    >>> jobj = json.loads(response.content)
-    >>> jobj['status'] == 'OK'
-    True
-
-    # use csrf checking
-    >>> c2 = Client(enforce_csrf_checks=True)
-    >>> response = c2.get(url)
-    >>> response = c2.post('/api/post/',
-    ...                    dict(title='csrf test2',body='this pass'))
-    >>> jobj = json.loads(response.content)
-    >>> jobj['status'] == 'OK'
-    True
-    """
-
-    # もしviews.pyのpost_viewに@csrf_exemptデコレーターをつけないと、
-    # c2を使う2つ目のテストは失敗する（response.status_codeが200ではなく403となるので）
-    # 一方c1を使う1つ目のテストは成功する。
-    #なので、テストクライアントを作るときはenforce_csrf_checks=Trueを指定する
-
-    pass
-
-
-def test_about_login():
-    """
-    >>> clean_questions()
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view,
-    ...                                        access_get_view,
-    ...                                        access_post_view)
-
-
-    # 認証をします
-    >>> c = make_client()
-    >>> j = access_auth_view(c)
-    >>> j['status'] == 'OK'
-    True
-
-    # すると同時にログインも出来ているので、postも可能です
-    >>> j = access_post_view(c, title='test', body='hello world')
-    >>> j['status'] == 'OK'
-    True
-
-    # getで確かめてみると、確かに投稿が反映されています。
-    >>> j = access_get_view(c)
-    >>> j['status'] == 'OK'
-    True
-    >>> post = j['posts'][0]
-    >>> post['title'] == 'test'
-    True
-    >>> post['body'] == 'hello world'
-    True
-    """
-
-
-def test_about_bad_request():
-    """
     >>> from mysite.question.shortcuts import (make_client,
     ...                                        access_auth_view)
 
@@ -241,39 +127,444 @@ def test_about_bad_request():
 
     >>> c = make_client()
 
-    # this is bad request.
-    # because does not send access_token_key,access_token_secret
-    # so server return Bad Request
-    >>> url_template = '/api/auth/?access_token=%s'
-    >>> url = url_template % 'ACC'
-    >>> response = c.get(url)
+    >>> url1 = '/api/auth/?access_token_key=KEY'
+    >>> response = c.get(url1)
     >>> jobj = json.loads(response.content)
     >>> jobj['status'] == 'Bad Request'
     True
 
-    # to test bad request of post, login
-    >>> jobj = access_auth_view(c)
-
-    # this is bad request.
-    # because does not send body
-    # so server return Bad Request
-    >>> response = c.post('/api/post/',
-    ...                   dict(title='test none boddy'))
-    >>> jobj = json.loads(response.content)
-    >>> jobj['status'] == 'Bad Request'
-    True
-
-    # this is bad request.
-    # because does not send title
-    # so server return Bad Request
-    >>> response = c.post('/api/post/',
-    ...                   dict(body='test none title'))
+    >>> url2 = '/api/auth/?access_token_secret=SECRET'
+    >>> response = c.get(url2)
     >>> jobj = json.loads(response.content)
     >>> jobj['status'] == 'Bad Request'
     True
     """
-    # Must send essential parameter
-    # if does't send, server return Bad Request
+
+
+def test_about_auth__notfound():
+    u"""
+    TwitterのOAuthの正しくないkey, secretの場合Not Foundを返す
+
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_auth_view)
+
+    >>> c = make_client()
+    >>> jobj = access_auth_view(c, key='dummy key', secret='dummy secret')
+    >>> jobj['status'] == 'Not Found'
+    True
+    """
+
+
+def test_about_auth__servererror():
+    u"""
+    key, sercretによってはServer Errorを返す
+
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_auth_view)
+
+    >>> c = make_client()
+    >>> jobj = access_auth_view(c, key='spam', secret='egg')
+    >>> jobj['status'] == 'Server Error'
+    True
+    """
+
+
+###############################################################################
+# /api/lecture/[get|add]に関するテスト
+###############################################################################
+def test_about_lecture():
+    u"""
+    >>> name1 = 'Programming 1'
+    >>> code1 = '0X123456789'
+    >>> name2 = u'並行システム論'
+    >>> code2 = '0X123456790'
+
+    >>> clean_lectures()
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_auth_view,
+    ...                                        access_lecture_get_view,
+    ...                                        access_lecture_add_view)
+
+    >>> c = make_client()
+
+    # authします
+    >>> jobj1 = access_auth_view(c)
+    >>> jobj1['status'] == 'OK'
+    True
+
+    # 最初は何も授業がありません
+    >>> jobj2 = access_lecture_get_view(c)
+    >>> jobj2['status'] == 'OK'
+    True
+    >>> jobj2['lectures'] == []
+    True
+
+    # 授業を追加します
+    >>> jobj3a = access_lecture_add_view(c, name=name1, code=code1)
+    >>> jobj3a['status'] == 'OK'
+    True
+    >>> jobj3a['created']
+    True
+
+    # あとで使うのでIDを保存
+    >>> lecture1 = jobj3a['lecture']
+    >>> id1 = lecture1['id']
+
+    # lecture/getで確認してみます
+    >>> jobj3b = access_lecture_get_view(c)
+    >>> jobj3b['status'] == 'OK'
+    True
+    >>> lectures = jobj3b['lectures']
+    >>> len(lectures) == 1
+    True
+    >>> lectures[0]['code'] == code1
+    True
+    >>> lectures[0]['name'] == name1
+    True
+    >>> lectures[0]['id'] == id1
+    True
+
+    # 二度目の追加は新規作成されません
+    >>> jobj4a = access_lecture_add_view(c, name=name1, code=code1)
+    >>> jobj4a['created']
+    False
+
+    # lecture/getで確認してみます
+    >>> jobj4b = access_lecture_get_view(c)
+    >>> lectures = jobj4b['lectures']
+    >>> len(lectures)
+    1
+
+    # 他の授業も追加してみる
+    >>> jobj5a = access_lecture_add_view(c, name=name2, code=code2)
+    >>> jobj5a['created']
+    True
+
+    # lecture/getで確認してみます
+    >>> jobj5b = access_lecture_get_view(c)
+    >>> lectures = jobj5b['lectures']
+    >>> len(lectures)
+    2
+    """
+
+
+def test_about_lecture__forbidden():
+    u"""
+    >>> name = 'Programming 1'
+    >>> code = '0X123456789'
+
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_auth_view,
+    ...                                        access_lecture_get_view,
+    ...                                        access_lecture_add_view)
+
+    >>> c = make_client()
+
+    # lecture/[get|add]はauthしていないとできません(Forbidden)
+    >>> jobj1a = access_lecture_get_view(c)
+    >>> jobj1a['status'] == 'Forbidden'
+    True
+    >>> jobj1b = access_lecture_add_view(c, name=name, code=code)
+    >>> jobj1b['status'] == 'Forbidden'
+    True
+
+    # authします
+    >>> jobj2 = access_auth_view(c)
+    >>> jobj2['status'] == 'OK'
+    True
+
+    # authして初めてlecture/getできます
+    >>> jobj3 = access_lecture_get_view(c)
+    >>> jobj3['status'] == 'OK'
+    True
+
+    # authをして初めてlecture/addできます
+    >>> jobj4a = access_lecture_add_view(c, name=name, code=code)
+    >>> jobj4a['status'] == 'OK'
+    True
+    """
+
+
+###############################################################################
+# /api/lecture/timeline/ [GET|POST]に関するテスト
+###############################################################################
+def test_about_timeline():
+    u"""
+    何も投稿されていない授業のタイムラインを取得
+    その授業のタイムラインに投稿
+    その授業のタイムラインを取得
+
+    >>> name = 'Arch1'
+    >>> code = 't001'
+
+    >>> clean_questions()
+    >>> clean_lectures()
+    >>> clean_users()
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_auth_view,
+    ...                                        access_timeline_get_view,
+    ...                                        access_timeline_post_view,
+    ...                                        access_lecture_add_view)
+    >>> from time import sleep
+
+
+    # 下準備（授業の作成）
+    >>> c0 = make_client()
+    >>> jobj0a = access_auth_view(c0)
+    >>> jobj0b = access_lecture_add_view(c0, name=name, code=code)
+    >>> lecture_id = jobj0b['lecture']['id']
+
+    >>> c = make_client()
+
+    # authをします
+    >>> jobj1 = access_auth_view(c)
+    >>> jobj1['status'] == 'OK'
+    True
+
+    # 最初は何も投稿がありません
+    >>> jobj2 = access_timeline_get_view(c, id=lecture_id)
+    >>> jobj2['status'] == 'OK'
+    True
+    >>> jobj2['posts'] == []
+    True
+
+    # タイムラインに投稿します
+    # before, afterをしていなければ最後尾に追加します
+    # 今回はタイムラインが空なので指定してもしなくても一緒です
+    >>> jobj3 = access_timeline_post_view(c, id=lecture_id, body=u'しりとり')
+    >>> jobj3['status'] == 'OK'
+    True
+
+    >>> post = jobj3['post']
+
+    # あとで使うのでID、実時間、仮想時間を保存
+    >>> post1_id = post['id']
+    >>> post1_time = post['time']
+    >>> post1_vts = post['virtual_ts']
+
+    ---------------------------------------------------------------------------
+    # 先ほどの投稿の直前に投稿を挿入
+    >>> sleep(1)
+    >>> jobj4 = access_timeline_post_view(c, id=lecture_id, body=u'おすし',
+    ...                                   before_virtual_ts=0,
+    ...                                   after_virtual_ts=post1_vts)
+    >>> jobj4['status'] == 'OK'
+    True
+    >>> post = jobj4['post']
+    >>> post2_id = post['id']
+    >>> post2_time = post['time']
+    >>> post2_vts = post['virtual_ts']
+
+    # 実時間が減少することはない
+    >>> post1_time < post2_time
+    True
+
+    # 仮想時間は小さくなってるはず
+    >>> post2_vts < post1_vts
+    True
+
+    ---------------------------------------------------------------------------
+    # post1, post2の間に投稿を挿入
+    >>> sleep(1)
+    >>> jobj5 = access_timeline_post_view(c, id=lecture_id, body=u'しかえし',
+    ...                                   before_virtual_ts=post2_vts,
+    ...                                   after_virtual_ts=post1_vts)
+    >>> jobj5['status'] == 'OK'
+    True
+    >>> post = jobj5['post']
+    >>> post3_id = post['id']
+    >>> post3_time = post['time']
+    >>> post3_vts = post['virtual_ts']
+
+    # 実時間が減少することはない
+    >>> post1_time < post2_time < post3_time
+    True
+
+    # 仮想時間は中間値になってるはず
+    >>> post2_vts < post3_vts < post1_vts
+    True
+
+    ---------------------------------------------------------------------------
+    # before, afterをしていなければ最後尾に追加します
+    >>> sleep(1)
+    >>> jobj6 = access_timeline_post_view(c, id=lecture_id, body=u'りんご')
+    >>> jobj6['status'] == 'OK'
+    True
+    >>> post = jobj6['post']
+    >>> post4_id = post['id']
+    >>> post4_time = post['time']
+    >>> post4_vts = post['virtual_ts']
+
+    # 実時間が減少することはない
+    >>> post1_time < post2_time < post3_time < post4_time
+    True
+
+    # 仮想時間は最大になってるはず
+    >>> post2_vts < post3_vts < post1_vts < post4_vts
+    True
+
+    ---------------------------------------------------------------------------
+    # タイムラインは仮想時間でソートされている
+    >>> jobj7 = access_timeline_get_view(c, id=lecture_id)
+    >>> jobj7['status'] == 'OK'
+    True
+    >>> posts = jobj7['posts']
+    >>> len(posts) == 4
+    True
+    >>> (posts[0]['id'] == post2_id and
+    ...  posts[1]['id'] == post3_id and
+    ...  posts[2]['id'] == post1_id and
+    ...  posts[3]['id'] == post4_id)
+    True
+    """
+
+
+def test_about_timeline__badrequest():
+    u"""
+    (注)Bad Request判定はForbidden, Not Found判定より先に行われるので
+    認証や授業の作成は要らない
+
+    before_virtual_ts, after_virtual_tsの片方だけ
+    指定した場合はBad Requestを返す
+
+    >>> clean_lectures()
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_timeline_post_view)
+
+    >>> c = make_client()
+
+    # before_virtual_tsだけ指定します
+    >>> jobj1 = access_timeline_post_view(c, id=1, body=u'beforeだけ',
+    ...                                   before_virtual_ts=1000)
+    >>> jobj1['status'] == 'Bad Request'
+    True
+
+    # after_virtual_tsだけ指定します
+    >>> jobj2 = access_timeline_post_view(c, id=1, body=u'afterだけ',
+    ...                                   after_virtual_ts=1000)
+    >>> jobj2['status'] == 'Bad Request'
+    True
+    """
+
+
+def test_about_timeline__forbidden():
+    u"""
+    authしないでget/postした場合Forbiddenを返す
+
+    >>> name = 'Arch1'
+    >>> code = 't001'
+
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_auth_view,
+    ...                                        access_timeline_get_view,
+    ...                                        access_timeline_post_view,
+    ...                                        access_lecture_add_view)
+
+
+    # 下準備（授業の作成）
+    >>> c0 = make_client()
+    >>> jobj0a = access_auth_view(c0)
+    >>> jobj0b = access_lecture_add_view(c0, name=name, code=code)
+    >>> lecture_id = jobj0b['lecture']['id']
+
+    >>> c = make_client()
+
+    # lecture/timeline/(method [get|post])はauthしていないとできません（Forbidden）
+    >>> jobj1a = access_timeline_get_view(c, id=lecture_id)
+    >>> jobj1a['status'] == 'Forbidden'
+    True
+    >>> jobj1b = access_timeline_post_view(c, id=lecture_id, body=u'難しいな')
+    >>> jobj1b['status'] == 'Forbidden'
+    True
+
+    # authをします
+    >>> jobj2 = access_auth_view(c)
+    >>> jobj2['status'] == 'OK'
+    True
+
+    # authして始めてgetできます
+    >>> jobj3 = access_timeline_get_view(c, id=lecture_id)
+    >>> jobj3['status'] == 'OK'
+    True
+
+    # authして始めてpostできます
+    >>> jobj4 = access_timeline_post_view(c, id=lecture_id, body=u'なるほど')
+    >>> jobj4['status'] == 'OK'
+    True
+    """
+
+
+def test_about_timeline__notfound():
+    u"""
+    存在しない授業IDでget/postした場合はNot Foundを返す
+
+    >>> clean_questions()
+    >>> clean_lectures()
+    >>> from mysite.question.shortcuts import (make_client,
+    ...                                        access_auth_view,
+    ...                                        access_timeline_get_view,
+    ...                                        access_timeline_post_view)
+
+
+    >>> c = make_client()
+
+    # authをします
+    >>> jobj1 = access_auth_view(c)
+    >>> jobj1['status'] == 'OK'
+    True
+
+    # 存在しないID(1)でgetします
+    >>> jobj2 = access_timeline_get_view(c, id=1)
+    >>> jobj2['status'] == 'Not Found'
+    True
+
+    # 存在しないID(1)でpostします
+    >>> jobj3 = access_timeline_post_view(c, id=1, body=u'なるほど')
+    >>> jobj3['status'] == 'Not Found'
+    True
+    """
+
+
+def test_about_csrf():
+    """
+    >>> from django.test.client import Client
+    >>> from mysite.question.shortcuts import (access_auth_view,
+    ...                                        access_lecture_add_view,
+    ...                                        access_timeline_post_view)
+
+
+    # don't use csrf checking
+    >>> c1 = Client()
+    >>> jobj1 = access_auth_view(c1)
+
+    >>> jobj2a = access_lecture_add_view(c1, name='hoge', code='foo')
+    >>> jobj2a['status'] == 'OK'
+    True
+    >>> lecture_id1 = jobj2a['lecture']['id']
+
+    >>> jobj2b = access_timeline_post_view(c1, id=lecture_id1, body='bar')
+    >>> jobj2b['status'] == 'OK'
+    True
+
+    # use csrf checking
+    >>> c2 = Client(enforce_csrf_checks=True)
+    >>> jobj3 = access_auth_view(c2)
+    >>> jobj4a = access_lecture_add_view(c2, name='hoge2', code='foo2')
+    >>> jobj4a['status'] == 'OK'
+    True
+    >>> lecture_id2 = jobj4a['lecture']['id']
+
+    >>> jobj4b = access_timeline_post_view(c2, id=lecture_id2, body='bar2')
+    >>> jobj4b['status'] == 'OK'
+    True
+    """
+
+    # もしviews.pyのlecture_add_view, lecture_timeline_viewに
+    # @csrf_exemptデコレーターをつけないと、
+    # c2を使う2つ目のテストは失敗する
+    # （response.status_codeが200ではなく403となるので）
+    # 一方c1を使う1つ目のテストは成功する。
+    # なので、テストクライアントを作るときはenforce_csrf_checks=Trueを指定する
 
 
 def test_about_user_profile():
@@ -314,6 +605,7 @@ import mysite.question.shortcuts as shortcuts
 
 
 def load_tests(loader, tests, ignore):
+    tw_util.get_vc = get_vc_mock  # switch mock
     tests.addTests(doctest.DocTestSuite(tw_util))
     tests.addTests(doctest.DocTestSuite(views))
     tests.addTests(doctest.DocTestSuite(admin))

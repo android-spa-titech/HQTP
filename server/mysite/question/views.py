@@ -10,7 +10,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.utils.datastructures import MultiValueDictKeyError
 import json
-from mysite.question.models import Question, user_to_dict
+from mysite.question.models import (Question,
+                                    user_to_dict,
+                                    Lecture)
+from time import time
 
 
 def convert_context_to_json(context):
@@ -115,6 +118,7 @@ def auth_view(request):
 
 
 def get_view(request):
+    # this method is no longer used
     if not request.user.is_authenticated():
         # get need auth
         return json_response_forbidden()
@@ -128,6 +132,7 @@ def get_view(request):
 
 @csrf_exempt
 def post_view(request):
+    # this method is no longer used
     try:
         title = request.POST['title']
         body = request.POST['body']
@@ -141,6 +146,103 @@ def post_view(request):
         return json_response(context=dict(post=q.to_dict()))
     else:
         return json_response_forbidden()
+
+
+def lecture_get_view(request):
+    if not request.user.is_authenticated():
+        # get need auth
+        return json_response_forbidden()
+
+    lecs = [lec.to_dict() for lec in Lecture.objects.all()]
+    context = dict(
+       lectures=lecs
+    )
+    return json_response(context)
+
+
+@csrf_exempt
+def lecture_add_view(request):
+    try:
+        code = request.POST['code']
+        name = request.POST['name']
+    except MultiValueDictKeyError:
+        return json_response_bad_request()
+
+    if not request.user.is_authenticated():
+        # add need auth
+        return json_response_forbidden()
+
+    # get_or_create(): 新規作成したらcreated = True
+    lec, created = Lecture.objects.get_or_create(
+        code=code, defaults=dict(name=name))
+    return json_response(context=dict(created=created,
+                                      lecture=lec.to_dict()))
+
+
+@csrf_exempt
+def lecture_timeline_view(request):
+    if request.method == 'GET':
+        try:
+            # get timeline
+            id = request.GET['id']
+        except MultiValueDictKeyError:
+            # key 'id' is not requested
+            return json_response_bad_request()
+
+        if not request.user.is_authenticated():
+            # get need auth
+            return json_response_forbidden()
+
+        try:
+            lec = Lecture.objects.get(pk=id)
+        except Lecture.DoesNotExist:
+            # invalid lecture ID
+            return json_response_not_found()
+        else:
+            # successfully get timeline
+            posts = [q.to_dict()
+                     for q in lec.question_set.order_by('virtual_ts')]
+            return json_response(dict(posts=posts))
+
+    elif request.method == 'POST':
+        try:
+            id = request.POST['id']
+            body = request.POST['body']
+        except MultiValueDictKeyError:
+            return json_response_bad_request()
+
+        if (('before_virtual_ts' in request.POST)
+            ^ ('after_virtual_ts' in request.POST)):
+            # only one is requested and the other one is not
+            # NOTE: ^ is logical exclusive-or
+            return json_response_bad_request()
+
+        if not request.user.is_authenticated():
+            # get need auth
+            return json_response_forbidden()
+
+        try:
+            lec = Lecture.objects.get(pk=id)
+        except Lecture.DoesNotExist:
+            # invalid lecture ID
+            return json_response_not_found()
+
+        if 'before_virtual_ts' not in request.POST:
+            # 'after_virtual_ts' is not in request.POST, too.
+            # post to latest
+            vts = Question.time_to_vts(time())
+            post = lec.question_set.create(body=body,
+                                           added_by=request.user,
+                                           virtual_ts=vts)
+        else:
+            # both 'before_virtual_ts' and 'after_virtual_ts' in request.POST
+            # post to between 2 lectures
+            vts = Question.calc_mid(int(request.POST['before_virtual_ts']),
+                                    int(request.POST['after_virtual_ts']))
+            post = lec.question_set.create(body=body,
+                                           added_by=request.user,
+                                           virtual_ts=vts)
+        return json_response(dict(post=post.to_dict()))
 
 
 def _test():
