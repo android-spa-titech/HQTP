@@ -8,9 +8,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import roboguice.inject.ContextSingleton;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+@ContextSingleton
 public class TimelineRecurringUpdaterImpl implements TimelineRecurringUpdater {
     @Inject
     HQTPProxy proxy;

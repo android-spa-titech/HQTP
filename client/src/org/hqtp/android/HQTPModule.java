@@ -1,12 +1,12 @@
 package org.hqtp.android;
 
-import roboguice.config.AbstractAndroidModule;
 import twitter4j.auth.OAuthAuthorization;
 import twitter4j.conf.ConfigurationContext;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
-public class HQTPModule extends AbstractAndroidModule {
+public class HQTPModule extends AbstractModule {
 
     @Override
     public void configure() {

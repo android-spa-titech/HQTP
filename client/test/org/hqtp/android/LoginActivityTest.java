@@ -1,14 +1,8 @@
 package org.hqtp.android;
 
-import static com.xtremelabs.robolectric.Robolectric.shadowOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import org.hqtp.android.util.HQTPTestRunner;
+import org.hqtp.android.util.RoboGuiceTest;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,36 +12,42 @@ import twitter4j.TwitterException;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.OAuthAuthorization;
 import twitter4j.auth.RequestToken;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.widget.Button;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.xtremelabs.robolectric.shadows.ShadowActivity;
 import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
 import com.xtremelabs.robolectric.shadows.ShadowIntent;
 
-@RunWith(LoginActivityTestRunner.class)
-public class LoginActivityTest {
+import static com.xtremelabs.robolectric.Robolectric.shadowOf;
+import static org.hamcrest.CoreMatchers.equalTo;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@RunWith(HQTPTestRunner.class)
+public class LoginActivityTest extends RoboGuiceTest {
     @Inject
-    Injector injector;
+    LoginActivity activity;
     @Inject
     OAuthAuthorization oauth;
     @Inject
     HQTPProxy proxy;
-    @Inject
-    LoginActivity activity;
     @InjectView(R.id.twitter_login)
     Button loginButton;
 
     private ShadowActivity shadowActivity;
-
-    @Before
-    public void setUp() throws Exception {
-        shadowActivity = shadowOf(activity);
-    }
 
     @Test
     public void activityShouldFinishWhenBackButtonPressed() throws Exception {
@@ -120,5 +120,27 @@ public class LoginActivityTest {
         assertNull(shadowActivity.getNextStartedActivity());
         AlertDialog alert = ShadowAlertDialog.getLatestAlertDialog();
         assertNotNull(alert);
+    }
+
+    private class TestModule extends AbstractModule {
+        @Override
+        protected void configure() {
+            bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
+            bind(OAuthAuthorization.class).toInstance(mock(OAuthAuthorization.class));
+            bind(LoginActivity.class).toInstance(activity);
+            bind(Activity.class).toInstance(activity);
+        }
+    }
+
+    @Before
+    public void setUp() {
+        activity = new LoginActivity();
+        shadowActivity = shadowOf(activity);
+        setUpRoboGuice(new TestModule(), activity);
+    }
+
+    @After
+    public void tearDown() {
+        tearDownRoboGuice();
     }
 }
