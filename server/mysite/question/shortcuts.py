@@ -17,7 +17,7 @@ def make_client():
 def access_auth_view(client, key=None, secret=None):
     # どちらもNoneかどちらもnot Noneでなければいけない
     error_msg = 'Usage: access_auth_view({KEY}, {SECRET})'
-    assert not((key is None) ^ (secret is None)), error_msg
+    assert not((key is None) != (secret is None)), error_msg
 
     # for convinient, key and secret are allowed blank
     # if blank then use android_spa's key and secret
