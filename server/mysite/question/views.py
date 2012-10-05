@@ -124,40 +124,6 @@ def auth_view(request):
     return json_response(context)
 
 
-"""
-# these methods are no longer used
-def get_view(request):
-    # this method is no longer used
-    if not request.user.is_authenticated():
-        # get need auth
-        return json_response_forbidden()
-
-    posts = [q.to_dict() for q in Post.objects.all()]
-    context = dict(
-       posts=posts
-    )
-    return json_response(context)
-
-
-@csrf_exempt
-def post_view(request):
-    # this method is no longer used
-    try:
-        title = request.POST['title']
-        body = request.POST['body']
-    except MultiValueDictKeyError:
-        # bad request
-        return json_response_bad_request()
-
-    added_by = request.user
-    if added_by.is_authenticated():
-        q = Post.objects.create(title=title, body=body, added_by=added_by)
-        return json_response(context=dict(post=q.to_dict()))
-    else:
-        return json_response_forbidden()
-"""
-
-
 def lecture_get_view(request):
     if not request.user.is_authenticated():
         # get need auth
