@@ -57,15 +57,15 @@ def save_img(screen_name, size='bigger'):
     # calc save directory (dirname == "HQTP/server/media/twicon")
     import os
     dirname = os.path.join(os.path.dirname(os.getcwdu()), 'media', 'twicon')
-    # memo
     # os.getcwdu(): returns current directory in unicode
     # os.path.join(path1[, path2[, ...]]): joins path in natural form
 
     import urllib
     f = urllib.urlopen(url)
+    file_type = f.info().gettype()
     src = f.read()  # source string
     f.close()
-    if src.find('<!DOCTYPE html>') != 0:  # expected -1
+    if file_type.find('image') != -1:
         # image file (not error page)
         out = open(os.path.join(dirname, screen_name), 'wb')
         # 'out' is local directory
