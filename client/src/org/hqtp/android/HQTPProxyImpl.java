@@ -26,7 +26,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.net.Uri;
-import android.util.Log;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -46,7 +45,7 @@ public class HQTPProxyImpl implements HQTPProxy {
         this.api_gateway = api_gateway;
     }
 
-    //DEBUG: デバッグ用のエンドポイント切り替え
+    // DEBUG: デバッグ用のエンドポイント切り替え
     public void setEndpoint(String endpoint)
     {
         this.api_gateway = endpoint;
@@ -66,44 +65,6 @@ public class HQTPProxyImpl implements HQTPProxy {
         }
 
         return User.fromJSON(json.getJSONObject("user"));
-    }
-
-    @Override
-    public boolean postQuestion(String title, String body) throws JSONException, IOException, HQTPAPIException {
-        HttpResponse response;
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("title", title);
-        params.put("body", body);
-        response = sendByPost("post/", params);
-        JSONObject json = toJSON(response.getEntity());
-        Log.d("info", json.toString());
-        if (!isStatusOK(json)) {
-            throw new HQTPAPIException("Post question failed. : /api/post returned status='"
-                    + json.getString("status") + "'");
-        }
-
-        return true;
-    }
-
-    @Override
-    public List<Question> getQuestions() throws JSONException, IOException, HQTPAPIException {
-        // ネットワークからの読込テスト
-        JSONObject json;
-        HttpResponse response = sendByGet("get/", null);
-        json = toJSON(response.getEntity());
-        Log.d("info", json.toString());
-
-        if (!isStatusOK(json)) {
-            throw new HQTPAPIException("Getting questions failed. : /api/get returned status='"
-                    + json.getString("status") + "'");
-        }
-        JSONArray array = json.getJSONArray("posts");
-        ArrayList<Question> res = new ArrayList<Question>();
-        for (int i = 0; i < array.length(); i++) {
-            JSONObject post = array.getJSONObject(i);
-            res.add(new Question(post.getString("title"), post.getString("body"), null));
-        }
-        return res;
     }
 
     @Override
