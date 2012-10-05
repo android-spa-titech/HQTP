@@ -19,15 +19,6 @@ def make_api(user_key, user_secret):
     return api
 
 
-def place_holder_func():
-    """
-    この関数はget_vcが置き換えられることに伴い、
-    このファイルのdocstringが0個になるのを防ぐために必要
-    """
-
-    pass
-
-
 def get_vc(user_key, user_secret):
     """
     this docstring can't call in test
