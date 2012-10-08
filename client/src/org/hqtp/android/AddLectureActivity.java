@@ -64,6 +64,9 @@ public class AddLectureActivity extends RoboActivity implements
     }
 
     private class PostAddLecture extends RoboAsyncTask<Lecture> {
+        public PostAddLecture() {
+            super(AddLectureActivity.this);
+        }
 
         @Override
         public Lecture call() throws Exception {

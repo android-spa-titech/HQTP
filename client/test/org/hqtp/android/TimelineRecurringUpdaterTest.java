@@ -4,21 +4,28 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.hqtp.android.util.HQTPTestRunner;
+import org.hqtp.android.util.RoboGuiceTest;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.name.Names;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 
 import static org.junit.Assert.assertThat;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(TimelineRecurringUpdaterTestRunner.class)
-public class TimelineRecurringUpdaterTest {
+@RunWith(HQTPTestRunner.class)
+public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
     @Inject
     TimelineRecurringUpdater updater;
     @Inject
@@ -131,6 +138,25 @@ public class TimelineRecurringUpdaterTest {
             this.posts = posts;
             times++;
         }
+    }
 
+    private class TestModule extends AbstractModule {
+        @Override
+        protected void configure() {
+            bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
+            bind(TimelineRecurringUpdater.class).to(TimelineRecurringUpdaterImpl.class);
+            bind(Long.class).annotatedWith(Names.named("TimelineUpdatePeriod")).toInstance(
+                    Long.valueOf(500));
+        }
+    }
+
+    @Before
+    public void setUp() {
+        setUpRoboGuice(new TestModule());
+    }
+
+    @After
+    public void tearDown() {
+        tearDownRoboGuice();
     }
 }
