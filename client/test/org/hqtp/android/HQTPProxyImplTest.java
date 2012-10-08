@@ -4,27 +4,27 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.client.methods.HttpUriRequest;
+import org.hqtp.android.util.HQTPTestRunner;
+import org.hqtp.android.util.RoboGuiceTest;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.name.Names;
 import com.xtremelabs.robolectric.Robolectric;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 
 import static org.junit.Assert.assertThat;
 
-@RunWith(HQTPProxyImplTestRunner.class)
-public class HQTPProxyImplTest {
-
+@RunWith(HQTPTestRunner.class)
+public class HQTPProxyImplTest extends RoboGuiceTest {
     @Inject
     HQTPProxy proxy;
-
-    @Before
-    public void setUp() throws Exception {
-    }
 
     @Test
     public void authenticateShouldCallAPI() throws Exception {
@@ -105,5 +105,25 @@ public class HQTPProxyImplTest {
         assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/lecture/timeline/"));
         // TODO: クエリパラメータの検査もしたい
         Assert.assertNotNull(res);
+    }
+
+    private class TestModule extends AbstractModule {
+        @Override
+        protected void configure() {
+            bind(HQTPProxy.class).to(HQTPProxyImpl.class);
+            bind(String.class).annotatedWith(
+                    Names.named("HQTP API Endpoint URL")).toInstance(
+                    "http://www.hqtp.org/api/");
+        }
+    }
+
+    @Before
+    public void setUp() {
+        setUpRoboGuice(new TestModule());
+    }
+
+    @After
+    public void tearDown() {
+        tearDownRoboGuice();
     }
 }

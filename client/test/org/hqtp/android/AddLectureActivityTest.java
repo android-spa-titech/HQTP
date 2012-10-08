@@ -1,33 +1,41 @@
 package org.hqtp.android;
 
-import static com.xtremelabs.robolectric.Robolectric.shadowOf;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import org.hqtp.android.util.HQTPTestRunner;
+import org.hqtp.android.util.RoboGuiceTest;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import roboguice.inject.InjectView;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.shadows.ShadowActivity;
 import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
 
-@RunWith(AddLectureActivityTestRunner.class)
-public class AddLectureActivityTest {
+import static com.xtremelabs.robolectric.Robolectric.shadowOf;
 
-    @Inject
-    HQTPProxy proxy;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@RunWith(HQTPTestRunner.class)
+public class AddLectureActivityTest extends RoboGuiceTest {
     @Inject
     AddLectureActivity activity;
+    @Inject
+    HQTPProxy proxy;
     @InjectView(R.id.lecture_code_text)
     TextView lectureCodeText;
     @InjectView(R.id.lecture_name_text)
@@ -107,4 +115,23 @@ public class AddLectureActivityTest {
         // assertNotNull(alert);
     }
 
+    private class TestModule extends AbstractModule {
+        @Override
+        protected void configure() {
+            bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
+            bind(AddLectureActivity.class).toInstance(activity);
+            bind(Activity.class).toInstance(activity);
+        }
+    }
+
+    @Before
+    public void setUp() {
+        activity = new AddLectureActivity();
+        setUpRoboGuice(new TestModule(), activity);
+    }
+
+    @After
+    public void tearDown() {
+        tearDownRoboGuice();
+    }
 }
