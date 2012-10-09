@@ -4,10 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,12 +24,12 @@ public class HQTPProxyImpl implements HQTPProxy {
     @Override
     public User authenticate(String access_token_key, String access_token_secret) throws HQTPAPIException, IOException,
             JSONException {
-        HttpResponse response = builder.get("auth/")
+        String response = builder.get("auth/")
             .param("access_token_key", access_token_key)
             .param("access_token_secret", access_token_secret)
             .send();
 
-        JSONObject json = toJSON(response.getEntity());
+        JSONObject json = new JSONObject(response);
         if (!isStatusOK(json)) {
             throw new HQTPAPIException("Authentication failed. : /api/auth returned status='"
                     + json.getString("status") + "'");
@@ -45,10 +41,10 @@ public class HQTPProxyImpl implements HQTPProxy {
     @Override
     public List<Post> getTimeline(int lectureId) throws IOException, HQTPAPIException, JSONException,
             java.text.ParseException {
-        HttpResponse response = builder.get("lecture/timeline/")
+        String response = builder.get("lecture/timeline/")
             .param("id", lectureId)
             .send();
-        JSONObject json = toJSON(response.getEntity());
+        JSONObject json = new JSONObject(response);
         ArrayList<Post> posts = new ArrayList<Post>();
         if (!isStatusOK(json)) {
             throw new HQTPAPIException("Getting timeline failed. : GET /api/lecture/timeline/?id=" + lectureId
@@ -73,21 +69,13 @@ public class HQTPProxyImpl implements HQTPProxy {
         if (nextVirtualTimestamp >= 0) {
             request.param("after_virtual_ts", nextVirtualTimestamp);
         }
-        HttpResponse response = request.send();
 
-        JSONObject json = toJSON(response.getEntity());
+        JSONObject json = new JSONObject(request.send());
         if (!isStatusOK(json)) {
             throw new HQTPAPIException("Posting to timeline failed. : POST /api/lecture/timeline/ returned status="
                     + json.getString("status"));
         }
         return Post.fromJSON(json.getJSONObject("post"));
-    }
-
-    private static JSONObject toJSON(HttpEntity entity) throws ParseException, IOException, JSONException
-    {
-        String response = EntityUtils.toString(entity);
-        entity.consumeContent(); // ここでconsumeするのはキモいのだろうか・・・
-        return new JSONObject(response);
     }
 
     private static boolean isStatusOK(JSONObject json) throws JSONException

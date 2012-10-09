@@ -5,17 +5,20 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 import android.net.Uri;
 
@@ -68,7 +71,7 @@ public final class APIRequestBuilder {
 
         public abstract APIRequest param(String key, String value);
 
-        public abstract HttpResponse send() throws ClientProtocolException, IOException, HQTPAPIException;
+        public abstract String send() throws ClientProtocolException, IOException, HQTPAPIException;
 
         /**
          * Issue a request and return the result.
@@ -82,25 +85,42 @@ public final class APIRequestBuilder {
          * @throws IOException
          * @throws HQTPAPIException
          */
-        protected HttpResponse send(HttpUriRequest request) throws ClientProtocolException, IOException,
+        protected String send(HttpUriRequest request) throws ClientProtocolException, IOException,
                 HQTPAPIException {
             DefaultHttpClient client = new DefaultHttpClient();
             client.setCookieStore(cookie_store);
-            HttpResponse response;
+            String response_str;
             try {
-                response = client.execute(request);
+                response_str = client.execute(request, new StringResponseHandler());
+            } catch (ClientProtocolException e) {
+                throw new HQTPAPIException(e.getMessage());
             } finally {
                 client.getConnectionManager().shutdown();
             }
 
-            final int status_code = response.getStatusLine().getStatusCode();
-            if (status_code != HttpStatus.SC_OK && status_code != HttpStatus.SC_CREATED) {
-                throw new HQTPAPIException("HTTP response returned failure. : return Http status code="
-                        + Integer.toString(status_code));
-            }
             cookie_store = client.getCookieStore();
+            return response_str;
+        }
 
-            return response;
+        /**
+         * A class that converts HttpResponse to String with some checks.
+         * It is strange but this way is safer than the way to treat HttpResponse returned by
+         * DefaultHttpClient.execute(HttpUriRequest).
+         */
+        private class StringResponseHandler implements ResponseHandler<String> {
+            @Override
+            public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+                final int status_code = response.getStatusLine().getStatusCode();
+                if (status_code != HttpStatus.SC_OK && status_code != HttpStatus.SC_CREATED) {
+                    throw new ClientProtocolException("HTTP response returned failure. : return Http status code="
+                            + Integer.toString(status_code));
+                }
+
+                HttpEntity entity = response.getEntity();
+                String response_str = EntityUtils.toString(entity);
+                entity.consumeContent();
+                return response_str;
+            }
         }
     }
 
@@ -122,7 +142,7 @@ public final class APIRequestBuilder {
         }
 
         @Override
-        public HttpResponse send() throws ClientProtocolException, IOException, HQTPAPIException {
+        public String send() throws ClientProtocolException, IOException, HQTPAPIException {
             return send(new HttpGet(builder.build().toString()));
         }
     }
@@ -147,7 +167,7 @@ public final class APIRequestBuilder {
         }
 
         @Override
-        public HttpResponse send() throws ClientProtocolException, IOException, HQTPAPIException {
+        public String send() throws ClientProtocolException, IOException, HQTPAPIException {
             HttpPost request = new HttpPost(uri);
             if (params.size() != 0) {
                 try {
