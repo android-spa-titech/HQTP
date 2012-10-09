@@ -22,7 +22,7 @@ class Post(models.Model):
     body = models.TextField()
     added_by = models.ForeignKey(User, null=True, blank=True)
     posted_at = models.DateTimeField(auto_now_add=True)
-    lecture = models.ForeignKey(Lecture, null=True, blank=True)
+    lecture = models.ForeignKey(Lecture)
 
     # 64bit(from -9223372036854775808 to 9223372036854775807)
     virtual_ts = models.BigIntegerField()
