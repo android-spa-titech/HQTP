@@ -52,10 +52,8 @@ def save_img(screen_name, size='bigger'):
     url = PROFILE_IMAGE % (screen_name, size)
 
     # calc save directory (dirname == "HQTP/server/media/twicon")
-    import os
-    dirname = os.path.join(os.path.dirname(os.getcwdu()), 'media', 'twicon')
-    # os.getcwdu(): returns current directory in unicode
-    # os.path.join(path1[, path2[, ...]]): joins path in natural form
+    from django.conf import settings
+    dirname = settings.MEDIA_ROOT
 
     import urllib
     f = urllib.urlopen(url)
