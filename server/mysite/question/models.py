@@ -20,7 +20,7 @@ class Lecture(models.Model):
 
 class Post(models.Model):
     body = models.TextField()
-    added_by = models.ForeignKey(User, null=True, blank=True)
+    added_by = models.ForeignKey(User)
     posted_at = models.DateTimeField(auto_now_add=True)
     lecture = models.ForeignKey(Lecture)
 

@@ -53,6 +53,7 @@ def save_img(screen_name, size='bigger'):
 
     # calc save directory (dirname == "HQTP/server/media/twicon")
     from django.conf import settings
+    import os
     dirname = settings.MEDIA_ROOT
 
     import urllib
