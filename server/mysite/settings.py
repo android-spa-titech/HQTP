@@ -58,7 +58,10 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                          'media',
+                          'twicon')
+# os.path.join(path1[, path2[, ...]]): joins path in natural form
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -162,3 +165,15 @@ LOGGING = {
 
 
 AUTH_PROFILE_MODULE = 'question.UserProfile'
+
+
+# Test coverage settings
+# add test target modules (contains executable statement)
+COVERAGE_ADDITIONAL_MODULES = [
+    'question.views',
+    'question.models',
+    'question.shortcuts',
+    'question.twutil.tw_util',
+    ]
+COVERAGE_REPORT_HTML_OUTPUT_DIR = '.cover'
+TEST_RUNNER = 'django_coverage.coverage_runner.CoverageRunner'

@@ -44,4 +44,7 @@ nosetests.xml
 .mr.developer.cfg
 
 
+media/twicon/*
 
+# test coverage output dir
+.cover

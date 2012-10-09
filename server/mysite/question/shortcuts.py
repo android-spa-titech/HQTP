@@ -1,12 +1,12 @@
+# -*- coding:utf-8 -*-
+
 from mysite.question.twutil.consumer_info import spa_key, spa_secret
 from django.test.client import Client
 import json
-import datetime
 
 
 def make_client():
     """
-    >>> from mysite.question.shortcuts import make_client
     >>> c = make_client()
     """
 
@@ -15,27 +15,15 @@ def make_client():
 
 
 def access_auth_view(client, key=None, secret=None):
-    """
-    >>> from mysite.question.tests import clean_users
-    >>> clean_users()
-
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view)
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> jobj['created']
-    True
-    """
+    # どちらもNoneかどちらもnot Noneでなければいけない
+    error_msg = 'Usage: access_auth_view({KEY}, {SECRET})'
+    assert not((key is None) != (secret is None)), error_msg
 
     # for convinient, key and secret are allowed blank
     # if blank then use android_spa's key and secret
-    if key is None and secret is None:
+    if key is None:  # secret is None, too.
         key = spa_key
         secret = spa_secret
-    elif key is None or secret is None:
-        raise Exception('Usage: access_auth_view({KEY}, {SECRET})')
 
     url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
     url = url_template % (key, secret)
@@ -44,60 +32,35 @@ def access_auth_view(client, key=None, secret=None):
     return jobj
 
 
-def access_get_view(client):
-    """
-    >>> from mysite.question.tests import clean_questions
-    >>> clean_questions()
-
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view,
-    ...                                        access_get_view)
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
-    >>> jobj = access_get_view(c)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> jobj['posts'] == []
-    True
-    """
-
-    url = '/api/get/'
+def access_lecture_get_view(client):
+    url = '/api/lecture/get/'
     response = client.get(url)
-    jojb = json.loads(response.content)
-    return jojb
+    jobj = json.loads(response.content)
+    return jobj
 
 
-def access_post_view(client, title=None, body=None):
-    """
-    >>> from mysite.question.tests import clean_questions
-    >>> clean_questions()
+def access_lecture_add_view(client, name, code):
+    url = '/api/lecture/add/'
+    response = client.post(url, dict(name=name, code=code))
+    jobj = json.loads(response.content)
+    return jobj
 
-    >>> from mysite.question.shortcuts import (make_client,
-    ...                                        access_auth_view,
-    ...                                        access_get_view,
-    ...                                        access_post_view)
-    >>> c = make_client()
-    >>> jobj = access_auth_view(c)
-    >>> jobj = access_post_view(c, 'Hello', 'World')
-    >>> jobj['status'] == 'OK'
-    True
-    >>> jobj = access_get_view(c)
-    >>> post = jobj['posts'][0]
-    >>> post['title'] == 'Hello'
-    True
-    >>> post['body'] == 'World'
-    True
-    """
 
-    # for convenient, title and body are allowed blank
-    # to make unique title and body, use now date and time
-    now = str(datetime.datetime.now())
-    if title is None:
-        title = 'TITLE:' + now
-    if body is None:
-        body = 'BODY:' + now
+def access_timeline_get_view(client, id):
+    url = '/api/lecture/timeline/?id=%s'
+    response = client.get(url % id)
+    jobj = json.loads(response.content)
+    return jobj
 
-    url = '/api/post/'
-    response = client.post(url, dict(title=title, body=body))
+
+def access_timeline_post_view(client, id, body,
+                              before_virtual_ts=None, after_virtual_ts=None):
+    url = '/api/lecture/timeline/'
+    dic = dict(id=id, body=body)
+    if before_virtual_ts is not None:
+        dic['before_virtual_ts'] = before_virtual_ts
+    if after_virtual_ts is not None:
+        dic['after_virtual_ts'] = after_virtual_ts
+    response = client.post(url, dic)
     jobj = json.loads(response.content)
     return jobj
