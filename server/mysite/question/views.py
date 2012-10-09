@@ -10,7 +10,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.utils.datastructures import MultiValueDictKeyError
 import json
-from mysite.question.models import Question, user_to_dict
+from mysite.question.models import (Post,
+                                    user_to_dict,
+                                    Lecture)
+from time import time
 
 
 def convert_context_to_json(context):
@@ -53,7 +56,7 @@ def json_response_server_error(context={}):
 
 
 def auth_view(request):
-    from twutil.tw_util import get_vc
+    from twutil.tw_util import get_vc, save_img
 
     try:
         key = request.GET['access_token_key']
@@ -75,6 +78,10 @@ def auth_view(request):
         return json_response_not_found()
     user_name = vc['id']
 
+    # get twitter icon URL and save icon image to local
+    # 暫定的に認証時に毎回アイコンを取得
+    icon_url = save_img(vc['screen_name'])
+
     # 新規に作成されたユーザーも、登録済みだったユーザーも
     # どちらもパスワードとしてtemp_passwordを設定する
     temp_password = User.objects.make_random_password()
@@ -91,6 +98,13 @@ def auth_view(request):
         profile = user.get_profile()
         profile.screen_name = vc['screen_name']
         profile.name = vc['name']
+        if icon_url is not None:
+            profile.icon_url = icon_url
+        else:
+            # set default icon
+            # 暫定的にandroid_spaのアイコンを使用
+            from mysite.question.twutil.tw_util import PROFILE_IMAGE
+            profile.icon_url = PROFILE_IMAGE % ('android_spa', 'bigger')
         profile.save()
         created = True
 
@@ -98,49 +112,113 @@ def auth_view(request):
     # セキュリティのために、パスワード認証ができないようにします
     # アクセストークンKEY、SECRETによる認証しか行いません
     auth_user.set_unusable_password()
-    if auth_user is not None:
-        if auth_user.is_active:
-            # Log in successful
-            login(request, auth_user)
-            user_info = user_to_dict(auth_user)
-        else:
-            # User is deleted
-            return json_response_not_found()
+    if auth_user.is_active:
+        # Log in successful
+        login(request, auth_user)
+        user_info = user_to_dict(auth_user)
     else:
-        # 新規作成・パスワードの設定を行っているのでここにはこないはず
-        return json_response_server_error()
+        # User is deleted
+        return json_response_not_found()
 
     context = dict(created=created, user=user_info)
     return json_response(context)
 
 
-def get_view(request):
+def lecture_get_view(request):
     if not request.user.is_authenticated():
         # get need auth
         return json_response_forbidden()
 
-    posts = [q.to_dict() for q in Question.objects.all()]
+    lecs = [lec.to_dict() for lec in Lecture.objects.all()]
     context = dict(
-       posts=posts
+       lectures=lecs
     )
     return json_response(context)
 
 
 @csrf_exempt
-def post_view(request):
+def lecture_add_view(request):
     try:
-        title = request.POST['title']
-        body = request.POST['body']
+        code = request.POST['code']
+        name = request.POST['name']
     except MultiValueDictKeyError:
-        # bad request
         return json_response_bad_request()
 
-    added_by = request.user
-    if added_by.is_authenticated():
-        q = Question.objects.create(title=title, body=body, added_by=added_by)
-        return json_response(context=dict(post=q.to_dict()))
-    else:
+    if not request.user.is_authenticated():
+        # add need auth
         return json_response_forbidden()
+
+    # get_or_create(): 新規作成したらcreated = True
+    lec, created = Lecture.objects.get_or_create(
+        code=code, defaults=dict(name=name))
+    return json_response(context=dict(created=created,
+                                      lecture=lec.to_dict()))
+
+
+@csrf_exempt
+def lecture_timeline_view(request):
+    if request.method == 'GET':
+        try:
+            # get timeline
+            id = request.GET['id']
+        except MultiValueDictKeyError:
+            # key 'id' is not requested
+            return json_response_bad_request()
+
+        if not request.user.is_authenticated():
+            # get need auth
+            return json_response_forbidden()
+
+        try:
+            lec = Lecture.objects.get(pk=id)
+        except Lecture.DoesNotExist:
+            # invalid lecture ID
+            return json_response_not_found()
+        else:
+            # successfully get timeline
+            posts = [q.to_dict()
+                     for q in lec.post_set.order_by('virtual_ts')]
+            return json_response(dict(posts=posts))
+
+    elif request.method == 'POST':
+        try:
+            id = request.POST['id']
+            body = request.POST['body']
+        except MultiValueDictKeyError:
+            return json_response_bad_request()
+
+        if (('before_virtual_ts' in request.POST)
+            != ('after_virtual_ts' in request.POST)):
+            # only one is requested and the other one is not
+            # NOTE: != is logical exclusive-or
+            return json_response_bad_request()
+
+        if not request.user.is_authenticated():
+            # get need auth
+            return json_response_forbidden()
+
+        try:
+            lec = Lecture.objects.get(pk=id)
+        except Lecture.DoesNotExist:
+            # invalid lecture ID
+            return json_response_not_found()
+
+        if 'before_virtual_ts' not in request.POST:
+            # 'after_virtual_ts' is not in request.POST, too.
+            # post to latest
+            vts = Post.time_to_vts(time())
+            post = lec.post_set.create(body=body,
+                                       added_by=request.user,
+                                       virtual_ts=vts)
+        else:
+            # both 'before_virtual_ts' and 'after_virtual_ts' in request.POST
+            # post to between 2 lectures
+            vts = Post.calc_mid(int(request.POST['before_virtual_ts']),
+                                    int(request.POST['after_virtual_ts']))
+            post = lec.post_set.create(body=body,
+                                       added_by=request.user,
+                                       virtual_ts=vts)
+        return json_response(dict(post=post.to_dict()))
 
 
 def _test():
