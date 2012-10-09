@@ -21,9 +21,6 @@ def make_api(user_key, user_secret):
 
 def get_vc(user_key, user_secret):
     """
-    this docstring can't call in test
-    because replace this with get_vc_mock
-
     >>> import consumer_info as ci
     >>> vc = get_vc(ci.spa_key,ci.spa_secret)
     >>> vc['id'] == ci.spa_id
