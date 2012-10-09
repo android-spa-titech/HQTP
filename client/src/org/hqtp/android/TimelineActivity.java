@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -29,6 +30,7 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
 
     private int lectureId;
     private TimelineAdapter adapter;
+    private ImageLoader image_loader;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +44,8 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
 
         adapter = new TimelineAdapter(this, R.layout.post_item);
         timelineListView.setAdapter(adapter);
+
+        image_loader = new ImageLoader();
 
         // リストの要素をクリックされたときの挙動
         timelineListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -111,6 +115,11 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
 
             Post post = (Post) getItem(position);
             TextView bodyView = (TextView) convertView.findViewById(R.id.postContent);
+
+            ImageView image_view = (ImageView) convertView.findViewById(R.id.icon);
+            // DEBUG(ide_an): Should show post.user.icon_url
+            image_loader.displayImage(image_view,
+                    "https://twimg0-a.akamaihd.net/profile_images/1323690764/player_normal.png");// ide_an's icon ;-P
 
             // 文字数が多いと全文をそのまま表示するとよくないかも
             bodyView.setText(post.getBody());
