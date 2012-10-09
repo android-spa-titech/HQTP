@@ -14,7 +14,7 @@ import roboguice.inject.InjectView;
 import twitter4j.auth.RequestToken;
 
 public class LectureListActivity extends RoboActivity {
-    
+
     @InjectView(R.id.listLecture)
     ListView lectureListView;
     private LectureListAdapter adapter;
@@ -24,12 +24,14 @@ public class LectureListActivity extends RoboActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.lecture_list);
         adapter = new LectureListAdapter(this, R.layout.lecture_item);
-     // リストの要素をクリックされたときの挙動
+        //TODO 講義リストを更新するためのタスク
+        // リストの要素をクリックされたときの挙動
         lectureListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ListView listView = (ListView) parent;
                 Lecture lecture = (Lecture) listView.getItemAtPosition(position);
+                //TODO 講義がクリックされた時の動作
             }
         });
     }
@@ -45,14 +47,14 @@ public class LectureListActivity extends RoboActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            // メモリを無駄に使わないように 
-//            if (convertView == null) {
-//                LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//                convertView = inflater.inflate(resourceId, null);
-//            }
-//
-//            TextView bodyView = (TextView) convertView.findViewById(R.id.postContent);
-
+            // メモリを無駄に使わないように
+            if (convertView == null) {
+                LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                convertView = inflater.inflate(resourceId, null);
+            }
+            Lecture lecture = getItem(position);
+            TextView textView = (TextView) convertView.findViewById(R.id.lectureName);
+            textView.setText(lecture.getName());
             return convertView;
         }
     }
