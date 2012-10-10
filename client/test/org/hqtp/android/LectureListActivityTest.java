@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 import roboguice.inject.InjectView;
 import android.app.Activity;
 import android.content.Intent;
-import android.widget.Button;
+import android.widget.ListView;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -25,18 +25,20 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 @RunWith(HQTPTestRunner.class)
-public class HQTPActivityTest extends RoboGuiceTest {
+public class LectureListActivityTest extends RoboGuiceTest {
     @Inject
-    HQTPActivity activity;
-    @InjectView(R.id.getallpost_button)
-    Button getAllPostButton;
+    LectureListActivity activity;
+    @InjectView(R.id.lecture_list)
+    ListView lectureList;
+
+    ShadowActivity shadowActivity;
 
     @Test
-    public void pressingTheAllPostButtonShouldCallActivity() throws Exception {
+    public void clickItemShouldStartActivity() throws Exception {
         activity.onCreate(null);
-        getAllPostButton.performClick();
+        lectureList.performItemClick(lectureList.getAdapter().getView(0, null, null),
+                0, 0);
 
-        ShadowActivity shadowActivity = shadowOf(activity);
         Intent startedIntent = shadowActivity.getNextStartedActivity();
         ShadowIntent shadowIntent = shadowOf(startedIntent);
         assertThat(shadowIntent.getComponent().getClassName(),
@@ -49,15 +51,17 @@ public class HQTPActivityTest extends RoboGuiceTest {
         @Override
         protected void configure() {
             bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
-            bind(HQTPActivity.class).toInstance(activity);
+            bind(LectureListActivity.class).toInstance(activity);
             bind(Activity.class).toInstance(activity);
         }
     }
 
     @Before
     public void setUp() {
-        activity = new HQTPActivity();
+        activity = new LectureListActivity();
         setUpRoboGuice(new TestModule(), activity);
+
+        shadowActivity = shadowOf(activity);
     }
 
     @After

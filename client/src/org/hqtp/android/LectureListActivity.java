@@ -1,6 +1,9 @@
 package org.hqtp.android;
 
+import roboguice.activity.RoboActivity;
+import roboguice.inject.InjectView;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,13 +12,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import roboguice.activity.RoboActivity;
-import roboguice.inject.InjectView;
-import twitter4j.auth.RequestToken;
 
 public class LectureListActivity extends RoboActivity {
 
-    @InjectView(R.id.listLecture)
+    @InjectView(R.id.lecture_list)
     ListView lectureListView;
     private LectureListAdapter adapter;
 
@@ -24,14 +24,20 @@ public class LectureListActivity extends RoboActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.lecture_list);
         adapter = new LectureListAdapter(this, R.layout.lecture_item);
-        //TODO 講義リストを更新するためのタスク
+        adapter.add(new Lecture(1, "テスト講義", "AAAAA"));
+
+        lectureListView.setAdapter(adapter);
+        // TODO 講義リストを更新するためのタスク
         // リストの要素をクリックされたときの挙動
         lectureListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ListView listView = (ListView) parent;
                 Lecture lecture = (Lecture) listView.getItemAtPosition(position);
-                //TODO 講義がクリックされた時の動作
+
+                Intent intent = new Intent(LectureListActivity.this, TimelineActivity.class);
+                intent.putExtra(TimelineActivity.LECTURE_ID, lecture.getId());
+                startActivity(intent);
             }
         });
     }

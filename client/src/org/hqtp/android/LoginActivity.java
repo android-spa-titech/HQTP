@@ -136,7 +136,7 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
                 e.putString("authentication", "succeeded");
                 e.commit();
             }
-            Intent intent = new Intent(LoginActivity.this, HQTPActivity.class);
+            Intent intent = new Intent(LoginActivity.this, LectureListActivity.class);
             startActivity(intent);
             // ログイン画面へのbackを無効にする(#93)ためにfinish()してアクティビティを無くしておく
             // 参考：
