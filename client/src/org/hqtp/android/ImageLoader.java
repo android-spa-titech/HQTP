@@ -14,6 +14,7 @@ import android.widget.ImageView;
 
 public class ImageLoader {
     private ImageCache image_cache;
+    private final int placeholder = android.R.drawable.ic_menu_close_clear_cancel;
     // ImageViewとURL文字列の対応を管理することでImageViewを使い回しているときの画像を一意に決める。
     // 参考： http://lablog.lanche.jp/archives/220
     private Map<ImageView, String> view2url;
@@ -22,7 +23,6 @@ public class ImageLoader {
     public ImageLoader() {
         image_cache = new ImageCache();
         view2url = new ConcurrentHashMap<ImageView, String>();
-        // TODO: どのExecutorを使うのが最適かよく分からないので調査
         loading_service = Executors.newSingleThreadExecutor();
     }
 
@@ -33,7 +33,7 @@ public class ImageLoader {
             image_view.setImageBitmap(bmp);
             return;
         } else {
-            // TODO: placeholderをimage_viewに指定したほうがいい？
+            image_view.setImageResource(placeholder);
             queueJob(image_view, image_url);
         }
     }
@@ -58,6 +58,7 @@ public class ImageLoader {
         @Override
         public void run() {
             Bitmap bmp = loadBitmap(image_url);
+            Log.d("LoadingHandler", (bmp!=null ? "succeed":"failed")+" to load url="+image_url);
             image_cache.put(image_url, bmp);
             if (isReused(image_view, image_url)) {
                 return;
@@ -103,7 +104,7 @@ public class ImageLoader {
                 image_view.setImageBitmap(bmp);
             } else {
                 Log.d("DisplayHandler", "fail to load : " + image_url);
-                // TODO: どうする?
+                image_view.setImageResource(placeholder);
             }
         }
     }
@@ -130,7 +131,6 @@ public class ImageLoader {
         }
 
         public void clear() {
-            // TODO: この辺でNullPointerExceptionが発生し得るといった記事を見かけた。要調査。
             cache.clear();
         }
     }

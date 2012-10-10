@@ -118,8 +118,7 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
 
             ImageView image_view = (ImageView) convertView.findViewById(R.id.icon);
             // DEBUG(ide_an): Should show post.user.icon_url
-            image_loader.displayImage(image_view,
-                    "https://twimg0-a.akamaihd.net/profile_images/1323690764/player_normal.png");// ide_an's icon ;-P
+            image_loader.displayImage(image_view, post.getUser().getIconURL());
 
             // 文字数が多いと全文をそのまま表示するとよくないかも
             bodyView.setText(post.getBody());

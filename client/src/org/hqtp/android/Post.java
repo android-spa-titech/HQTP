@@ -16,7 +16,7 @@ public class Post {
 
     // TODO: toggle comment
     // private Lecture lecture;
-    // private User user;
+    private User user;
 
     public int getId() {
         return id;
@@ -50,16 +50,16 @@ public class Post {
                 df.parse(json.getString("time")),
                 json.getLong("virtual_ts")
                 );
+        post.user = User.fromJSON(json.getJSONObject("user"));
         // TODO: toggle comment
-        // post.user = User.fromJSON(json.getString("user"));
         // post.lecture = Lecture.fromJSON(json.getString("lecture"));
         return post;
     }
+
+    public User getUser() {
+        return user;
+    }
     // TODO: toggle comment
-    // public User getUser() {
-    // //TODO: implement
-    // return null;
-    // }
     //
     // public Lecture getLecture() {
     // //TODO: implement
