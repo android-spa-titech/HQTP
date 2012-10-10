@@ -48,3 +48,5 @@ media/twicon/*
 
 # test coverage output dir
 .cover
+
+mysite/server_info.py
