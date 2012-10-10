@@ -94,7 +94,7 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
         String token;
         String tokenSecret;
         Uri uri;
-        
+
         AfterTwitterAuthorizationTask(Uri uri) {
             super();
             this.uri = uri;
@@ -111,13 +111,13 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
             if (uri != null) {
                 AccessToken accessToken;
                 accessToken = oauth.getOAuthAccessToken(requestToken,
-                    uri.getQueryParameter("oauth_verifier"));  
+                        uri.getQueryParameter("oauth_verifier"));
                 token = accessToken.getToken();
                 tokenSecret = accessToken.getTokenSecret();
                 Editor e = preferences.edit();
                 e.putString("token", token);
                 e.putString("tokenSecret", tokenSecret);
-                e.commit();        
+                e.commit();
             }
             proxy.authenticate(token, tokenSecret);
             return null;
