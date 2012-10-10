@@ -55,6 +55,19 @@ def json_response_server_error(context={}):
                                    mimetype='application/json')
 
 
+def current_site_url():
+    """Returns fully qualified URL (no trailing slash) for the current site."""
+    from django.contrib.sites.models import Site
+    from django.conf import settings
+    current_site = Site.objects.get_current()
+    protocol = getattr(settings, 'MY_SITE_PROTOCOL', 'http')
+    port = getattr(settings, 'MY_SITE_PORT', '')
+    url = '%s://%s' % (protocol, current_site.domain)
+    if port:
+        url += ':%s' % port
+    return url
+
+
 def auth_view(request):
     from twutil.tw_util import get_vc, save_img
 
@@ -81,8 +94,7 @@ def auth_view(request):
     # get twitter icon URL and save icon image to local
     # 暫定的に認証時に毎回アイコンを取得
     icon_url = save_img(vc['screen_name'])
-    from mysite.server_info import server_url
-    twicon_prefix = server_url + 'site_media/twicon/'
+    twicon_prefix = current_site_url() + '/site_media/twicon/'
     if icon_url is None:
         # set default icon
         # 暫定的にandroid_spaのアイコンを使用
