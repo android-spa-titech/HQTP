@@ -3,8 +3,6 @@ package org.hqtp.android;
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
 import roboguice.util.RoboAsyncTask;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -28,6 +26,8 @@ public class AddLectureActivity extends RoboActivity implements
 
     @Inject
     HQTPProxy proxy;
+    @Inject
+    Alerter alerter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,10 +46,10 @@ public class AddLectureActivity extends RoboActivity implements
             String lectureName = lectureNameText.getText().toString();
             String lectureCode = lectureCodeText.getText().toString();
             if (lectureName.isEmpty()) {
-                showAlert("AddLectureActivity", "授業名を入力してください。");
+                alerter.alert("AddLectureActivity", "授業名を入力してください。");
             }
             else if (lectureCode.isEmpty()) {
-                showAlert("AddLectureActivity", "授業コードを入力してください。");
+                alerter.alert("AddLectureActivity", "授業コードを入力してください。");
             } else {
                 PostAddLecture addlecture = new PostAddLecture();
                 addlecture.execute();
@@ -87,16 +87,5 @@ public class AddLectureActivity extends RoboActivity implements
             // TODO:すでに存在する講義を入力していたらアラートを提示
             // TODO:通信エラー処理
         }
-    }
-
-    private void showAlert(String title, String message) {
-        new AlertDialog.Builder(this)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                }
-            }).show();
     }
 }
