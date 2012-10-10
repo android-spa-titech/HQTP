@@ -95,9 +95,9 @@ public class LoginActivityTest extends RoboGuiceTest {
         Thread.sleep(100);
 
         verify(proxy).authenticate("123-accessToken", "accessTokenSecret");
-        assertThat(preferences.getString("token", ""), equalTo("123-accessToken"));
-        assertThat(preferences.getString("tokenSecret", ""), equalTo("accessTokenSecret"));
-        assertThat(preferences.getString("authentication", ""), equalTo("succeeded"));
+        assertThat(preferences.getString(LoginActivity.SAVED_AUTH_TOKEN, ""), equalTo("123-accessToken"));
+        assertThat(preferences.getString(LoginActivity.SAVED_AUTH_TOKEN_SECRET, ""), equalTo("accessTokenSecret"));
+        assertTrue(preferences.getBoolean(LoginActivity.SAVED_AUTH_TOKEN_STATE, false));
 
         Intent startedIntent = shadowActivity.getNextStartedActivity();
         assertNotNull(startedIntent);
@@ -131,9 +131,9 @@ public class LoginActivityTest extends RoboGuiceTest {
     @Test
     public void activityShouldUseSavedLoginInformation() throws Exception {
         Editor e = preferences.edit();
-        e.putString("token", "123-accessToken");
-        e.putString("tokenSecret", "accessTokenSecret");
-        e.putString("authentication", "succeeded");
+        e.putString(LoginActivity.SAVED_AUTH_TOKEN, "123-accessToken");
+        e.putString(LoginActivity.SAVED_AUTH_TOKEN_SECRET, "accessTokenSecret");
+        e.putBoolean(LoginActivity.SAVED_AUTH_TOKEN_STATE, true);
         e.commit();
 
         activity.onCreate(null);
@@ -152,8 +152,8 @@ public class LoginActivityTest extends RoboGuiceTest {
     @Test
     public void activityShouldUseValidLoginInformation() throws Exception {
         Editor e = preferences.edit();
-        e.putString("token", "123-accessToken");
-        e.putString("tokenSecret", "accessTokenSecret");
+        e.putString(LoginActivity.SAVED_AUTH_TOKEN, "123-accessToken");
+        e.putString(LoginActivity.SAVED_AUTH_TOKEN_SECRET, "accessTokenSecret");
         e.commit();
 
         activity.onCreate(null);

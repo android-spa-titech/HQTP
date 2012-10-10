@@ -21,6 +21,11 @@ import android.widget.TextView;
 import com.google.inject.Inject;
 
 public class LoginActivity extends RoboActivity implements OnClickListener {
+    public static final String SAVED_REQUEST_TOKEN = "SAVED_REQUEST_TOKEN";
+    public static final String SAVED_AUTH_TOKEN = "SAVED_AUTH_TOKEN";
+    public static final String SAVED_AUTH_TOKEN_SECRET = "SAVED_AUTH_TOKEN_SECRET";
+    public static final String SAVED_AUTH_TOKEN_STATE = "SAVED_AUTH_TOKEN_STATE";
+
     @InjectView(R.id.twitter_login)
     Button loginButton;
     @InjectView(R.id.changeEndpointButton)
@@ -49,17 +54,17 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
         oauth.setOAuthConsumer(getString(R.string.consumer_key), getString(R.string.consumer_secret));
 
-        if (savedInstanceState != null && savedInstanceState.containsKey("REQUEST_TOKEN")) {
-            requestToken = (RequestToken) savedInstanceState.getSerializable("REQUEST_TOKEN");
+        if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_REQUEST_TOKEN)) {
+            requestToken = (RequestToken) savedInstanceState.getSerializable(SAVED_REQUEST_TOKEN);
         }
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.twitter_login) {
-            if (preferences.getString("authentication", "").equals("succeeded")) {
+            if (preferences.getBoolean(SAVED_AUTH_TOKEN_STATE, false)) {
                 AfterTwitterAuthorizationTask task = new AfterTwitterAuthorizationTask(
-                        preferences.getString("token", ""), preferences.getString("tokenSecret", ""));
+                        preferences.getString(SAVED_AUTH_TOKEN, ""), preferences.getString(SAVED_AUTH_TOKEN_SECRET, ""));
                 task.execute();
             } else {
                 TwitterAuthorizationTask task = new TwitterAuthorizationTask();
@@ -86,7 +91,7 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable("REQUEST_TOKEN", requestToken);
+        outState.putSerializable(SAVED_REQUEST_TOKEN, requestToken);
     }
 
     private class AfterTwitterAuthorizationTask extends SafeAsyncTask<Void>
@@ -115,8 +120,8 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
                 token = accessToken.getToken();
                 tokenSecret = accessToken.getTokenSecret();
                 Editor e = preferences.edit();
-                e.putString("token", token);
-                e.putString("tokenSecret", tokenSecret);
+                e.putString(SAVED_AUTH_TOKEN, token);
+                e.putString(SAVED_AUTH_TOKEN_SECRET, tokenSecret);
                 e.commit();
             }
             proxy.authenticate(token, tokenSecret);
@@ -131,9 +136,9 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
         @Override
         protected void onSuccess(Void v) {
-            if (!preferences.getString("authentication", "").equals("succeeded")) {
+            if (!preferences.getBoolean(SAVED_AUTH_TOKEN_STATE, false)) {
                 Editor e = preferences.edit();
-                e.putString("authentication", "succeeded");
+                e.putBoolean(SAVED_AUTH_TOKEN_STATE, true);
                 e.commit();
             }
             Intent intent = new Intent(LoginActivity.this, HQTPActivity.class);
