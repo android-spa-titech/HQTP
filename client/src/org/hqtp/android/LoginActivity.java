@@ -9,6 +9,8 @@ import twitter4j.auth.RequestToken;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -34,12 +36,17 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
     @Inject
     private HQTPProxy proxy;
 
+    SharedPreferences preferences;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
         loginButton.setOnClickListener(this);
         changeEndpointButton.setOnClickListener(this);
+
+        preferences = getPreferences(MODE_PRIVATE);
+
         oauth.setOAuthConsumer(getString(R.string.consumer_key), getString(R.string.consumer_secret));
 
         if (savedInstanceState != null && savedInstanceState.containsKey("REQUEST_TOKEN")) {
@@ -50,8 +57,14 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.twitter_login) {
-            TwitterAuthorizationTask task = new TwitterAuthorizationTask();
-            task.execute();
+            if (preferences.getString("authentication", "").equals("succeeded")) {
+                AfterTwitterAuthorizationTask task = new AfterTwitterAuthorizationTask(
+                        preferences.getString("token", ""), preferences.getString("tokenSecret", ""));
+                task.execute();
+            } else {
+                TwitterAuthorizationTask task = new TwitterAuthorizationTask();
+                task.execute();
+            }
         } else if (v.getId() == R.id.changeEndpointButton) {// DEBUG: change endpoint(for local test)
             String new_endpoint = endpointText.getText().toString();
             if (!new_endpoint.isEmpty()) {
@@ -78,17 +91,35 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
     private class AfterTwitterAuthorizationTask extends SafeAsyncTask<Void>
     {
+        String token;
+        String tokenSecret;
         Uri uri;
-
+        
         AfterTwitterAuthorizationTask(Uri uri) {
             super();
             this.uri = uri;
         }
 
+        AfterTwitterAuthorizationTask(String token, String tokenSecret) {
+            super();
+            this.token = token;
+            this.tokenSecret = tokenSecret;
+        }
+
         @Override
         public Void call() throws Exception {
-            AccessToken accessToken = oauth.getOAuthAccessToken(requestToken, uri.getQueryParameter("oauth_verifier"));
-            proxy.authenticate(accessToken.getToken(), accessToken.getTokenSecret());
+            if (uri != null) {
+                AccessToken accessToken;
+                accessToken = oauth.getOAuthAccessToken(requestToken,
+                    uri.getQueryParameter("oauth_verifier"));  
+                token = accessToken.getToken();
+                tokenSecret = accessToken.getTokenSecret();
+                Editor e = preferences.edit();
+                e.putString("token", token);
+                e.putString("tokenSecret", tokenSecret);
+                e.commit();        
+            }
+            proxy.authenticate(token, tokenSecret);
             return null;
         }
 
@@ -100,6 +131,11 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
         @Override
         protected void onSuccess(Void v) {
+            if (!preferences.getString("authentication", "").equals("succeeded")) {
+                Editor e = preferences.edit();
+                e.putString("authentication", "succeeded");
+                e.commit();
+            }
             Intent intent = new Intent(LoginActivity.this, HQTPActivity.class);
             startActivity(intent);
             // ログイン画面へのbackを無効にする(#93)ためにfinish()してアクティビティを無くしておく
