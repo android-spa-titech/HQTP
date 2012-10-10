@@ -81,6 +81,14 @@ def auth_view(request):
     # get twitter icon URL and save icon image to local
     # 暫定的に認証時に毎回アイコンを取得
     icon_url = save_img(vc['screen_name'])
+    from mysite.server_info import server_url
+    twicon_prefix = server_url + 'site_media/twicon/'
+    if icon_url is None:
+        # set default icon
+        # 暫定的にandroid_spaのアイコンを使用
+        icon_url = twicon_prefix + 'android_spa'
+    else:
+        icon_url = twicon_prefix + vc['screen_name']
 
     # 新規に作成されたユーザーも、登録済みだったユーザーも
     # どちらもパスワードとしてtemp_passwordを設定する
@@ -98,13 +106,7 @@ def auth_view(request):
         profile = user.get_profile()
         profile.screen_name = vc['screen_name']
         profile.name = vc['name']
-        if icon_url is not None:
-            profile.icon_url = icon_url
-        else:
-            # set default icon
-            # 暫定的にandroid_spaのアイコンを使用
-            from mysite.question.twutil.tw_util import PROFILE_IMAGE
-            profile.icon_url = PROFILE_IMAGE % ('android_spa', 'bigger')
+        profile.icon_url = icon_url
         profile.save()
         created = True
 
