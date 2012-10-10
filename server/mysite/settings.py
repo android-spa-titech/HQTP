@@ -47,6 +47,9 @@ TIME_ZONE = 'Asia/Tokyo'
 LANGUAGE_CODE = 'ja'
 
 SITE_ID = 1
+SITE_PROTOCOL = 'http'
+from server_info import server_port
+SITE_PORT = server_port
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.

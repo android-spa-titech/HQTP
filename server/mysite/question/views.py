@@ -60,8 +60,8 @@ def current_site_url():
     from django.contrib.sites.models import Site
     from django.conf import settings
     current_site = Site.objects.get_current()
-    protocol = getattr(settings, 'MY_SITE_PROTOCOL', 'http')
-    port = getattr(settings, 'MY_SITE_PORT', '')
+    protocol = getattr(settings, 'SITE_PROTOCOL', 'http')
+    port = getattr(settings, 'SITE_PORT', '')
     url = '%s://%s' % (protocol, current_site.domain)
     if port:
         url += ':%s' % port
