@@ -10,10 +10,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import roboguice.inject.InjectView;
 import android.app.Activity;
 import android.content.Intent;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.google.inject.AbstractModule;
@@ -25,6 +25,8 @@ import static org.junit.Assert.assertThat;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.Matchers.any;
 
 @RunWith(HQTPTestRunner.class)
 public class TimelineActivityTest extends RoboGuiceTest {
@@ -36,6 +38,8 @@ public class TimelineActivityTest extends RoboGuiceTest {
     ListView listView;
     @Inject
     TimelineRecurringUpdater updater;
+    @Inject
+    ImageLoader image_loader;
 
     private User user;
 
@@ -47,10 +51,12 @@ public class TimelineActivityTest extends RoboGuiceTest {
         verify(updater).registerTimelineObserver(activity);
         verify(updater).startRecurringUpdateTimeline();
         assertThat(listView.getCount(), equalTo(0));
+        verify(image_loader, never()).displayImage(any(ImageView.class), any(Activity.class));
 
         activity.onStop();
         verify(updater).unregisterTimelineObserver(activity);
         verify(updater).stop();
+        verify(image_loader).shutdown();
     }
 
     @Test

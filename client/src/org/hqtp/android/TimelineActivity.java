@@ -48,8 +48,6 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
         adapter = new TimelineAdapter(this, R.layout.post_item);
         timelineListView.setAdapter(adapter);
 
-        image_loader = new ImageLoaderImpl();
-
         // リストの要素をクリックされたときの挙動
         timelineListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -68,6 +66,7 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
     protected void onStop() {
         updater.unregisterTimelineObserver(this);
         updater.stop();
+        image_loader.shutdown();
         super.onStop();
     }
 

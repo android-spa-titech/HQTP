@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -49,6 +50,15 @@ public class ImageLoaderImpl implements ImageLoader {
 
     public void clearCache() {
         image_cache.clear();
+    }
+
+    public void shutdown() {
+        try {
+            loading_service.awaitTermination(1000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        clearCache();
     }
 
     private void queueJob(ImageView image_view, String image_url, Activity activity) {

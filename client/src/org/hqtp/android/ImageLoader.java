@@ -8,5 +8,5 @@ public interface ImageLoader {
 
     public void clearCache();
 
-    // TODO: 現在積んでるタスクのキャンセルも用意すべき？
+    public void shutdown();
 }
