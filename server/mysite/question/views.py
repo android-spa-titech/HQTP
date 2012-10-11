@@ -56,7 +56,10 @@ def json_response_server_error(context={}):
 
 
 def auth_view(request):
-    from twutil.tw_util import get_vc, save_img
+    from twutil.tw_util import get_vc
+    from mysite.question.image_utils import (get_img, save_bindata,
+                                             build_media_absolute_pathname,
+                                             build_media_absolute_url)
 
     try:
         key = request.GET['access_token_key']
@@ -80,15 +83,15 @@ def auth_view(request):
 
     # get twitter icon URL and save icon image to local
     # 暫定的に認証時に毎回アイコンを取得
-    icon_url = save_img(vc['screen_name'])
-    # note: requestからprotocol,domain,portを考慮して完全URLを生成する
-    twicon_prefix = request.build_absolute_uri('/site_media/twicon/')
-    if icon_url is None:
-        # set default icon
-        # 暫定的にandroid_spaのアイコンを使用
-        icon_url = twicon_prefix + 'android_spa'
+    twicon = get_img(vc['icon_url'])
+    if twicon is None:
+        relative_pathname = 'default_twicon'
     else:
-        icon_url = twicon_prefix + vc['screen_name']
+        import os
+        relative_pathname = os.path.join('twicon', str(user_name))
+        absolute_pathname = build_media_absolute_pathname(relative_pathname)
+        save_bindata(absolute_pathname, twicon)
+    icon_url = build_media_absolute_url(request, relative_pathname)
 
     # 新規に作成されたユーザーも、登録済みだったユーザーも
     # どちらもパスワードとしてtemp_passwordを設定する

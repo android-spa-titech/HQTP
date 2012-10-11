@@ -17,7 +17,7 @@ def get_vc_mock(user_key, user_secret):
     >>> import mysite.question.twutil.consumer_info as ci
     >>> vc = get_vc(ci.spa_key, ci.spa_secret)
     >>> vc == dict(id=ci.spa_id, screen_name=ci.spa_screen_name,
-    ...            name=ci.spa_name)
+    ...            name=ci.spa_name, icon_url=ci.spa_icon_url)
     True
 
     2. If input key is in the database, but secret is wrong
@@ -41,7 +41,8 @@ def get_vc_mock(user_key, user_secret):
         ci.spa_key: dict(secret=ci.spa_secret,
                       vc=dict(id=ci.spa_id,
                               screen_name=ci.spa_screen_name,
-                              name=ci.spa_name)
+                              name=ci.spa_name,
+                              icon_url=ci.spa_icon_url)
                       )
         }
     not_found_keys = set(['dummy key'])
@@ -101,11 +102,14 @@ def test_about_auth():
     True
 
     # Test about icon
+    # icon_urlがちゃんとURL文字列になっているか検査
     >>> 'icon_url' in user
     True
-    >>> user['icon_url'].find(user['name']) != -1
+    >>> import re
+    >>> ptn = re.compile('http://.+/site_media/twicon/(\d+)')
+    >>> mo = ptn.match(user['icon_url'])
+    >>> mo is not None
     True
-
 
     # user is crated only first time
     >>> c2 = shortcuts.make_client()
