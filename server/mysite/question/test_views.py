@@ -85,6 +85,7 @@ def test_about_api_auth():
 
 
 def test_about_auth():
+    # test_about_api_authと統合できないか?
     u"""
     >>> c = shortcuts.make_client()
 
