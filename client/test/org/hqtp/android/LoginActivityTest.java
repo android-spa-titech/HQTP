@@ -97,7 +97,7 @@ public class LoginActivityTest extends RoboGuiceTest {
         assertNotNull(startedIntent);
         ShadowIntent shadowIntent = shadowOf(startedIntent);
         assertThat(shadowIntent.getComponent().getClassName(),
-                equalTo(HQTPActivity.class.getName()));
+                equalTo(LectureListActivity.class.getName()));
     }
 
     @Test
