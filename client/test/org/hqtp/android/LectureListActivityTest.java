@@ -1,5 +1,8 @@
 package org.hqtp.android;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hqtp.android.util.HQTPTestRunner;
 import org.hqtp.android.util.RoboGuiceTest;
 import org.junit.After;
@@ -10,6 +13,7 @@ import org.junit.runner.RunWith;
 import roboguice.inject.InjectView;
 import android.app.Activity;
 import android.content.Intent;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.google.inject.AbstractModule;
@@ -23,19 +27,32 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(HQTPTestRunner.class)
 public class LectureListActivityTest extends RoboGuiceTest {
     @Inject
+    HQTPProxy proxy;
+    @Inject
     LectureListActivity activity;
     @InjectView(R.id.lecture_list)
     ListView lectureList;
+    @InjectView(R.id.add_lecture)
+    Button addLectureButton;
+    @InjectView(R.id.refresh)
+    Button refreshButton;
 
-    ShadowActivity shadowActivity;
+    private ShadowActivity shadowActivity;
 
     @Test
     public void clickItemShouldStartActivity() throws Exception {
+        List<Lecture> lectures = new ArrayList<Lecture>();
+        lectures.add(new Lecture(1, "Test lecture", "Test lecture code"));
+        when(proxy.getLectures()).thenReturn(lectures);
+
         activity.onCreate(null);
+        Thread.sleep(100);
+        assertThat(lectureList.getAdapter().getCount(), equalTo(1));
         lectureList.performItemClick(lectureList.getAdapter().getView(0, null, null),
                 0, 0);
 
@@ -45,6 +62,34 @@ public class LectureListActivityTest extends RoboGuiceTest {
                 equalTo(TimelineActivity.class.getName()));
         assertThat(shadowIntent.getIntExtra(TimelineActivity.LECTURE_ID, -1),
                 equalTo(1));
+    }
+
+    @Test
+    public void clickAddLectureButtonShouldStartActivity() throws Exception {
+        activity.onCreate(null);
+        addLectureButton.performClick();
+
+        Intent startedIntent = shadowActivity.getNextStartedActivity();
+        ShadowIntent shadowIntent = shadowOf(startedIntent);
+        assertThat(shadowIntent.getComponent().getClassName(),
+                equalTo(AddLectureActivity.class.getName()));
+    }
+
+    @Test
+    public void clickRefreshButtonShouldRefreshList() throws Exception {
+        List<Lecture> lectures = new ArrayList<Lecture>();
+        when(proxy.getLectures()).thenReturn(lectures);
+        activity.onCreate(null);
+        Thread.sleep(100);
+
+        assertThat(lectureList.getAdapter().getCount(), equalTo(0));
+
+        lectures.add(new Lecture(1, "Test lecture", "Test lecture code"));
+        when(proxy.getLectures()).thenReturn(lectures);
+        refreshButton.performClick();
+        Thread.sleep(100);
+
+        assertThat(lectureList.getAdapter().getCount(), equalTo(1));
     }
 
     private class TestModule extends AbstractModule {
