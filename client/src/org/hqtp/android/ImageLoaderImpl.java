@@ -1,10 +1,17 @@
 package org.hqtp.android;
 
-import java.net.URL;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -73,9 +80,19 @@ public class ImageLoaderImpl implements ImageLoader {
     }
 
     private Bitmap loadBitmap(String image_url) {
+        // Usually we use java.net.URL to get Input Stream of response, but mockito cannot mock it.
+        // Instead, we use HttpClient to get InputStream of response...
+        DefaultHttpClient client = new DefaultHttpClient();
         try {
-            URL url = new URL(image_url);
-            return BitmapFactory.decodeStream(url.openStream());
+            return client.execute(new HttpGet(image_url), new ResponseHandler<Bitmap>() {
+                @Override
+                public Bitmap handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+                    HttpEntity entity = response.getEntity();
+                    Bitmap bmp = BitmapFactory.decodeStream(entity.getContent());
+                    entity.consumeContent();
+                    return bmp;
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
             return null;
