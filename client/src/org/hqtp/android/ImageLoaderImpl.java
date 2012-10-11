@@ -27,7 +27,8 @@ public class ImageLoaderImpl implements ImageLoader {
         loading_service = Executors.newSingleThreadExecutor();
     }
 
-    public void displayImage(ImageView image_view, String image_url) {
+    public void displayImage(ImageView image_view, Activity activity) {
+        String image_url = (String) image_view.getTag();
         view2url.put(image_view, image_url);
         Bitmap bmp = image_cache.get(image_url);
         if (bmp != null && !bmp.isRecycled()) {
@@ -35,7 +36,7 @@ public class ImageLoaderImpl implements ImageLoader {
             return;
         } else {
             image_view.setImageResource(placeholder);
-            queueJob(image_view, image_url);
+            queueJob(image_view, image_url, activity);
         }
     }
 
@@ -43,17 +44,19 @@ public class ImageLoaderImpl implements ImageLoader {
         image_cache.clear();
     }
 
-    private void queueJob(ImageView image_view, String image_url) {
-        loading_service.submit(new LodingHandler(image_view, image_url));
+    private void queueJob(ImageView image_view, String image_url, Activity activity) {
+        loading_service.submit(new LodingHandler(image_view, image_url, activity));
     }
 
     private class LodingHandler implements Runnable {
         private ImageView image_view;
         private String image_url;
+        private Activity activity;
 
-        public LodingHandler(ImageView image_view, String image_url) {
+        public LodingHandler(ImageView image_view, String image_url, Activity activity) {
             this.image_view = image_view;
             this.image_url = image_url;
+            this.activity = activity;
         }
 
         @Override
@@ -65,8 +68,7 @@ public class ImageLoaderImpl implements ImageLoader {
                 return;
             }
             // ロードした画像をUIに表示
-            Activity parent = (Activity) image_view.getContext();
-            parent.runOnUiThread(new DisplayHandler(image_view, image_url, bmp));
+            activity.runOnUiThread(new DisplayHandler(image_view, image_url, bmp));
         }
     }
 
