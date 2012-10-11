@@ -6,6 +6,7 @@ import consumer_info
 
 PROFILE_IMAGE = ('http://api.twitter.com/1/users/profile_image'
                  + '?screen_name=%s&size=%s')
+# なぜグローバル変数? save_img()以外でも使う予定があるのか?
 
 
 def make_auth():
@@ -59,10 +60,9 @@ def save_img(screen_name, size='bigger'):
     import urllib
     f = urllib.urlopen(url)
     file_type = f.info().gettype()
-    src = f.read()  # source string
+    src = f.read()  # source string (binary)
     f.close()
-    if file_type.find('image') != -1:
-        # image file (not error page)
+    if 'image' in file_type:  # not error page
         out = open(os.path.join(dirname, screen_name), 'wb')
         # 'out' is local directory
         out.write(src)  # save icon image file from twitter server to local

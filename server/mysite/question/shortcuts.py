@@ -21,7 +21,7 @@ def access_auth_view(client, key=None, secret=None):
 
     # for convinient, key and secret are allowed blank
     # if blank then use android_spa's key and secret
-    if key is None:  # secret is None, too.
+    if key is None and secret is None:
         key = spa_key
         secret = spa_secret
 
@@ -46,17 +46,17 @@ def access_lecture_add_view(client, name, code):
     return jobj
 
 
-def access_timeline_get_view(client, id):
+def access_timeline_get_view(client, lecture_id):
     url = '/api/lecture/timeline/?id=%s'
-    response = client.get(url % id)
+    response = client.get(url % lecture_id)
     jobj = json.loads(response.content)
     return jobj
 
 
-def access_timeline_post_view(client, id, body,
+def access_timeline_post_view(client, lecture_id, body,
                               before_virtual_ts=None, after_virtual_ts=None):
     url = '/api/lecture/timeline/'
-    dic = dict(id=id, body=body)
+    dic = dict(id=lecture_id, body=body)
     if before_virtual_ts is not None:
         dic['before_virtual_ts'] = before_virtual_ts
     if after_virtual_ts is not None:
