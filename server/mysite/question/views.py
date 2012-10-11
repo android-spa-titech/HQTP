@@ -81,8 +81,8 @@ def auth_view(request):
     # get twitter icon URL and save icon image to local
     # 暫定的に認証時に毎回アイコンを取得
     icon_url = save_img(vc['screen_name'])
-    from mysite.server_info import server_url
-    twicon_prefix = server_url + 'site_media/twicon/'
+    # note: requestからprotocol,domain,portを考慮して完全URLを生成する
+    twicon_prefix = request.build_absolute_uri('/site_media/twicon/')
     if icon_url is None:
         # set default icon
         # 暫定的にandroid_spaのアイコンを使用
