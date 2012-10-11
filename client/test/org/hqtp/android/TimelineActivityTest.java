@@ -37,6 +37,8 @@ public class TimelineActivityTest extends RoboGuiceTest {
     @Inject
     TimelineRecurringUpdater updater;
 
+    private User user;
+
     @Test
     public void loadingActivityShouldStartAndRegisterItself() throws Exception {
         activity.onCreate(null);
@@ -53,8 +55,7 @@ public class TimelineActivityTest extends RoboGuiceTest {
 
     @Test
     public void activityShouldUpdateTimelineRepeatedly() throws Exception {
-        Post post1 = new Post(31, "body", new Date(), 1234);
-        // TODO: ユーザー情報とひもづける
+        Post post1 = new Post(31, "body", new Date(), 1234, user);
         List<Post> posts = new ArrayList<Post>();
         posts.add(post1);
 
@@ -65,7 +66,7 @@ public class TimelineActivityTest extends RoboGuiceTest {
         activity.onUpdate(posts);
         assertThat(listView.getCount(), equalTo(1));
 
-        Post post2 = new Post(32, "body2", new Date(), 1233);
+        Post post2 = new Post(32, "body2", new Date(), 1233, user);
         posts.add(post2);
         activity.onUpdate(posts);
         assertThat(listView.getCount(), equalTo(2));
@@ -91,6 +92,11 @@ public class TimelineActivityTest extends RoboGuiceTest {
                 TimelineActivityTest.LECTURE_ID);
         activity.setIntent(intent);
         setUpRoboGuice(new TestModule(), activity);
+        this.user = new User(
+                1,
+                "test_user",
+                "https://twimg0-a.akamaihd.net/profile_images/2222585882/android_onsen_normal.png"
+                );
     }
 
     @After

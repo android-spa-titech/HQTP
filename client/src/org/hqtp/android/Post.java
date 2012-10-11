@@ -35,11 +35,12 @@ public class Post {
         return virtualTimestamp;
     }
 
-    public Post(int id, String body, Date time, long virtualTimestamp) {
+    public Post(int id, String body, Date time, long virtualTimestamp, User user) {
         this.id = id;
         this.body = body;
         this.time = time;
         this.virtualTimestamp = virtualTimestamp;
+        this.user = user;
     }
 
     public static Post fromJSON(JSONObject json) throws JSONException, ParseException {
@@ -48,9 +49,9 @@ public class Post {
                 json.getInt("id"),
                 json.getString("body"),
                 df.parse(json.getString("time")),
-                json.getLong("virtual_ts")
+                json.getLong("virtual_ts"),
+                User.fromJSON(json.getJSONObject("user"))
                 );
-        post.user = User.fromJSON(json.getJSONObject("user"));
         // TODO: toggle comment
         // post.lecture = Lecture.fromJSON(json.getString("lecture"));
         return post;
