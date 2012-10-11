@@ -54,6 +54,7 @@ public class TimelineActivityTest extends RoboGuiceTest {
     @Test
     public void activityShouldUpdateTimelineRepeatedly() throws Exception {
         Post post1 = new Post(31, "body", new Date(), 1234);
+        // TODO: ユーザー情報とひもづける
         List<Post> posts = new ArrayList<Post>();
         posts.add(post1);
 
@@ -76,6 +77,7 @@ public class TimelineActivityTest extends RoboGuiceTest {
             bind(TimelineRecurringUpdater.class).toInstance(
                     mock(TimelineRecurringUpdater.class));
             bind(TimelineActivity.class).toInstance(activity);
+            bind(ImageLoader.class).toInstance(mock(ImageLoader.class));
             bind(Activity.class).toInstance(activity);
         }
     }

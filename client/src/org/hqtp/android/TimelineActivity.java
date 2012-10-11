@@ -26,11 +26,13 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
     @Inject
     TimelineRecurringUpdater updater;
 
+    @Inject
+    ImageLoader image_loader;
+
     public static final String LECTURE_ID = "LECTURE_ID";
 
     private int lectureId;
     private TimelineAdapter adapter;
-    private ImageLoader image_loader;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +47,7 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
         adapter = new TimelineAdapter(this, R.layout.post_item);
         timelineListView.setAdapter(adapter);
 
-        image_loader = new ImageLoader();
+        image_loader = new ImageLoaderImpl();
 
         // リストの要素をクリックされたときの挙動
         timelineListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
