@@ -4,9 +4,10 @@ import mysite.question.shortcuts as sc
 import unittest
 
 
-class LectureTestHelper:
+class PostTestHelper:
     def __init__(self, jobj):
         """
+        post = jobj['post']
         post1_id = post['id']
         post1_time = post['time']
         post1_vts = post['virtual_ts']
@@ -112,7 +113,7 @@ class HQTPTestCase(unittest.TestCase):
         self.assertEqual(j_post_new['status'], 'OK')
 
         # あとで使うのでID, 実時間, 仮想時間を保存
-        post0 = LectureTestHelper(j_post_new)
+        post0 = PostTestHelper(j_post_new)
 
         # --------------------------------------------------------------------
         # 先ほどの投稿より前に投稿する
@@ -123,7 +124,7 @@ class HQTPTestCase(unittest.TestCase):
             before_virtual_ts=0, after_virtual_ts=post0.vts)
         self.assertEqual(j_post_vts1['status'], 'OK')
 
-        post1 = LectureTestHelper(j_post_vts1)
+        post1 = PostTestHelper(j_post_vts1)
 
         # 実時間が減少することはない post0_time < post1_time
         self.assertLess(post0.time, post1.time)
@@ -139,7 +140,7 @@ class HQTPTestCase(unittest.TestCase):
             before_virtual_ts=post0.vts, after_virtual_ts=post1.vts)
         self.assertEqual(j_post_vts2['status'], 'OK')
 
-        post2 = LectureTestHelper(j_post_vts2)
+        post2 = PostTestHelper(j_post_vts2)
 
         # 実時間が減少することはない
         self.assertListLess(post0.time, post1.time, post2.time)
@@ -154,7 +155,7 @@ class HQTPTestCase(unittest.TestCase):
             c1, res_lec_id, body=u'眠い')
         self.assertEqual(j_post_vts3['status'], 'OK')
 
-        post3 = LectureTestHelper(j_post_vts3)
+        post3 = PostTestHelper(j_post_vts3)
 
         # 実時間は減少しない
         self.assertListLess(post0.time, post1.time, post2.time, post3.time)
@@ -174,15 +175,10 @@ class HQTPTestCase(unittest.TestCase):
         self.assertEqual(posts[2]['id'], post0.pid)
         self.assertEqual(posts[3]['id'], post3.pid)
 
-    def test_fails(self):
-        # テストが落ちることを確認するためのケース suiteには入れないこと
-        self.assertEqual(1, 2)
-
 
 def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(HQTPTestCase('test_about_auth'))
     suite.addTest(HQTPTestCase('test_about_lecture'))
     suite.addTest(HQTPTestCase('test_about_timeline'))
-    # suite.addTest(HQTPTestCase('test_fails'))
     return suite
