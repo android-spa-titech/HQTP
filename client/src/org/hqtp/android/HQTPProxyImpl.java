@@ -1,6 +1,7 @@
 package org.hqtp.android;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,5 +89,13 @@ public class HQTPProxyImpl implements HQTPProxy {
             JSONException, java.text.ParseException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public List<Lecture> getLectures() throws HQTPAPIException, IOException, JSONException, ParseException {
+        // TODO Auto-generated method stub
+        List<Lecture> lectures = new ArrayList<Lecture>();
+        lectures.add(new Lecture(1, "Test Class", "Test Class Code"));
+        return lectures;
     }
 }

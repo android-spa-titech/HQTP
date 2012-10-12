@@ -29,9 +29,9 @@
                 <data android:scheme="hqtp" />
             </intent-filter>
         </activity>
-        <activity android:name=".HQTPActivity"></activity>
-        <activity android:name=".PostQuestionActivity"></activity>
         <activity android:name=".TimelineActivity"></activity>
+        <activity android:name=".LectureListActivity"></activity>
+        <activity android:name=".AddLectureActivity"></activity>
     </application>
 
 </manifest>

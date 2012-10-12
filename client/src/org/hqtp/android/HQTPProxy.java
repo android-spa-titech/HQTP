@@ -30,6 +30,8 @@ public interface HQTPProxy {
     public abstract Post postTimeline(String body, int lectureId, long prevVirtualTimestamp,
             long nextVirtualTimestamp) throws IOException, HQTPAPIException, JSONException, ParseException;
 
+    public abstract List<Lecture> getLectures() throws HQTPAPIException, IOException, JSONException, ParseException;
+
     public abstract Lecture addLecture(String lectureCode, String lectureName) throws HQTPAPIException, IOException,
             JSONException, ParseException;
 }
