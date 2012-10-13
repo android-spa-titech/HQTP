@@ -32,6 +32,7 @@
         <activity android:name=".TimelineActivity"></activity>
         <activity android:name=".LectureListActivity"></activity>
         <activity android:name=".AddLectureActivity"></activity>
+        <activity android:name=".PostTimelineActivity"></activity>
     </application>
 
 </manifest>
