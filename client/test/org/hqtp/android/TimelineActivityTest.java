@@ -19,12 +19,10 @@ import android.widget.ListView;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 
+import static org.mockito.Mockito.*;
+
 import static org.hamcrest.core.IsEqual.equalTo;
-
 import static org.junit.Assert.assertThat;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 @RunWith(HQTPTestRunner.class)
 public class TimelineActivityTest extends RoboGuiceTest {
@@ -53,7 +51,9 @@ public class TimelineActivityTest extends RoboGuiceTest {
 
     @Test
     public void activityShouldUpdateTimelineRepeatedly() throws Exception {
-        Post post1 = new Post(31, "body", new Date(), 1234);
+        User user = new User(1, "testUser", "http://example.com/icon.png");
+        Lecture lecture = new Lecture(2, "testLecture", "testLectureCode");
+        Post post1 = new Post(31, "body", new Date(), 1234, user, lecture);
         List<Post> posts = new ArrayList<Post>();
         posts.add(post1);
 
@@ -64,7 +64,7 @@ public class TimelineActivityTest extends RoboGuiceTest {
         activity.onUpdate(posts);
         assertThat(listView.getCount(), equalTo(1));
 
-        Post post2 = new Post(32, "body2", new Date(), 1233);
+        Post post2 = new Post(32, "body2", new Date(), 1233, user, lecture);
         posts.add(post2);
         activity.onUpdate(posts);
         assertThat(listView.getCount(), equalTo(2));

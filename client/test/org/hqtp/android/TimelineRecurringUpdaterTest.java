@@ -31,10 +31,13 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
     @Inject
     HQTPProxy proxy;
 
+    User user = new User(1, "testUser", "http://example.com/icon.png");
+    Lecture lecture = new Lecture(2, "testLecture", "testLectureCode");
+
     @Test
     public void updaterShouldNotifyObserver() throws Exception {
         List<Post> posts = new ArrayList<Post>();
-        posts.add(new Post(31, "body", new Date(), 1234));
+        posts.add(new Post(31, "body", new Date(), 1234, user, lecture));
         when(proxy.getTimeline(47)).thenReturn(posts);
 
         TestObserver observer = new TestObserver();
@@ -53,7 +56,7 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
     @Test
     public void updaterShouldNotifyRecurrently() throws Exception {
         List<Post> posts = new ArrayList<Post>();
-        posts.add(new Post(31, "body", new Date(), 1234));
+        posts.add(new Post(31, "body", new Date(), 1234, user, lecture));
         when(proxy.getTimeline(47)).thenReturn(posts).thenReturn(posts);
 
         TestObserver observer = new TestObserver();
@@ -70,7 +73,7 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
     @Test
     public void unregisteredObserverShouldNotNotified() throws Exception {
         List<Post> posts = new ArrayList<Post>();
-        posts.add(new Post(31, "body", new Date(), 1234));
+        posts.add(new Post(31, "body", new Date(), 1234, user, lecture));
         when(proxy.getTimeline(47)).thenReturn(posts);
 
         TestObserver observer = new TestObserver();
@@ -89,7 +92,7 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
     @Test
     public void shouldNotNotifyAfterStopped() throws Exception {
         List<Post> posts = new ArrayList<Post>();
-        posts.add(new Post(31, "body", new Date(), 1234));
+        posts.add(new Post(31, "body", new Date(), 1234, user, lecture));
         when(proxy.getTimeline(47)).thenReturn(posts);
 
         TestObserver observer = new TestObserver();
@@ -110,7 +113,7 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
     @Test
     public void updaterShouldCallProxy() throws Exception {
         List<Post> posts = new ArrayList<Post>();
-        posts.add(new Post(31, "body", new Date(), 1234));
+        posts.add(new Post(31, "body", new Date(), 1234, user, lecture));
         when(proxy.getTimeline(47)).thenReturn(posts);
 
         updater.setLectureId(47);

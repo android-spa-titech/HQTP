@@ -8,6 +8,12 @@ public class User {
     private String name;
     private String iconURL;
 
+    public User(int id, String name, String iconURL) {
+        this.id = id;
+        this.name = name;
+        this.iconURL = iconURL;
+    }
+
     public int getId()
     {
         return id;
@@ -25,10 +31,9 @@ public class User {
 
     public static User fromJSON(JSONObject json) throws JSONException
     {
-        User user = new User();
-        user.id = json.getInt("id");
-        user.name = json.getString("name");
-        user.iconURL = json.getString("icon_url");
-        return user;
+        return new User(
+                json.getInt("id"),
+                json.getString("name"),
+                json.getString("icon_url"));
     }
 }
