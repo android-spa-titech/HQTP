@@ -22,13 +22,13 @@ import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
 
 import static com.xtremelabs.robolectric.Robolectric.shadowOf;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(HQTPTestRunner.class)
 public class AddLectureActivityTest extends RoboGuiceTest {
