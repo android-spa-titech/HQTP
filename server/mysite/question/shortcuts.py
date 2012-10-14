@@ -10,8 +10,7 @@ def make_client():
     >>> c = make_client()
     """
 
-    c = Client(enforce_csrf_checks=True)
-    return c
+    return Client(enforce_csrf_checks=True)
 
 
 def access_auth_view(client, key=None, secret=None):
@@ -19,7 +18,7 @@ def access_auth_view(client, key=None, secret=None):
     error_msg = 'Usage: access_auth_view({KEY}, {SECRET})'
     assert not((key is None) != (secret is None)), error_msg
 
-    # for convinient, key and secret are allowed blank
+    # for convenient, key and secret are allowed blank
     # if blank then use android_spa's key and secret
     if key is None and secret is None:
         key = spa_key
@@ -28,29 +27,25 @@ def access_auth_view(client, key=None, secret=None):
     url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
     url = url_template % (key, secret)
     response = client.get(url)
-    jobj = json.loads(response.content)
-    return jobj
+    return json.loads(response.content)
 
 
 def access_lecture_get_view(client):
     url = '/api/lecture/get/'
     response = client.get(url)
-    jobj = json.loads(response.content)
-    return jobj
+    return json.loads(response.content)
 
 
 def access_lecture_add_view(client, name, code):
     url = '/api/lecture/add/'
     response = client.post(url, dict(name=name, code=code))
-    jobj = json.loads(response.content)
-    return jobj
+    return json.loads(response.content)
 
 
 def access_timeline_get_view(client, lecture_id):
     url = '/api/lecture/timeline/?id=%s'
     response = client.get(url % lecture_id)
-    jobj = json.loads(response.content)
-    return jobj
+    return json.loads(response.content)
 
 
 def access_timeline_post_view(client, lecture_id, body,
@@ -62,5 +57,4 @@ def access_timeline_post_view(client, lecture_id, body,
     if after_virtual_ts is not None:
         dic['after_virtual_ts'] = after_virtual_ts
     response = client.post(url, dic)
-    jobj = json.loads(response.content)
-    return jobj
+    return json.loads(response.content)

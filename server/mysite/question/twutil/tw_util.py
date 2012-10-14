@@ -16,8 +16,7 @@ def make_auth():
 def make_api(user_key, user_secret):
     auth = make_auth()
     auth.set_access_token(user_key, user_secret)
-    api = tweepy.API(auth_handler=auth)
-    return api
+    return tweepy.API(auth_handler=auth)
 
 
 def get_vc(user_key, user_secret):
@@ -40,8 +39,8 @@ def get_vc(user_key, user_secret):
     if not vc:
         # 正しいアクセストークンキー、シークレットでなかった場合
         return {}
-    ret = dict(id=vc.id, screen_name=vc.screen_name, name=vc.name)
-    return ret
+    else:
+        return dict(id=vc.id, screen_name=vc.screen_name, name=vc.name)
 
 
 def save_img(screen_name, size='bigger'):
