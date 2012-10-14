@@ -192,8 +192,8 @@ def lecture_timeline_view(request):
             return json_response_bad_request()
 
         if (('body' in request.POST)
-            == ('img' in request.FILES)):
-            # bodyとimgのどちらか一方を指定
+            == ('image' in request.FILES)):
+            # bodyとimageのどちらか一方を指定
             return json_response_bad_request()
 
         if (('before_virtual_ts' in request.POST)
@@ -229,16 +229,16 @@ def lecture_timeline_view(request):
                                    added_by=request.user,
                                    virtual_ts=vts)
 
-        if 'img' in request.FILES:
-            img = request.FILES['img']
+        if 'image' in request.FILES:
             # save image file
             # ユニークなfilenameとして、Postのpkを使う
+            image = request.FILES['image']
             filename = 'img_' + str(post.pk)
             relative_pathname = os.path.join('uploads', filename)
             absolute_pathname = build_media_absolute_pathname(relative_pathname)
-            save_bindata(absoluet_pathname, img['content'])
-            img_url = build_media_absolute_url(request, relative_pathname)
-            post.img_url = img_url
+            save_bindata(absoluet_pathname, image['content'])
+            image_url = build_media_absolute_url(request, relative_pathname)
+            post.image_url = image_url
             post.save()
 
 
