@@ -8,7 +8,12 @@ import mysite.question.test_unit as test_unit
 
 
 def load_tests(loader, tests, ignore):
-    tests.addTests(test_unit.test_suite())
+    # unit test
+    tests.addTests(test_unit.auth_test_case())
+    tests.addTests(test_unit.lecture_test_case())
+    tests.addTests(test_unit.timeline_test_case())
+
+    # doc test
     tests.addTests(doctest.DocTestSuite(tw_util))
     tests.addTests(doctest.DocTestSuite(views))
     tests.addTests(doctest.DocTestSuite(admin))
