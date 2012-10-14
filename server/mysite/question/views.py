@@ -14,6 +14,7 @@ from mysite.question.models import (Post,
                                     user_to_dict,
                                     Lecture)
 from time import time
+import os
 
 
 def convert_context_to_json(context):
@@ -87,7 +88,6 @@ def auth_view(request):
     if twicon is None:
         relative_pathname = 'default_twicon'
     else:
-        import os
         relative_pathname = os.path.join('twicon', str(user_name))
         absolute_pathname = build_media_absolute_pathname(relative_pathname)
         save_bindata(absolute_pathname, twicon)
@@ -188,8 +188,12 @@ def lecture_timeline_view(request):
     elif request.method == 'POST':
         try:
             id = request.POST['id']
-            body = request.POST['body']
         except MultiValueDictKeyError:
+            return json_response_bad_request()
+
+        if (('body' in request.POST)
+            == ('img' in request.FILES)):
+            # bodyとimgのどちらか一方を指定
             return json_response_bad_request()
 
         if (('before_virtual_ts' in request.POST)
@@ -208,21 +212,36 @@ def lecture_timeline_view(request):
             # invalid lecture ID
             return json_response_not_found()
 
+        # CharFieldはデフォルト値が''
+        body = request.POST.get('body', '')
+
         if 'before_virtual_ts' not in request.POST:
             # 'after_virtual_ts' is not in request.POST, too.
             # post to latest
             vts = Post.time_to_vts(time())
-            post = lec.post_set.create(body=body,
-                                       added_by=request.user,
-                                       virtual_ts=vts)
         else:
             # both 'before_virtual_ts' and 'after_virtual_ts' in request.POST
             # post to between 2 lectures
             vts = Post.calc_mid(int(request.POST['before_virtual_ts']),
                                     int(request.POST['after_virtual_ts']))
-            post = lec.post_set.create(body=body,
-                                       added_by=request.user,
-                                       virtual_ts=vts)
+
+        post = lec.post_set.create(body=body,
+                                   added_by=request.user,
+                                   virtual_ts=vts)
+
+        if 'img' in request.FILES:
+            img = request.FILES['img']
+            # save image file
+            # ユニークなfilenameとして、Postのpkを使う
+            filename = 'img_' + str(post.pk)
+            relative_pathname = os.path.join('uploads', filename)
+            absolute_pathname = build_media_absolute_pathname(relative_pathname)
+            save_bindata(absoluet_pathname, img['content'])
+            img_url = build_media_absolute_url(request, relative_pathname)
+            post.img_url = img_url
+            post.save()
+
+
         return json_response(dict(post=post.to_dict()))
 
 
