@@ -162,7 +162,7 @@ def lecture_timeline_view(request):
             return json_response_bad_request()
 
         if not request.user.is_authenticated():
-            # get need auth
+            # get need authentication
             return json_response_forbidden()
 
         try:

@@ -39,8 +39,7 @@ def get_vc(user_key, user_secret):
     if not vc:
         # 正しいアクセストークンキー、シークレットでなかった場合
         return {}
-    else:
-        return dict(id=vc.id, screen_name=vc.screen_name, name=vc.name)
+    return dict(id=vc.id, screen_name=vc.screen_name, name=vc.name)
 
 
 def save_img(screen_name, size='bigger'):
