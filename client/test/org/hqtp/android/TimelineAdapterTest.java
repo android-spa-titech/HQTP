@@ -28,12 +28,9 @@ import com.xtremelabs.robolectric.shadows.ShadowActivity;
 import com.xtremelabs.robolectric.shadows.ShadowIntent;
 
 import static com.xtremelabs.robolectric.Robolectric.shadowOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThat;
 
-import static org.hamcrest.Matchers.notNullValue;
-
-import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.CoreMatchers.*;
 
 @RunWith(HQTPTestRunner.class)
 public class TimelineAdapterTest extends RoboGuiceTest {
@@ -186,7 +183,7 @@ public class TimelineAdapterTest extends RoboGuiceTest {
 
         ShadowActivity shadowActivity = shadowOf(activity);
         Intent startedIntent = shadowActivity.getNextStartedActivity();
-        assertNotNull(startedIntent);
+        assertThat(startedIntent, notNullValue());
         ShadowIntent shadowIntent = shadowOf(startedIntent);
 
         // The date separator's virtual timestamp is calculated based on the following post.
@@ -253,7 +250,7 @@ public class TimelineAdapterTest extends RoboGuiceTest {
 
         ShadowActivity shadowActivity = shadowOf(activity);
         Intent startedIntent = shadowActivity.getNextStartedActivity();
-        assertNotNull(startedIntent);
+        assertThat(startedIntent, notNullValue());
         ShadowIntent shadowIntent = shadowOf(startedIntent);
         assertThat(shadowIntent.getComponent().getClassName(), equalTo(PostTimelineActivity.class.getName()));
         assertThat(shadowIntent.getIntExtra(PostTimelineActivity.LECTURE_ID, -1), equalTo(TEST_LECTURE_ID));
@@ -277,7 +274,7 @@ public class TimelineAdapterTest extends RoboGuiceTest {
 
         ShadowActivity shadowActivity = shadowOf(activity);
         Intent startedIntent = shadowActivity.getNextStartedActivity();
-        assertNotNull(startedIntent);
+        assertThat(startedIntent, notNullValue());
         ShadowIntent shadowIntent = shadowOf(startedIntent);
         Calendar cal = Calendar.getInstance();
         cal.setTime(Post.virtualTimestampToDate(testPost.getVirtualTimestamp()));

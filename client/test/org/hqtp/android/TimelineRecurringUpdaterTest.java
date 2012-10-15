@@ -15,11 +15,11 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.name.Names;
 
+import static org.junit.Assert.assertThat;
+
+import static org.hamcrest.CoreMatchers.*;
+
 import static org.mockito.Mockito.*;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import static org.hamcrest.Matchers.*;
 
 @RunWith(HQTPTestRunner.class)
 public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
@@ -74,7 +74,7 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
         Thread.sleep(1000);
 
         updater.stop();
-        assertThat(observer.times, greaterThan(1));
+        assertThat(observer.times > 1, is(true));
     }
 
     @Test

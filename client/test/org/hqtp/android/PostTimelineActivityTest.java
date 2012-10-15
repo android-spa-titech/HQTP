@@ -20,14 +20,11 @@ import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.shadows.ShadowActivity;
 import com.xtremelabs.robolectric.shadows.ShadowToast;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertThat;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.CoreMatchers.*;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.*;
 
 @RunWith(HQTPTestRunner.class)
 public class PostTimelineActivityTest extends RoboGuiceTest {

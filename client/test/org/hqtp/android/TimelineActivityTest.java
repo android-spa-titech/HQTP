@@ -15,11 +15,11 @@ import android.widget.ListView;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 
+import static org.junit.Assert.assertThat;
+
+import static org.hamcrest.CoreMatchers.instanceOf;
+
 import static org.mockito.Mockito.*;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import static org.hamcrest.Matchers.instanceOf;
 
 @RunWith(HQTPTestRunner.class)
 public class TimelineActivityTest extends RoboGuiceTest {
