@@ -82,9 +82,6 @@ public class PostTimelineActivity extends RoboActivity {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(SAVED_POST_BODY, postBody.getText().toString());
-        outState.putInt(LECTURE_ID, lectureId);
-        outState.putLong(PREV_VIRTUAL_TS, prevVirtualTimestamp);
-        outState.putLong(NEXT_VIRTUAL_TS, nextVirtualTimestamp);
     }
 
     /**
