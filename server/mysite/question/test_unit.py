@@ -74,6 +74,7 @@ class LectureTests(TestCase):
         self.j_lec_get3 = sc.access_lecture_get_view(c)
 
     def test_about_authenticate(self):
+        # ユーザーの認証をfixtureに移して、このテストは削除?
         self.assertEqual(self.j_auth['status'], 'OK')
 
     def test_about_get_empty_lecture_list(self):
@@ -101,19 +102,17 @@ class LectureTests(TestCase):
 
 
 class TimeLineTests(TestCase):
+    # 準備: 授業データの読み込み
+    fixtures = ['question/fixtures/test.json']
+
     def assertListSorted(self, *args):
         self.assertListEqual(sorted(args), list(args))
 
     def setUp(self):
-        # 準備: ユーザーの認証
+        # 準備: ユーザーの認証と授業IDの取得
         c = sc.make_client()
         self.j_auth = sc.access_auth_view(c)
-
-        # 準備: 授業の作成 (他のユーザーが行う)
-        c0 = sc.make_client()
-        sc.access_auth_view(c0)
-        lec = sc.access_lecture_add_view(c0, name=u'しりとり演習', code=u'77777')
-        lec_id = lec['lecture']['id']
+        lec_id = sc.get_nth_lecture_id(0)
 
         # 最初はなにも投稿がありません
         self.j_tl = sc.access_timeline_get_view(c, lec_id)
@@ -129,14 +128,14 @@ class TimeLineTests(TestCase):
         from time import sleep
         sleep(1)
         self.j_post_vts1 = sc.access_timeline_post_view(
-            c, lec_id, body=u'おすし',
+            c, lec_id, body=u'いか',
             before_virtual_ts=0, after_virtual_ts=self.post0.vts)
         self.post1 = PostMetaDataFromJSON(self.j_post_vts1)
 
         # この2つのpostの間に投稿
         sleep(1)
         self.j_post_vts2 = sc.access_timeline_post_view(
-            c, lec_id, body=u'しかえし',
+            c, lec_id, body=u'からし',
             before_virtual_ts=self.post0.vts, after_virtual_ts=self.post1.vts)
         self.post2 = PostMetaDataFromJSON(self.j_post_vts2)
 
