@@ -9,6 +9,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Post {
+    private final static int VIRTUAL_TS_SCALE = 100000;
+
     private int id;
     private String body;
     private Date time;
@@ -67,10 +69,10 @@ public class Post {
     }
 
     public static Date virtualTimestampToDate(long virtualTimestamp) {
-        return new Date(virtualTimestamp / 100000);
+        return new Date(virtualTimestamp / VIRTUAL_TS_SCALE);
     }
 
     public static long dateToVirtualTimestamp(Date date) {
-        return date.getTime() * 100000;
+        return date.getTime() * VIRTUAL_TS_SCALE;
     }
 }
