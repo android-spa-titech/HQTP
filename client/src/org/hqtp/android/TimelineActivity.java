@@ -119,9 +119,8 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
             TextView bodyView = (TextView) convertView.findViewById(R.id.postContent);
 
             ImageView image_view = (ImageView) convertView.findViewById(R.id.icon);
-            // DEBUG(ide_an): Should show post.user.icon_url
             image_view.setTag(post.getUser().getIconURL());
-            image_loader.displayImage(image_view, (Activity) this.getContext());
+            image_loader.displayImage(image_view, TimelineActivity.this);
 
             // 文字数が多いと全文をそのまま表示するとよくないかも
             bodyView.setText(post.getBody());
