@@ -117,12 +117,14 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
     public class ItemLongClickListener implements AdapterView.OnItemLongClickListener {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            final int currentPos = cells.indexOf(formCell);
-            cells.remove(formCell);
-            if (position < currentPos) {
-                cells.add(position + 1, formCell);
-            } else {
-                cells.add(position, formCell);
+            synchronized (cells) {
+                final int currentPos = cells.indexOf(formCell);
+                cells.remove(formCell);
+                if (position < currentPos) {
+                    cells.add(position + 1, formCell);
+                } else {
+                    cells.add(position, formCell);
+                }
             }
             observable.notifyChanged();
             return true;
@@ -131,8 +133,10 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
-            cells.remove(formCell);
-            cells.add(formCell);
+            synchronized (cells) {
+                cells.remove(formCell);
+                cells.add(formCell);
+            }
             observable.notifyChanged();
             alerter.toastShort("投稿しました");
         }
@@ -140,47 +144,48 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
 
     @Override
     public void onUpdate(List<Post> posts) {
-        boolean formCellAdded = false;
-        long beforeFormCellId = Long.MAX_VALUE;
-        if (!cells.get(cells.size() - 1).equals(formCell)) {
-            final int currentPos = cells.indexOf(formCell);
-            beforeFormCellId = cells.get(currentPos - 1).getItemId();
-        }
+        synchronized (cells) {
+            boolean formCellAdded = false;
+            long beforeFormCellId = Long.MAX_VALUE;
+            if (!cells.get(cells.size() - 1).equals(formCell)) {
+                final int currentPos = cells.indexOf(formCell);
+                beforeFormCellId = cells.get(currentPos - 1).getItemId();
+            }
 
-        cells.clear();
-        Date prevDate = null;
-        Date lastSeparatorDate = null;
-        ListCell prevCell = null;
-        for (Post post : posts) {
-            Date currentDate = Post.virtualTimestampToDate(post.getVirtualTimestamp());
-            if (prevDate == null || !isSameDate(prevDate, currentDate)) {
-                lastSeparatorDate = currentDate;
-                prevCell = new DateSeparatorCell(currentDate);
+            cells.clear();
+            Date prevDate = null;
+            Date lastSeparatorDate = null;
+            ListCell prevCell = null;
+            for (Post post : posts) {
+                Date currentDate = Post.virtualTimestampToDate(post.getVirtualTimestamp());
+                if (prevDate == null || !isSameDate(prevDate, currentDate)) {
+                    lastSeparatorDate = currentDate;
+                    prevCell = new DateSeparatorCell(currentDate);
+                    cells.add(prevCell);
+                    if (!formCellAdded && prevCell.getItemId() == beforeFormCellId) {
+                        cells.add(formCell);
+                        formCellAdded = true;
+                    }
+                }
+                prevDate = currentDate;
+
+                prevCell = new PostCell(post);
                 cells.add(prevCell);
                 if (!formCellAdded && prevCell.getItemId() == beforeFormCellId) {
                     cells.add(formCell);
                     formCellAdded = true;
                 }
             }
-            prevDate = currentDate;
 
-            prevCell = new PostCell(post);
-            cells.add(prevCell);
-            if (!formCellAdded && prevCell.getItemId() == beforeFormCellId) {
-                lastSeparatorDate = currentDate;
-                cells.add(formCell);
-                formCellAdded = true;
+            if (lastSeparatorDate == null || !isSameDate(lastSeparatorDate, new Date())) {
+                cells.add(new DateSeparatorCell(new Date()));
             }
-        }
 
-        if (lastSeparatorDate == null || !isSameDate(lastSeparatorDate, new Date())) {
-            cells.add(new DateSeparatorCell(new Date()));
+            if (!formCellAdded) {
+                cells.add(formCell);
+            }
+            observable.notifyChanged();
         }
-
-        if (!formCellAdded) {
-            cells.add(formCell);
-        }
-        observable.notifyChanged();
     }
 
     private boolean isSameDate(Date date1, Date date2) {
