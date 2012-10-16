@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -24,6 +25,9 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
     TimelineRecurringUpdater updater;
     @Inject
     Alerter alerter;
+
+    @Inject
+    ImageLoader image_loader;
 
     public static final String LECTURE_ID = "LECTURE_ID";
 
@@ -61,6 +65,7 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
     protected void onStop() {
         updater.unregisterTimelineObserver(this);
         updater.stop();
+        image_loader.shutdown();
         super.onStop();
     }
 
@@ -111,6 +116,10 @@ public class TimelineActivity extends RoboActivity implements TimelineObserver {
 
             Post post = (Post) getItem(position);
             TextView bodyView = (TextView) convertView.findViewById(R.id.postContent);
+
+            ImageView image_view = (ImageView) convertView.findViewById(R.id.icon);
+            image_view.setTag(post.getUser().getIconURL());
+            image_loader.displayImage(image_view, TimelineActivity.this);
 
             // 文字数が多いと全文をそのまま表示するとよくないかも
             bodyView.setText(post.getBody());

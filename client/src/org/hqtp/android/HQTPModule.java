@@ -12,6 +12,7 @@ public class HQTPModule extends AbstractModule {
     public void configure() {
         bind(HQTPProxy.class).to(HQTPProxyImpl.class);
         bind(TimelineRecurringUpdater.class).to(TimelineRecurringUpdaterImpl.class);
+        bind(ImageLoader.class).to(ImageLoaderImpl.class);
         bind(String.class).annotatedWith(Names.named("HQTP API Endpoint URL")).toInstance("http://www.hqtp.org/api/");
         bind(Long.class).annotatedWith(Names.named("TimelineUpdatePeriod")).toInstance(Long.valueOf(500));
 

@@ -16,7 +16,7 @@ public class Post {
 
     // TODO: toggle comment
     // private Lecture lecture;
-    // private User user;
+    private User user;
 
     public int getId() {
         return id;
@@ -35,11 +35,12 @@ public class Post {
         return virtualTimestamp;
     }
 
-    public Post(int id, String body, Date time, long virtualTimestamp) {
+    public Post(int id, String body, Date time, long virtualTimestamp, User user) {
         this.id = id;
         this.body = body;
         this.time = time;
         this.virtualTimestamp = virtualTimestamp;
+        this.user = user;
     }
 
     public static Post fromJSON(JSONObject json) throws JSONException, ParseException {
@@ -48,18 +49,18 @@ public class Post {
                 json.getInt("id"),
                 json.getString("body"),
                 df.parse(json.getString("time")),
-                json.getLong("virtual_ts")
+                json.getLong("virtual_ts"),
+                User.fromJSON(json.getJSONObject("user"))
                 );
         // TODO: toggle comment
-        // post.user = User.fromJSON(json.getString("user"));
         // post.lecture = Lecture.fromJSON(json.getString("lecture"));
         return post;
     }
+
+    public User getUser() {
+        return user;
+    }
     // TODO: toggle comment
-    // public User getUser() {
-    // //TODO: implement
-    // return null;
-    // }
     //
     // public Lecture getLecture() {
     // //TODO: implement
