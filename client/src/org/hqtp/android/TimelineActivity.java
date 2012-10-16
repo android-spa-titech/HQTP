@@ -4,7 +4,6 @@ import java.util.List;
 
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;

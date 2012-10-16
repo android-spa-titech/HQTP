@@ -22,7 +22,7 @@ import android.widget.ImageView;
 
 //TODO: singletonにすべき?
 public class ImageLoaderImpl implements ImageLoader {
-    private ImageCache image_cache;
+    private Map<String, Bitmap> image_cache;
     private final int placeholder = android.R.drawable.ic_menu_close_clear_cancel;
     // ImageViewとURL文字列の対応を管理することでImageViewを使い回しているときの画像を一意に決める。
     // 参考： http://lablog.lanche.jp/archives/220
@@ -30,7 +30,7 @@ public class ImageLoaderImpl implements ImageLoader {
     private ExecutorService loading_service;
 
     public ImageLoaderImpl() {
-        image_cache = new ImageCache();
+        image_cache = new ConcurrentHashMap<String, Bitmap>();
         view2url = new ConcurrentHashMap<ImageView, String>();
         loading_service = Executors.newSingleThreadExecutor();
     }
@@ -53,10 +53,15 @@ public class ImageLoaderImpl implements ImageLoader {
     }
 
     public void shutdown() {
+        //via http://gurimmer.lolipop.jp/daihakken/2012/01/27/javaexecutorservice%E3%81%AE%E6%AD%A3%E3%81%97%E3%81%84%E7%B5%82%E4%BA%86shutdown%E3%81%AE%E4%BB%95%E6%96%B9/
+        loading_service.shutdown();
         try {
-            loading_service.awaitTermination(1000, TimeUnit.MILLISECONDS);
+            if(!loading_service.awaitTermination(1000, TimeUnit.MILLISECONDS)){
+                loading_service.shutdownNow();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
+            loading_service.shutdownNow();
         }
         clearCache();
     }
@@ -136,32 +141,6 @@ public class ImageLoaderImpl implements ImageLoader {
                 Log.d("DisplayHandler", "fail to load : " + image_url);
                 image_view.setImageResource(placeholder);
             }
-        }
-    }
-
-    private class ImageCache {
-        private Map<String, Bitmap> cache;
-
-        public ImageCache() {
-            cache = new ConcurrentHashMap<String, Bitmap>();
-        }
-
-        public Bitmap get(String image_url) {
-            if (cache.containsKey(image_url)) {
-                Log.d("ImageCache", "hit! :" + image_url);
-                return cache.get(image_url);
-            } else {
-                Log.d("ImageCache", "miss! :" + image_url);
-                return null;
-            }
-        }
-
-        public void put(String image_url, Bitmap bmp) {
-            cache.put(image_url, bmp);
-        }
-
-        public void clear() {
-            cache.clear();
         }
     }
 }
