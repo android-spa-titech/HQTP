@@ -45,6 +45,7 @@ nosetests.xml
 
 
 media/twicon/*
+mysite/question/fixtures/*
 
 # test coverage output dir
 .cover
