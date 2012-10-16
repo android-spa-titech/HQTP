@@ -10,8 +10,9 @@ import sys
 import subprocess
 
 
+settings_filename = 'fixture_settings'  # DBを切り替えたsettingsファイル
+settings_opt = '--settings=' + settings_filename
 prefix = 'fixture_'  # Fixtureを作成する関数はprefixから始まる
-dbname = 'mydb.sqlite'  # TODO: Fixture作業用DBを指定できるようにする
 
 
 def reset_database(appname):
@@ -23,7 +24,8 @@ def reset_database(appname):
     # Are you sure you want to reset database?
     # Type 'yes' to continue, or 'no' to cancel:
     p_echo = subprocess.Popen(['echo', 'yes'], stdout=subprocess.PIPE)
-    p = subprocess.Popen(['python', 'manage.py', 'reset', appname],
+    p = subprocess.Popen(['python', 'manage.py', 'reset', appname,
+                          settings_opt],
                          stdin=p_echo.stdout)
     p.communicate()
 
@@ -34,7 +36,8 @@ def sync_database():
     """
     # Would you like to create superusers now? (yes/no):
     p_echo = subprocess.Popen(['echo', 'no'], stdout=subprocess.PIPE)
-    p = subprocess.Popen(['python', 'manage.py', 'syncdb'],
+    p = subprocess.Popen(['python', 'manage.py', 'syncdb',
+                          settings_opt],
                          stdin=p_echo.stdout)
     p.communicate()
 
@@ -43,7 +46,8 @@ def dump_database(pathname):
     """
     pathnameにデータベースのダンプを行う
     """
-    p = subprocess.Popen(['python', 'manage.py', 'dumpdata'],
+    p = subprocess.Popen(['python', 'manage.py', 'dumpdata',
+                          settings_opt],
                          stdout=subprocess.PIPE)
     out, err = p.communicate()
 
@@ -94,13 +98,16 @@ def fixture_lecture():
 
 ###############################################################################
 if __name__ == '__main__':
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+    os.environ['DJANGO_SETTINGS_MODULE'] = settings_filename
 
     # DBを初期化
-    os.remove(dbname)
     sync_database()
 
     # call fixture_ functions
     fs = filter(lambda (k, v): k.startswith(prefix), locals().items())
     for k, func in fs:
         func()
+
+    # DBを削除
+    mod = __import__(settings_filename)
+    os.remove(mod.dbname)
