@@ -48,18 +48,15 @@ class AuthenticateTests(TestCase):
 
 class AuthenticateFailTests(TestCase):
     def setUp(self):
-        from mysite.question.twutil.consumer_info import spa_key, spa_secret
         c = sc.make_client()
 
         # access_token_key しか渡されていないと Bad Request
-        url_key = '/api/auth/?access_token_key=%s'
-        url_key = url_key % spa_key
+        url_key = '/api/auth/?access_token_key=BAD_REQUEST_KEY'
         response = c.get(url_key)
         self.j_only_key = loads(response.content)
 
         # access_token_secret しか渡されていないと Bad Request
-        url_secret = '/api/auth/?access_token_secret=%s'
-        url_secret = url_secret % spa_secret
+        url_secret = '/api/auth/?access_token_secret=BAD_REQUEST_SECRET'
         response = c.get(url_secret)
         self.j_only_secret = loads(response.content)
 
@@ -266,44 +263,49 @@ class TimeLineFailTests(TestCase):
     fixtures = ['test_sample_lecture.json']
 
     def setUp(self):
-        c = sc.make_client()
-        lec_id = sc.get_nth_lecture_dict(0)['id']
-
-        # before_virtual_ts, after_virtual_ts 片方だけだと Bad Request
-        self.j_only_before = sc.access_timeline_post_view(c, lec_id,
-            body=u'投稿できないよ!', before_virtual_ts=65536)
-        self.j_only_after = sc.access_timeline_post_view(c, lec_id,
-            body=u'投稿できないよ!', after_virtual_ts=65536)
-
-        # 認証しないで timeline get/post したら Forbidden
-        self.j_get_fbd = sc.access_timeline_get_view(c, lec_id)
-        self.j_post_fbd = sc.access_timeline_post_view(c, lec_id,
-            body=u'認証が切れたら、俺は投稿もできないのかよ')
-
-        # 認証すると get/post できます
-        self.j_auth = sc.access_auth_view(c)
-        self.j_get_auth = sc.access_timeline_get_view(c, lec_id)
-        self.j_post_auth = sc.access_timeline_post_view(c, lec_id,
-            body=u'計　　画　　通　　り')
-
-        # 存在しない授業にget/postしようとすると Not Found
-        self.j_get_not = sc.access_timeline_get_view(c, lec_id + 1)
-        self.j_post_not = sc.access_timeline_post_view(c, lec_id + 1,
-            body=u'チャドの授業が・・・消えた・・・?')
+        self.c = sc.make_client()
+        self.lec_id = sc.get_nth_lecture_dict(0)['id']
 
     def test_about_post__bad_request(self):
-        self.assertEqual(self.j_only_before['status'], 'Bad Request')
-        self.assertEqual(self.j_only_after['status'], 'Bad Request')
+        # before_virtual_ts, after_virtual_ts 片方だけだと Bad Request
+        j_only_before = sc.access_timeline_post_view(self.c, self.lec_id,
+            body=u'投稿できないよ!', before_virtual_ts=65536)
+        self.assertEqual(j_only_before['status'], 'Bad Request')
+
+        j_only_after = sc.access_timeline_post_view(self.c, self.lec_id,
+            body=u'投稿できないよ!', after_virtual_ts=65536)
+        self.assertEqual(j_only_after['status'], 'Bad Request')
 
     def test_about_timeline__forbidden(self):
-        self.assertEqual(self.j_get_fbd['status'], 'Forbidden')
-        self.assertEqual(self.j_post_fbd['status'], 'Forbidden')
+        # 認証しないで timeline get/post したら Forbidden
+        j_get_fbd = sc.access_timeline_get_view(self.c, self.lec_id)
+        self.assertEqual(j_get_fbd['status'], 'Forbidden')
+
+        j_post_fbd = sc.access_timeline_post_view(self.c, self.lec_id,
+            body=u'認証が切れたら、俺は投稿もできないのかよ')
+        self.assertEqual(j_post_fbd['status'], 'Forbidden')
 
     def test_about_authenticated_user(self):
-        self.assertEqual(self.j_auth['status'], 'OK')
-        self.assertEqual(self.j_get_auth['status'], 'OK')
-        self.assertEqual(self.j_post_auth['status'], 'OK')
+        # 認証すると get/post できます
+        j_auth = sc.access_auth_view(self.c)
+        self.assertEqual(j_auth['status'], 'OK')
+
+        j_get_auth = sc.access_timeline_get_view(self.c, self.lec_id)
+        self.assertEqual(j_get_auth['status'], 'OK')
+
+        j_post_auth = sc.access_timeline_post_view(self.c, self.lec_id,
+            body=u'計　　画　　通　　り')
+        self.assertEqual(j_post_auth['status'], 'OK')
 
     def test_about_timeline__not_found(self):
-        self.assertEqual(self.j_get_not['status'], 'Not Found')
-        self.assertEqual(self.j_post_not['status'], 'Not Found')
+        # 存在しない授業にget/postしようとすると Not Found
+        sc.access_auth_view(self.c)
+        dummy_lec_id = 42
+        self.assertNotEqual(self.lec_id, dummy_lec_id)
+
+        j_get_not = sc.access_timeline_get_view(self.c, dummy_lec_id)
+        self.assertEqual(j_get_not['status'], 'Not Found')
+
+        j_post_not = sc.access_timeline_post_view(self.c, dummy_lec_id,
+            body=u'チャドの授業が・・・消えた・・・?')
+        self.assertEqual(j_post_not['status'], 'Not Found')
