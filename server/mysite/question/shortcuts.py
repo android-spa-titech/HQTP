@@ -60,10 +60,8 @@ def access_timeline_post_view(client, lecture_id, body,
     return json.loads(response.content)
 
 
-def get_nth_lecture_id(index):
-    # 呼び出された時点でのDBからindex番目のLectureモデルのIDを取得する
+def get_nth_lecture_dict(n):
+    # 呼び出された時点でのDBからindex番目のLectureモデルのディクショナリを取得する
     # Fixtureでテスト用のLectureモデルを投入した時の使用を想定
-    pashiri = make_client()
-    access_auth_view(pashiri)
-    j_lec_list = access_lecture_get_view(pashiri)
-    return j_lec_list['lectures'][index]['id']
+    from mysite.question.models import Lecture
+    return Lecture.objects.all()[n].to_dict()

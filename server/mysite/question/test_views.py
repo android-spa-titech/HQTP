@@ -129,13 +129,13 @@ def test_about_auth__badrequest():
 
     >>> c = shortcuts.make_client()
 
-    >>> url1 = '/api/auth/?access_token_key=KEY'
+    >>> url1 = '/api/auth/?access_token_key=KEY'  # 間違い?
     >>> response = c.get(url1)
     >>> jobj = json.loads(response.content)
     >>> jobj['status'] == 'Bad Request'
     True
 
-    >>> url2 = '/api/auth/?access_token_secret=SECRET'
+    >>> url2 = '/api/auth/?access_token_secret=SECRET'  # これも間違い?
     >>> response = c.get(url2)
     >>> jobj = json.loads(response.content)
     >>> jobj['status'] == 'Bad Request'
