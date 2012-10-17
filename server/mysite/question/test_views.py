@@ -125,17 +125,16 @@ def test_about_auth__badrequest():
     access_token_key, access_token_secretが両方渡されないとBad Requestを返す
 
     >>> import json
-    >>> from question.twutil.consumer_info import spa_key, spa_secret
 
     >>> c = shortcuts.make_client()
 
-    >>> url1 = '/api/auth/?access_token_key=KEY'  # 間違い?
+    >>> url1 = '/api/auth/?access_token_key=KEY'
     >>> response = c.get(url1)
     >>> jobj = json.loads(response.content)
     >>> jobj['status'] == 'Bad Request'
     True
 
-    >>> url2 = '/api/auth/?access_token_secret=SECRET'  # これも間違い?
+    >>> url2 = '/api/auth/?access_token_secret=SECRET'
     >>> response = c.get(url2)
     >>> jobj = json.loads(response.content)
     >>> jobj['status'] == 'Bad Request'

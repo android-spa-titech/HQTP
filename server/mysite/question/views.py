@@ -13,6 +13,8 @@ import json
 from mysite.question.models import (Post,
                                     user_to_dict,
                                     Lecture)
+from mysite.question.twutil.tw_util import get_vc, save_img
+from time import time
 
 
 def convert_context_to_json(context):
@@ -55,8 +57,6 @@ def json_response_server_error(context={}):
 
 
 def auth_view(request):
-    from twutil.tw_util import get_vc, save_img
-
     try:
         key = request.GET['access_token_key']
         secret = request.GET['access_token_secret']
@@ -208,7 +208,6 @@ def lecture_timeline_view(request):
                                 int(request.POST['after_virtual_ts']))
         else:
             # post to latest
-            from time import time
             vts = Post.time_to_vts(time())
 
         post = lec.post_set.create(body=body,

@@ -6,7 +6,6 @@ import consumer_info
 
 PROFILE_IMAGE = ('http://api.twitter.com/1/users/profile_image'
                  + '?screen_name=%s&size=%s')
-# なぜグローバル変数? save_img()以外でも使う予定があるのか?
 
 
 def make_auth():
