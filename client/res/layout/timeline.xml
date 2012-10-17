@@ -9,43 +9,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Please fill here class name"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="32dp" />
+        android:text="Please fill here class name" />
 
-    <FrameLayout
+    <ListView
+        android:id="@+id/listPost"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-        <ListView
-            android:id="@+id/listPost"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fastScrollEnabled="true" >
-        </ListView>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="52dp"
-            android:layout_gravity="bottom|center"
-            android:orientation="horizontal" >
-
-            <Button
-                android:id="@+id/buttonUpdate"
-                android:layout_width="160dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:background="@drawable/button_refresh" />
-
-            <Button
-                android:id="@+id/buttonPost"
-                android:layout_width="160dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:background="@drawable/button_post" />
-
-        </LinearLayout>
-
-    </FrameLayout>
+        android:layout_height="match_parent"
+        android:fastScrollEnabled="true" >
+    </ListView>
 
 </LinearLayout>

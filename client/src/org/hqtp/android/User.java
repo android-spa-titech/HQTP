@@ -8,10 +8,10 @@ public class User {
     private String name;
     private String iconURL;
 
-    public User(int id, String name, String icon_url) {
+    public User(int id, String name, String iconURL) {
         this.id = id;
         this.name = name;
-        this.iconURL = icon_url;
+        this.iconURL = iconURL;
     }
 
     public int getId()

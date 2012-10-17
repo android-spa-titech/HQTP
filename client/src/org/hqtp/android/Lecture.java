@@ -1,5 +1,8 @@
 package org.hqtp.android;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class Lecture {
     private int id;
     private String name;
@@ -23,4 +26,11 @@ public class Lecture {
         return this.code;
     }
 
+    public static Lecture fromJSON(JSONObject json) throws JSONException
+    {
+        int id = json.getInt("id");
+        String name = json.getString("name");
+        String code = json.getString("code");
+        return new Lecture(id, name, code);
+    }
 }

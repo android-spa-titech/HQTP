@@ -22,12 +22,11 @@ import com.xtremelabs.robolectric.shadows.ShadowActivity;
 import com.xtremelabs.robolectric.shadows.ShadowIntent;
 
 import static com.xtremelabs.robolectric.Robolectric.shadowOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-
 import static org.junit.Assert.assertThat;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.CoreMatchers.equalTo;
+
+import static org.mockito.Mockito.*;
 
 @RunWith(HQTPTestRunner.class)
 public class LectureListActivityTest extends RoboGuiceTest {

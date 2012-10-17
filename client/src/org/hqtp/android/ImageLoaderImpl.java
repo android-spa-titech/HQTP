@@ -14,13 +14,14 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import roboguice.inject.ContextSingleton;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.ImageView;
 
-//TODO: singletonにすべき?
+@ContextSingleton
 public class ImageLoaderImpl implements ImageLoader {
     private Map<String, Bitmap> image_cache;
     private final int placeholder = android.R.drawable.ic_menu_close_clear_cancel;
@@ -53,10 +54,11 @@ public class ImageLoaderImpl implements ImageLoader {
     }
 
     public void shutdown() {
-        //via http://gurimmer.lolipop.jp/daihakken/2012/01/27/javaexecutorservice%E3%81%AE%E6%AD%A3%E3%81%97%E3%81%84%E7%B5%82%E4%BA%86shutdown%E3%81%AE%E4%BB%95%E6%96%B9/
+        // via
+        // http://gurimmer.lolipop.jp/daihakken/2012/01/27/javaexecutorservice%E3%81%AE%E6%AD%A3%E3%81%97%E3%81%84%E7%B5%82%E4%BA%86shutdown%E3%81%AE%E4%BB%95%E6%96%B9/
         loading_service.shutdown();
         try {
-            if(!loading_service.awaitTermination(1000, TimeUnit.MILLISECONDS)){
+            if (!loading_service.awaitTermination(1000, TimeUnit.MILLISECONDS)) {
                 loading_service.shutdownNow();
             }
         } catch (InterruptedException e) {
