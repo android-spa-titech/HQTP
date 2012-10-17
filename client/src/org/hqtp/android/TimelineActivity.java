@@ -54,10 +54,10 @@ public class TimelineActivity extends RoboActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         adapter.onActivityResult(requestCode, resultCode, data);
     }
-    
+
     @Override
-    protected void onStop() {
+    protected void onDestroy() {
         imageLoader.shutdown();
-        super.onStop();
+        super.onDestroy();
     }
 }
