@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,6 +56,7 @@ public class Post {
 
     public static Post fromJSON(JSONObject json) throws JSONException, ParseException {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        df.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
         User user = User.fromJSON(json.getJSONObject("user"));
         Lecture lecture = Lecture.fromJSON(json.getJSONObject("lecture"));
         Post post = new Post(

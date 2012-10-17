@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import roboguice.inject.ContextSingleton;
 import android.app.Activity;
@@ -42,11 +43,16 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
     private DataSetObservable observable = new DataSetObservable();
     private int lectureId;
 
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-    private SimpleDateFormat dateSeparatorFormat = new SimpleDateFormat("yyyy/MM/dd");
+    private SimpleDateFormat dateFormat;
+    private SimpleDateFormat dateSeparatorFormat;
     private final long ONE_HOUR_MILLIS = 60 * 60 * 1000;
 
     public TimelineAdapter() {
+        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
+        dateSeparatorFormat = new SimpleDateFormat("yyyy/MM/dd");
+        dateSeparatorFormat.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
+
         cells.add(new DateSeparatorCell(new Date()));
 
         formCell = new PostingCell();
@@ -338,7 +344,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
         private final Date date;
 
         public DateSeparatorCell(Date date) {
-            Calendar cal = Calendar.getInstance();
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Tokyo"));
             cal.setTime(date);
             cal.set(Calendar.HOUR, 0);
             cal.set(Calendar.MINUTE, 0);
