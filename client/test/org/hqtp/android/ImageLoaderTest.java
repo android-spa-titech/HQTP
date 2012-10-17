@@ -2,6 +2,7 @@ package org.hqtp.android;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.entity.InputStreamEntity;
@@ -12,6 +13,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import roboguice.activity.RoboActivity;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,16 +24,14 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.xtremelabs.robolectric.Robolectric;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(HQTPTestRunner.class)
 public class ImageLoaderTest extends RoboGuiceTest {
     @Inject
-    HQTPActivity activity;
-    @Inject
     ImageLoader loader;
+
+    private Activity activity;
 
     @Test
     public void loaderShouldDisplayImage() throws Exception {
@@ -55,14 +56,14 @@ public class ImageLoaderTest extends RoboGuiceTest {
         @Override
         protected void configure() {
             bind(ImageLoader.class).to(ImageLoaderImpl.class);
-            bind(HQTPActivity.class).toInstance(activity);
             bind(Activity.class).toInstance(activity);
         }
     }
 
     @Before
     public void setUp() {
-        activity = new HQTPActivity();
+        activity = new RoboActivity() {
+        };
         setUpRoboGuice(new TestModule());
     }
 

@@ -17,9 +17,9 @@ import com.google.inject.Inject;
 import com.google.inject.name.Names;
 import com.xtremelabs.robolectric.Robolectric;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-
 import static org.junit.Assert.assertThat;
+
+import static org.hamcrest.CoreMatchers.*;
 
 @RunWith(HQTPTestRunner.class)
 public class HQTPProxyImplTest extends RoboGuiceTest {
@@ -104,7 +104,7 @@ public class HQTPProxyImplTest extends RoboGuiceTest {
         assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
         assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/lecture/timeline/"));
         // TODO: クエリパラメータの検査もしたい
-        Assert.assertNotNull(res);
+        assertThat(res, notNullValue());
     }
 
     private class TestModule extends AbstractModule {

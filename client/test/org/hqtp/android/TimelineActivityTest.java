@@ -1,90 +1,73 @@
 package org.hqtp.android;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import org.hqtp.android.util.HQTPTestRunner;
 import org.hqtp.android.util.RoboGuiceTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import roboguice.inject.InjectView;
 import android.app.Activity;
 import android.content.Intent;
-import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-
 import static org.junit.Assert.assertThat;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
-import static org.mockito.Matchers.any;
+import static org.hamcrest.CoreMatchers.instanceOf;
+
+import static org.mockito.Mockito.*;
 
 @RunWith(HQTPTestRunner.class)
 public class TimelineActivityTest extends RoboGuiceTest {
-    public static int LECTURE_ID = 47;
+    private static final int LECTURE_ID = 47;
 
-    @Inject
-    TimelineActivity activity;
     @InjectView(R.id.listPost)
     ListView listView;
     @Inject
-    TimelineRecurringUpdater updater;
+    TimelineAdapter adapter;
     @Inject
-    ImageLoader image_loader;
+    TimelineRecurringUpdater updater;
 
-    private User user;
+    private TimelineActivity activity;
 
     @Test
-    public void loadingActivityShouldStartAndRegisterItself() throws Exception {
+    public void loadingActivityShouldStartAndRegisterAdapter() throws Exception {
         activity.onCreate(null);
+        activity.onStart();
 
         verify(updater).setLectureId(LECTURE_ID);
-        verify(updater).registerTimelineObserver(activity);
+        verify(adapter).setLectureId(LECTURE_ID);
+        verify(updater).registerTimelineObserver(adapter);
         verify(updater).startRecurringUpdateTimeline();
-        assertThat(listView.getCount(), equalTo(0));
-        verify(image_loader, never()).displayImage(any(ImageView.class), any(Activity.class));
+        assertThat(listView.getOnItemLongClickListener(),
+                instanceOf(TimelineAdapter.ItemLongClickListener.class));
 
-        activity.onStop();
-        verify(updater).unregisterTimelineObserver(activity);
+        activity.onPause();
+        verify(updater).unregisterTimelineObserver(adapter);
         verify(updater).stop();
-        verify(image_loader).shutdown();
     }
 
     @Test
-    public void activityShouldUpdateTimelineRepeatedly() throws Exception {
-        Post post1 = new Post(31, "body", new Date(), 1234, user);
-        List<Post> posts = new ArrayList<Post>();
-        posts.add(post1);
-
+    public void activityShouldDelegateResult() throws Exception {
         activity.onCreate(null);
-        assertThat(listView.getCount(), equalTo(0));
-        activity.onUpdate(posts);
-        assertThat(listView.getCount(), equalTo(1));
-        activity.onUpdate(posts);
-        assertThat(listView.getCount(), equalTo(1));
+        activity.onActivityResult(0, Activity.RESULT_OK, null);
 
-        Post post2 = new Post(32, "body2", new Date(), 1233, user);
-        posts.add(post2);
-        activity.onUpdate(posts);
-        assertThat(listView.getCount(), equalTo(2));
+        verify(adapter).onActivityResult(0, Activity.RESULT_OK, null);
     }
 
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
+            bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
             bind(TimelineRecurringUpdater.class).toInstance(
                     mock(TimelineRecurringUpdater.class));
-            bind(TimelineActivity.class).toInstance(activity);
+            bind(TimelineAdapter.class).toInstance(mock(TimelineAdapter.class));
             bind(ImageLoader.class).toInstance(mock(ImageLoader.class));
+            bind(TimelineActivity.class).toInstance(activity);
             bind(Activity.class).toInstance(activity);
         }
     }
@@ -93,16 +76,9 @@ public class TimelineActivityTest extends RoboGuiceTest {
     public void setUp() {
         activity = new TimelineActivity();
         Intent intent = new Intent();
-        intent.putExtra(
-                TimelineActivity.LECTURE_ID,
-                TimelineActivityTest.LECTURE_ID);
+        intent.putExtra(PostTimelineActivity.LECTURE_ID, TimelineActivityTest.LECTURE_ID);
         activity.setIntent(intent);
         setUpRoboGuice(new TestModule(), activity);
-        this.user = new User(
-                1,
-                "test_user",
-                "https://twimg0-a.akamaihd.net/profile_images/2222585882/android_onsen_normal.png"
-                );
     }
 
     @After

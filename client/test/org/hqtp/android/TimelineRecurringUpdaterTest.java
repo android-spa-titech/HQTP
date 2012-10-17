@@ -15,69 +15,75 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.name.Names;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-
 import static org.junit.Assert.assertThat;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.CoreMatchers.*;
+
+import static org.mockito.Mockito.*;
 
 @RunWith(HQTPTestRunner.class)
 public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
+    public static int LECTURE_ID = 47;
+
     @Inject
     TimelineRecurringUpdater updater;
     @Inject
     HQTPProxy proxy;
 
-    private User user;
+    private Post testPost;
+    private User testUser;
+    private Lecture testLecture;
+    private List<Post> testPosts;
+
+    @Before
+    public void setUpFixture() throws Exception {
+        testUser = new User(1, "testUser", "http://example.com/icon.png");
+        testLecture = new Lecture(2, "testLecture", "testLectureCode");
+        testPost = new Post(3, "body", new Date(), 1000, testUser, testLecture);
+        testPosts = new ArrayList<Post>();
+        testPosts.add(testPost);
+    }
 
     @Test
     public void updaterShouldNotifyObserver() throws Exception {
-        List<Post> posts = new ArrayList<Post>();
-        posts.add(new Post(31, "body", new Date(), 1234, user));
-        when(proxy.getTimeline(47)).thenReturn(posts);
+        when(proxy.getTimeline(LECTURE_ID)).thenReturn(testPosts);
 
         TestObserver observer = new TestObserver();
 
-        updater.setLectureId(47);
+        updater.setLectureId(LECTURE_ID);
         updater.registerTimelineObserver(observer);
         updater.startRecurringUpdateTimeline();
         Thread.sleep(100);
 
         updater.stop();
-        verify(proxy).getTimeline(47);
+        verify(proxy).getTimeline(LECTURE_ID);
         assertThat(observer.times, equalTo(1));
-        assertThat(observer.posts, equalTo(posts));
+        assertThat(observer.posts, equalTo(testPosts));
     }
 
     @Test
     public void updaterShouldNotifyRecurrently() throws Exception {
-        List<Post> posts = new ArrayList<Post>();
-        posts.add(new Post(31, "body", new Date(), 1234, user));
-        when(proxy.getTimeline(47)).thenReturn(posts).thenReturn(posts);
+        when(proxy.getTimeline(LECTURE_ID))
+            .thenReturn(testPosts).thenReturn(testPosts);
 
         TestObserver observer = new TestObserver();
 
-        updater.setLectureId(47);
+        updater.setLectureId(LECTURE_ID);
         updater.registerTimelineObserver(observer);
         updater.startRecurringUpdateTimeline();
         Thread.sleep(1000);
 
         updater.stop();
-        assert (observer.times > 1);
+        assertThat(observer.times > 1, is(true));
     }
 
     @Test
     public void unregisteredObserverShouldNotNotified() throws Exception {
-        List<Post> posts = new ArrayList<Post>();
-        posts.add(new Post(31, "body", new Date(), 1234, user));
-        when(proxy.getTimeline(47)).thenReturn(posts);
+        when(proxy.getTimeline(LECTURE_ID)).thenReturn(testPosts);
 
         TestObserver observer = new TestObserver();
 
-        updater.setLectureId(47);
+        updater.setLectureId(LECTURE_ID);
         updater.registerTimelineObserver(observer);
         updater.startRecurringUpdateTimeline();
         Thread.sleep(100);
@@ -85,42 +91,38 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
         updater.unregisterTimelineObserver(observer);
         Thread.sleep(1000);
         assertThat(observer.times, equalTo(1));
-        assertThat(observer.posts, equalTo(posts));
+        assertThat(observer.posts, equalTo(testPosts));
     }
 
     @Test
     public void shouldNotNotifyAfterStopped() throws Exception {
-        List<Post> posts = new ArrayList<Post>();
-        posts.add(new Post(31, "body", new Date(), 1234, user));
-        when(proxy.getTimeline(47)).thenReturn(posts);
+        when(proxy.getTimeline(LECTURE_ID)).thenReturn(testPosts);
 
         TestObserver observer = new TestObserver();
 
-        updater.setLectureId(47);
+        updater.setLectureId(LECTURE_ID);
         updater.registerTimelineObserver(observer);
         updater.startRecurringUpdateTimeline();
         Thread.sleep(100);
         assertThat(observer.times, equalTo(1));
-        assertThat(observer.posts, equalTo(posts));
+        assertThat(observer.posts, equalTo(testPosts));
 
         updater.stop();
         Thread.sleep(1000);
         assertThat(observer.times, equalTo(1));
-        assertThat(observer.posts, equalTo(posts));
+        assertThat(observer.posts, equalTo(testPosts));
     }
 
     @Test
     public void updaterShouldCallProxy() throws Exception {
-        List<Post> posts = new ArrayList<Post>();
-        posts.add(new Post(31, "body", new Date(), 1234, user));
-        when(proxy.getTimeline(47)).thenReturn(posts);
+        when(proxy.getTimeline(LECTURE_ID)).thenReturn(testPosts);
 
-        updater.setLectureId(47);
+        updater.setLectureId(LECTURE_ID);
         updater.startRecurringUpdateTimeline();
         Thread.sleep(100);
 
         updater.stop();
-        verify(proxy).getTimeline(47);
+        verify(proxy).getTimeline(LECTURE_ID);
     }
 
     @Test
@@ -155,11 +157,6 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
     @Before
     public void setUp() {
         setUpRoboGuice(new TestModule());
-        this.user = new User(
-                1,
-                "test_user",
-                "https://twimg0-a.akamaihd.net/profile_images/2222585882/android_onsen_normal.png"
-                );
     }
 
     @After

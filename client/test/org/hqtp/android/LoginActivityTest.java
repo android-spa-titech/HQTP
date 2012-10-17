@@ -25,16 +25,11 @@ import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
 import com.xtremelabs.robolectric.shadows.ShadowIntent;
 
 import static com.xtremelabs.robolectric.Robolectric.shadowOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.CoreMatchers.*;
+
+import static org.mockito.Mockito.*;
 
 @RunWith(HQTPTestRunner.class)
 public class LoginActivityTest extends RoboGuiceTest {
@@ -53,7 +48,7 @@ public class LoginActivityTest extends RoboGuiceTest {
     public void activityShouldFinishWhenBackButtonPressed() throws Exception {
         activity.onCreate(null);
         activity.onBackPressed();
-        assertTrue(activity.isFinishing());
+        assertThat(activity.isFinishing(), is(true));
     }
 
     @Test
@@ -67,7 +62,7 @@ public class LoginActivityTest extends RoboGuiceTest {
         Thread.sleep(100);
 
         Intent startedIntent = shadowActivity.getNextStartedActivity();
-        assertNotNull(startedIntent);
+        assertThat(startedIntent, notNullValue());
         ShadowIntent shadowIntent = shadowOf(startedIntent);
         assertThat(shadowIntent.getData().toString(),
                 equalTo("http://api.twitter.com/oauth/authorize?oauth_token=token"));
@@ -94,7 +89,7 @@ public class LoginActivityTest extends RoboGuiceTest {
         verify(proxy).authenticate("123-accessToken", "accessTokenSecret");
 
         Intent startedIntent = shadowActivity.getNextStartedActivity();
-        assertNotNull(startedIntent);
+        assertThat(startedIntent, notNullValue());
         ShadowIntent shadowIntent = shadowOf(startedIntent);
         assertThat(shadowIntent.getComponent().getClassName(),
                 equalTo(LectureListActivity.class.getName()));
@@ -117,9 +112,9 @@ public class LoginActivityTest extends RoboGuiceTest {
                 Uri.parse("hqtp://request_callback?oauth_verifier=verifier")));
         Thread.sleep(100);
 
-        assertNull(shadowActivity.getNextStartedActivity());
+        assertThat(shadowActivity.getNextStartedActivity(), nullValue());
         AlertDialog alert = ShadowAlertDialog.getLatestAlertDialog();
-        assertNotNull(alert);
+        assertThat(alert, notNullValue());
     }
 
     private class TestModule extends AbstractModule {
