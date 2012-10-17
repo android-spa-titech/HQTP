@@ -58,10 +58,3 @@ def access_timeline_post_view(client, lecture_id, body,
         dic['after_virtual_ts'] = after_virtual_ts
     response = client.post(url, dic)
     return json.loads(response.content)
-
-
-def get_nth_lecture_dict(n):
-    # 呼び出された時点でのDBからindex番目のLectureモデルのディクショナリを取得する
-    # Fixtureでテスト用のLectureモデルを投入した時の使用を想定
-    from mysite.question.models import Lecture
-    return Lecture.objects.all()[n].to_dict()

@@ -1,0 +1,23 @@
+[
+    {
+    	"pk": 1,
+    	"model": "question.post",
+    	"fields": {
+    		"body": "First Post",
+    		"lecture": 1,
+    		"posted_at": "2012-10-17T13:43:15.282",
+    		"added_by": 1,
+    		"virtual_ts": 135044899528200600
+    	}
+    }, {
+    	"pk": 2,
+    	"model": "question.post",
+    	"fields": {
+    		"body": "Second Post",
+    		"lecture": 1,
+    		"posted_at": "2012-10-17T13:43:43.176",
+    		"added_by": 1,
+    		"virtual_ts": 135044902317511100
+    	}
+    }
+]
