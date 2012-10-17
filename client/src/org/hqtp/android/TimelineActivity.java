@@ -16,6 +16,8 @@ public class TimelineActivity extends RoboActivity {
     TimelineRecurringUpdater updater;
     @Inject
     TimelineAdapter adapter;
+    @Inject
+    ImageLoader imageLoader;
 
     public static final String LECTURE_ID = "LECTURE_ID";
 
@@ -51,5 +53,11 @@ public class TimelineActivity extends RoboActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         adapter.onActivityResult(requestCode, resultCode, data);
+    }
+    
+    @Override
+    protected void onStop() {
+        imageLoader.shutdown();
+        super.onStop();
     }
 }

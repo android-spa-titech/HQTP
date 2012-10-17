@@ -32,15 +32,18 @@ import static org.junit.Assert.assertThat;
 
 import static org.hamcrest.CoreMatchers.*;
 
+import static org.mockito.Mockito.*;
+
 @RunWith(HQTPTestRunner.class)
 public class TimelineAdapterTest extends RoboGuiceTest {
     static final int TEST_LECTURE_ID = 42;
 
     @Inject
     TimelineAdapter adapter;
+    @Inject
+    ImageLoader imageLoader;
 
-    private Activity activity = new RoboActivity() {
-    };
+    private Activity activity;
     private Post testPost;
     private Post testOldPost;
     private User testUser;
@@ -110,6 +113,9 @@ public class TimelineAdapterTest extends RoboGuiceTest {
 
         assertThat(postContent.getText().toString(), equalTo(testOldPost.getBody()));
         assertThat(userName.getText().toString(), equalTo(testUser.getName()));
+        assertThat(userIcon.getTag(), instanceOf(String.class));
+        assertThat((String) userIcon.getTag(), equalTo(testUser.getIconURL()));
+        verify(imageLoader).displayImage(userIcon, activity);
     }
 
     @Test
@@ -292,12 +298,15 @@ public class TimelineAdapterTest extends RoboGuiceTest {
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
+            bind(ImageLoader.class).toInstance(mock(ImageLoader.class));
             bind(Activity.class).toInstance(activity);
         }
     }
 
     @Before
     public void setUp() {
+        activity = new RoboActivity() {
+        };
         setUpRoboGuice(new TestModule(), activity);
     }
 

@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.inject.Inject;
@@ -33,6 +34,8 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
     Activity activity;
     @Inject
     Alerter alerter;
+    @Inject
+    ImageLoader imageLoader;
 
     private List<ListCell> cells = new ArrayList<ListCell>();
     private PostingCell formCell;
@@ -288,9 +291,12 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
             TextView bodyView = (TextView) convertView.findViewById(R.id.postContent);
             TextView userNameView = (TextView) convertView.findViewById(R.id.userName);
             TextView postedTimeView = (TextView) convertView.findViewById(R.id.postedTime);
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.userIcon);
 
             bodyView.setText(post.getBody());
             userNameView.setText(post.getUser().getName());
+            imageView.setTag(post.getUser().getIconURL());
+            imageLoader.displayImage(imageView, TimelineAdapter.this.activity);
             final Date postedDate = post.getTime();
             final long diffMillis = new Date().getTime() - postedDate.getTime();
             if (diffMillis < ONE_HOUR_MILLIS) {

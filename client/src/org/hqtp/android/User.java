@@ -31,9 +31,11 @@ public class User {
 
     public static User fromJSON(JSONObject json) throws JSONException
     {
-        return new User(
+        User user = new User(
                 json.getInt("id"),
                 json.getString("name"),
-                json.getString("icon_url"));
+                json.getString("icon_url")
+                );
+        return user;
     }
 }

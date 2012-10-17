@@ -25,14 +25,14 @@ import static org.mockito.Mockito.*;
 public class TimelineActivityTest extends RoboGuiceTest {
     private static final int LECTURE_ID = 47;
 
-    @Inject
-    TimelineActivity activity;
     @InjectView(R.id.listPost)
     ListView listView;
     @Inject
     TimelineAdapter adapter;
     @Inject
     TimelineRecurringUpdater updater;
+
+    private TimelineActivity activity;
 
     @Test
     public void loadingActivityShouldStartAndRegisterAdapter() throws Exception {
@@ -66,6 +66,7 @@ public class TimelineActivityTest extends RoboGuiceTest {
             bind(TimelineRecurringUpdater.class).toInstance(
                     mock(TimelineRecurringUpdater.class));
             bind(TimelineAdapter.class).toInstance(mock(TimelineAdapter.class));
+            bind(ImageLoader.class).toInstance(mock(ImageLoader.class));
             bind(TimelineActivity.class).toInstance(activity);
             bind(Activity.class).toInstance(activity);
         }
