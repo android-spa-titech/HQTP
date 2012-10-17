@@ -15,6 +15,8 @@ import twitter4j.auth.RequestToken;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.widget.Button;
 
@@ -43,6 +45,7 @@ public class LoginActivityTest extends RoboGuiceTest {
     Button loginButton;
 
     private ShadowActivity shadowActivity;
+    private SharedPreferences preferences;
 
     @Test
     public void activityShouldFinishWhenBackButtonPressed() throws Exception {
@@ -87,6 +90,9 @@ public class LoginActivityTest extends RoboGuiceTest {
         Thread.sleep(100);
 
         verify(proxy).authenticate("123-accessToken", "accessTokenSecret");
+        assertThat(preferences.getString(LoginActivity.SAVED_AUTH_TOKEN, ""), equalTo("123-accessToken"));
+        assertThat(preferences.getString(LoginActivity.SAVED_AUTH_TOKEN_SECRET, ""), equalTo("accessTokenSecret"));
+        assertTrue(preferences.getBoolean(LoginActivity.SAVED_AUTH_TOKEN_STATE, false));
 
         Intent startedIntent = shadowActivity.getNextStartedActivity();
         assertThat(startedIntent, notNullValue());
@@ -117,6 +123,47 @@ public class LoginActivityTest extends RoboGuiceTest {
         assertThat(alert, notNullValue());
     }
 
+    @Test
+    public void activityShouldUseSavedLoginInformation() throws Exception {
+        Editor e = preferences.edit();
+        e.putString(LoginActivity.SAVED_AUTH_TOKEN, "123-accessToken");
+        e.putString(LoginActivity.SAVED_AUTH_TOKEN_SECRET, "accessTokenSecret");
+        e.putBoolean(LoginActivity.SAVED_AUTH_TOKEN_STATE, true);
+        e.commit();
+
+        activity.onCreate(null);
+        loginButton.performClick();
+        Thread.sleep(100);
+
+        verify(proxy).authenticate("123-accessToken", "accessTokenSecret");
+
+        Intent startedIntent = shadowActivity.getNextStartedActivity();
+        assertNotNull(startedIntent);
+        ShadowIntent shadowIntent = shadowOf(startedIntent);
+        assertThat(shadowIntent.getComponent().getClassName(),
+                equalTo(HQTPActivity.class.getName()));
+    }
+
+    @Test
+    public void activityShouldUseValidLoginInformation() throws Exception {
+        Editor e = preferences.edit();
+        e.putString(LoginActivity.SAVED_AUTH_TOKEN, "123-accessToken");
+        e.putString(LoginActivity.SAVED_AUTH_TOKEN_SECRET, "accessTokenSecret");
+        e.commit();
+
+        activity.onCreate(null);
+        RequestToken requestToken = new RequestToken("token", "secret");
+        when(oauth.getOAuthRequestToken("hqtp://request_callback/")).thenReturn(requestToken);
+        loginButton.performClick();
+        Thread.sleep(100);
+
+        Intent startedIntent = shadowActivity.getNextStartedActivity();
+        assertNotNull(startedIntent);
+        ShadowIntent shadowIntent = shadowOf(startedIntent);
+        assertThat(shadowIntent.getData().toString(),
+                equalTo("http://api.twitter.com/oauth/authorize?oauth_token=token"));
+    }
+
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
@@ -132,6 +179,8 @@ public class LoginActivityTest extends RoboGuiceTest {
         activity = new LoginActivity();
         shadowActivity = shadowOf(activity);
         setUpRoboGuice(new TestModule(), activity);
+
+        preferences = activity.getPreferences(Activity.MODE_PRIVATE);
     }
 
     @After
