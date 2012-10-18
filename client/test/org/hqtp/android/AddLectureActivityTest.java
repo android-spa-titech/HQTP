@@ -94,6 +94,8 @@ public class AddLectureActivityTest extends RoboGuiceTest {
         ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
         assertThat(shadowIntent.getComponent().getClassName(),
                 equalTo(TimelineActivity.class.getName()));
+        assertThat(shadowIntent.getIntExtra(TimelineActivity.LECTURE_ID, 0),
+                equalTo(123));
     }
 
     @Test
@@ -138,6 +140,8 @@ public class AddLectureActivityTest extends RoboGuiceTest {
         ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
         assertThat(shadowIntent.getComponent().getClassName(),
                 equalTo(TimelineActivity.class.getName()));
+        assertThat(shadowIntent.getIntExtra(TimelineActivity.LECTURE_ID, 0),
+                equalTo(123));
     }
 
     private class TestModule extends AbstractModule {

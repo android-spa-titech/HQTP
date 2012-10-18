@@ -79,7 +79,7 @@ public class AddLectureActivity extends RoboActivity implements
         @Override
         protected void onSuccess(Lecture lecture) throws Exception {
             Intent intent = new Intent(AddLectureActivity.this, TimelineActivity.class);
-            intent.putExtra("lectureId", lecture.getId());
+            intent.putExtra(TimelineActivity.LECTURE_ID, lecture.getId());
             startActivity(intent);
         }
 
@@ -92,7 +92,7 @@ public class AddLectureActivity extends RoboActivity implements
                             @Override
                             public void onClick(DialogInterface arg0, int arg1) {
                                 Intent intent = new Intent(AddLectureActivity.this, TimelineActivity.class);
-                                intent.putExtra("lectureId", lecture.getId());
+                                intent.putExtra(TimelineActivity.LECTURE_ID, lecture.getId());
                                 startActivity(intent);
                             }
                         });
