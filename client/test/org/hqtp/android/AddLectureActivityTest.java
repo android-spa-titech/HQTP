@@ -19,6 +19,7 @@ import com.google.inject.Inject;
 import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.shadows.ShadowActivity;
 import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
+import com.xtremelabs.robolectric.shadows.ShadowIntent;
 
 import static com.xtremelabs.robolectric.Robolectric.shadowOf;
 import static org.junit.Assert.assertThat;
@@ -77,6 +78,8 @@ public class AddLectureActivityTest extends RoboGuiceTest {
     @Test
     public void pressingTheAddButtonShouldCallProxy() throws Exception {
         activity.onCreate(null);
+        when(proxy.addLecture("lectureCode", "lectureName")).thenReturn(
+                new Lecture(123, "lectureCode", "lectureName"));
 
         lectureCodeText.setText("lectureCode");
         lectureNameText.setText("lectureName");
@@ -87,11 +90,12 @@ public class AddLectureActivityTest extends RoboGuiceTest {
         verify(proxy).addLecture("lectureCode", "lectureName");
         ShadowActivity shadowActivity = shadowOf(activity);
         Intent startedIntent = shadowActivity.getNextStartedActivity();
-        // TODO: Uncomment when HQTPProxyImple.addLecture() is implemented.
-        // assertNotNull(startedIntent);
-        // ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
-        // assertThat(shadowIntent.getComponent().getClassName(),
-        //         equalTo(TimelineActivity.class.getName()));
+        assertThat(startedIntent, notNullValue());
+        ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
+        assertThat(shadowIntent.getComponent().getClassName(),
+                equalTo(TimelineActivity.class.getName()));
+        assertThat(shadowIntent.getIntExtra(TimelineActivity.LECTURE_ID, 0),
+                equalTo(123));
     }
 
     @Test
@@ -108,8 +112,36 @@ public class AddLectureActivityTest extends RoboGuiceTest {
 
         verify(proxy).addLecture("lectureCode", "lectureName");
         AlertDialog alert = ShadowAlertDialog.getLatestAlertDialog();
-        // TODO: Uncomment when error handling code is implemented.
-        // assertNotNull(alert);
+        assertThat(alert, notNullValue());
+    }
+
+    @Test
+    public void alreadyCreatedLecture() throws Exception {
+        activity.onCreate(null);
+
+        when(proxy.addLecture("lectureCode", "lectureName")).thenThrow(
+                new LectureAlreadyCreatedException(
+                        new Lecture(123, "lectureCode", "lectureName"),
+                        "Lecture exists"));
+        lectureCodeText.setText("lectureCode");
+        lectureNameText.setText("lectureName");
+        addButton.performClick();
+        Robolectric.runBackgroundTasks();
+        Thread.sleep(100);
+
+        verify(proxy).addLecture("lectureCode", "lectureName");
+        AlertDialog alert = ShadowAlertDialog.getLatestAlertDialog();
+        assertThat(alert, notNullValue());
+        alert.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
+
+        ShadowActivity shadowActivity = shadowOf(activity);
+        Intent startedIntent = shadowActivity.getNextStartedActivity();
+        assertThat(startedIntent, notNullValue());
+        ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
+        assertThat(shadowIntent.getComponent().getClassName(),
+                equalTo(TimelineActivity.class.getName()));
+        assertThat(shadowIntent.getIntExtra(TimelineActivity.LECTURE_ID, 0),
+                equalTo(123));
     }
 
     private class TestModule extends AbstractModule {

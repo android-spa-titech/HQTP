@@ -33,5 +33,5 @@ public interface HQTPProxy {
     public abstract List<Lecture> getLectures() throws HQTPAPIException, IOException, JSONException, ParseException;
 
     public abstract Lecture addLecture(String lectureCode, String lectureName) throws HQTPAPIException, IOException,
-            JSONException, ParseException;
+            JSONException, LectureAlreadyCreatedException, ParseException;
 }

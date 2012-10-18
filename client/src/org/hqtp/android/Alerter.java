@@ -20,12 +20,17 @@ public final class Alerter {
     }
 
     void alert(String title, String message) {
+        alert(title, message, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+    }
+
+    void alert(String title, String message, DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(context)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {}
-            }).show();
+            .setPositiveButton("OK", listener).show();
     }
 }

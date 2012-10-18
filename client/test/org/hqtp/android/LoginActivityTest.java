@@ -92,7 +92,7 @@ public class LoginActivityTest extends RoboGuiceTest {
         verify(proxy).authenticate("123-accessToken", "accessTokenSecret");
         assertThat(preferences.getString(LoginActivity.SAVED_AUTH_TOKEN, ""), equalTo("123-accessToken"));
         assertThat(preferences.getString(LoginActivity.SAVED_AUTH_TOKEN_SECRET, ""), equalTo("accessTokenSecret"));
-        assertTrue(preferences.getBoolean(LoginActivity.SAVED_AUTH_TOKEN_STATE, false));
+        assertThat(preferences.getBoolean(LoginActivity.SAVED_AUTH_TOKEN_STATE, false), is(true));
 
         Intent startedIntent = shadowActivity.getNextStartedActivity();
         assertThat(startedIntent, notNullValue());
@@ -138,10 +138,10 @@ public class LoginActivityTest extends RoboGuiceTest {
         verify(proxy).authenticate("123-accessToken", "accessTokenSecret");
 
         Intent startedIntent = shadowActivity.getNextStartedActivity();
-        assertNotNull(startedIntent);
+        assertThat(startedIntent, notNullValue());
         ShadowIntent shadowIntent = shadowOf(startedIntent);
         assertThat(shadowIntent.getComponent().getClassName(),
-                equalTo(HQTPActivity.class.getName()));
+                equalTo(LectureListActivity.class.getName()));
     }
 
     @Test
@@ -158,7 +158,7 @@ public class LoginActivityTest extends RoboGuiceTest {
         Thread.sleep(100);
 
         Intent startedIntent = shadowActivity.getNextStartedActivity();
-        assertNotNull(startedIntent);
+        assertThat(startedIntent, notNullValue());
         ShadowIntent shadowIntent = shadowOf(startedIntent);
         assertThat(shadowIntent.getData().toString(),
                 equalTo("http://api.twitter.com/oauth/authorize?oauth_token=token"));
