@@ -61,6 +61,8 @@ public class LectureListActivityTest extends RoboGuiceTest {
                 equalTo(TimelineActivity.class.getName()));
         assertThat(shadowIntent.getIntExtra(TimelineActivity.LECTURE_ID, -1),
                 equalTo(1));
+        assertThat(shadowIntent.getStringExtra(TimelineActivity.LECTURE_NAME),
+                equalTo("Test lecture"));
     }
 
     @Test

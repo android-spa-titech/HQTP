@@ -24,6 +24,7 @@ import static org.mockito.Mockito.*;
 @RunWith(HQTPTestRunner.class)
 public class TimelineActivityTest extends RoboGuiceTest {
     private static final int LECTURE_ID = 47;
+    private static final String LECTURE_NAME = "lecture name";
 
     @InjectView(R.id.listPost)
     ListView listView;
@@ -76,7 +77,8 @@ public class TimelineActivityTest extends RoboGuiceTest {
     public void setUp() {
         activity = new TimelineActivity();
         Intent intent = new Intent();
-        intent.putExtra(PostTimelineActivity.LECTURE_ID, TimelineActivityTest.LECTURE_ID);
+        intent.putExtra(TimelineActivity.LECTURE_ID, TimelineActivityTest.LECTURE_ID);
+        intent.putExtra(TimelineActivity.LECTURE_NAME, TimelineActivityTest.LECTURE_NAME);
         activity.setIntent(intent);
         setUpRoboGuice(new TestModule(), activity);
     }
