@@ -80,6 +80,7 @@ public class AddLectureActivity extends RoboActivity implements
         protected void onSuccess(Lecture lecture) throws Exception {
             Intent intent = new Intent(AddLectureActivity.this, TimelineActivity.class);
             intent.putExtra(TimelineActivity.LECTURE_ID, lecture.getId());
+            intent.putExtra(TimelineActivity.LECTURE_NAME, lecture.getName());
             startActivity(intent);
         }
 
@@ -93,6 +94,7 @@ public class AddLectureActivity extends RoboActivity implements
                             public void onClick(DialogInterface arg0, int arg1) {
                                 Intent intent = new Intent(AddLectureActivity.this, TimelineActivity.class);
                                 intent.putExtra(TimelineActivity.LECTURE_ID, lecture.getId());
+                                intent.putExtra(TimelineActivity.LECTURE_NAME, lecture.getName());
                                 startActivity(intent);
                             }
                         });
