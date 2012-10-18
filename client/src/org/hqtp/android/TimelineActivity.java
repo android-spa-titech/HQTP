@@ -13,7 +13,7 @@ import com.google.inject.Inject;
 public class TimelineActivity extends RoboActivity {
     @InjectView(R.id.listPost)
     ListView timelineListView;
-    @InjectView(R.id.className)
+    @InjectView(R.id.lectureName)
     TextView lectureNameTextView;// TODO: id変えたい・・・
     @Inject
     TimelineRecurringUpdater updater;
