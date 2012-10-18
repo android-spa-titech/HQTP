@@ -17,7 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Names;
 import com.xtremelabs.robolectric.Robolectric;
 
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import static org.hamcrest.CoreMatchers.*;
 
@@ -105,6 +105,93 @@ public class HQTPProxyImplTest extends RoboGuiceTest {
         assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/lecture/timeline/"));
         // TODO: クエリパラメータの検査もしたい
         assertThat(res, notNullValue());
+    }
+
+    @Test
+    public void getLectureShouldCallAPI() throws Exception {
+        Robolectric.clearHttpResponseRules();
+        Robolectric.clearPendingHttpResponses();
+        Robolectric.addPendingHttpResponse(200, "{\n" +
+                "\"status\": \"OK\",\n" +
+                "\"lectures\": [\n" +
+                "{\n" +
+                "\"id\": 123,\n" +
+                "\"name\": \"lectureName\",\n" +
+                "\"code\": \"lectureCode\"\n" +
+                "},\n" +
+                "]\n" +
+                "}");
+
+        List<Lecture> res = proxy.getLectures();
+
+        HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
+        assertThat(sentHttpRequest.getMethod(), equalTo("GET"));
+        assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
+        assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/lecture/get/"));
+
+        assertThat(res, notNullValue());
+        assertThat(res.size(), equalTo(1));
+        Lecture lecture = res.get(0);
+        assertThat(lecture.getId(), equalTo(123));
+        assertThat(lecture.getName(), equalTo("lectureName"));
+        assertThat(lecture.getCode(), equalTo("lectureCode"));
+    }
+
+    @Test
+    public void addLectureShouldCallAPI() throws Exception {
+        Robolectric.clearHttpResponseRules();
+        Robolectric.clearPendingHttpResponses();
+        Robolectric.addPendingHttpResponse(200, "{\n" +
+                "\"status\": \"OK\",\n" +
+                "\"created\": true,\n" +
+                "\"lecture\": {\n" +
+                "\"id\": 123,\n" +
+                "\"name\": \"lectureName\",\n" +
+                "\"code\": \"lectureCode\"\n" +
+                "}\n" +
+                "}");
+
+        Lecture lecture = proxy.addLecture("lectureName", "lectureCode");
+
+        HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
+        assertThat(sentHttpRequest.getMethod(), equalTo("POST"));
+        assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
+        assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/lecture/add/"));
+
+        assertThat(lecture, notNullValue());
+        assertThat(lecture.getId(), equalTo(123));
+        assertThat(lecture.getName(), equalTo("lectureName"));
+        assertThat(lecture.getCode(), equalTo("lectureCode"));
+    }
+
+    @Test
+    public void addLectureShouldThrowException() throws Exception {
+        Robolectric.clearHttpResponseRules();
+        Robolectric.clearPendingHttpResponses();
+        Robolectric.addPendingHttpResponse(200, "{\n" +
+                "\"status\": \"OK\",\n" +
+                "\"created\": false,\n" +
+                "\"lecture\": {\n" +
+                "\"id\": 123,\n" +
+                "\"name\": \"lectureName\",\n" +
+                "\"code\": \"lectureCode\"\n" +
+                "}\n" +
+                "}");
+        try {
+            proxy.addLecture("lectureName", "lectureCode");
+            fail();
+        } catch (LectureAlreadyCreatedException e) {
+            HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
+            assertThat(sentHttpRequest.getMethod(), equalTo("POST"));
+            assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
+            assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/lecture/add/"));
+
+            Lecture lecture = e.lecture;
+            assertThat(lecture, notNullValue());
+            assertThat(lecture.getId(), equalTo(123));
+            assertThat(lecture.getName(), equalTo("lectureName"));
+            assertThat(lecture.getCode(), equalTo("lectureCode"));
+        }
     }
 
     private class TestModule extends AbstractModule {

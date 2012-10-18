@@ -3,6 +3,7 @@ package org.hqtp.android;
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
 import roboguice.util.RoboAsyncTask;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -78,14 +79,27 @@ public class AddLectureActivity extends RoboActivity implements
         @Override
         protected void onSuccess(Lecture lecture) throws Exception {
             Intent intent = new Intent(AddLectureActivity.this, TimelineActivity.class);
-            intent.putExtra("lectureId", lecture.getId());
+            intent.putExtra(TimelineActivity.LECTURE_ID, lecture.getId());
             startActivity(intent);
         }
 
         @Override
         protected void onException(Exception e) {
-            // TODO:すでに存在する講義を入力していたらアラートを提示
-            // TODO:通信エラー処理
+            if (e instanceof LectureAlreadyCreatedException) {
+                final Lecture lecture = ((LectureAlreadyCreatedException) e).lecture;
+                alerter.alert("AddLectureActivity", "既に授業が追加されていました",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface arg0, int arg1) {
+                                Intent intent = new Intent(AddLectureActivity.this, TimelineActivity.class);
+                                intent.putExtra(TimelineActivity.LECTURE_ID, lecture.getId());
+                                startActivity(intent);
+                            }
+                        });
+
+            } else {
+                alerter.alert("AddLectureActivity", "通信エラーです");
+            }
         }
     }
 }

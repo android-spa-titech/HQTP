@@ -79,23 +79,51 @@ public class HQTPProxyImpl implements HQTPProxy {
         return Post.fromJSON(json.getJSONObject("post"));
     }
 
-    private static boolean isStatusOK(JSONObject json) throws JSONException
-    {
-        return json.has("status") && json.getString("status").equals("OK");
-    }
-
     @Override
     public Lecture addLecture(String lectureCode, String lectureName) throws HQTPAPIException, IOException,
             JSONException, java.text.ParseException {
-        // TODO Auto-generated method stub
-        return null;
+        String response = builder.post("lecture/add/")
+            .param("code", lectureCode)
+            .param("name", lectureName)
+            .send();
+
+        JSONObject json = new JSONObject(response);
+        if (!isStatusOK(json)) {
+            throw new HQTPAPIException("Creating a lecture was failed. : POST /api/lecture/add/ returned status="
+                    + json.getString("status"));
+        }
+
+        Lecture lecture = Lecture.fromJSON(json.getJSONObject("lecture"));
+        if (!isCreated(json)) {
+            throw new LectureAlreadyCreatedException(lecture, "Lecture is already created.");
+        } else {
+            return lecture;
+        }
     }
 
     @Override
     public List<Lecture> getLectures() throws HQTPAPIException, IOException, JSONException, ParseException {
-        // TODO Auto-generated method stub
-        List<Lecture> lectures = new ArrayList<Lecture>();
-        lectures.add(new Lecture(1, "Test Class", "Test Class Code"));
+        String response = builder.get("lecture/get/").send();
+
+        JSONObject json = new JSONObject(response);
+        if (!isStatusOK(json)) {
+            throw new HQTPAPIException("Getting lectures was failed. : GET /api/lecture/get/ returned status="
+                    + json.getString("status"));
+        }
+
+        ArrayList<Lecture> lectures = new ArrayList<Lecture>();
+        JSONArray array = json.getJSONArray("lectures");
+        for (int i = 0, length = array.length(); i < length; i++) {
+            lectures.add(Lecture.fromJSON(array.getJSONObject(i)));
+        }
         return lectures;
+    }
+
+    private static boolean isStatusOK(JSONObject json) throws JSONException {
+        return json.has("status") && json.getString("status").equals("OK");
+    }
+
+    private static boolean isCreated(JSONObject json) throws JSONException {
+        return json.has("created") && json.getBoolean("created");
     }
 }

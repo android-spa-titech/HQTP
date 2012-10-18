@@ -55,6 +55,7 @@ public class LectureListActivity extends RoboActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(LectureListActivity.this, AddLectureActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
             }
         });
@@ -62,6 +63,7 @@ public class LectureListActivity extends RoboActivity {
         refreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                v.setEnabled(false);
                 new RefreshTask().execute();
             }
         });
@@ -114,6 +116,11 @@ public class LectureListActivity extends RoboActivity {
         protected void onException(Exception e) throws RuntimeException {
             super.onException(e);
             alerter.toastShort("講義一覧の取得に失敗しました");
+        }
+
+        @Override
+        protected void onFinally() {
+            refreshButton.setEnabled(true);
         }
     }
 }
