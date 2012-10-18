@@ -60,32 +60,11 @@ def get_vc_mock(user_key, user_secret):
 
 
 ###############################################################################
-# /api/auth/のAPIに関するテスト
-###############################################################################
-def test_about_api_auth():
-    """
-    >>> c = shortcuts.make_client()
-    >>> jobj = shortcuts.access_auth_view(c)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> 'created' in jobj
-    True
-    >>> user = jobj['user']
-    >>> 'id' in user
-    True
-    >>> 'name' in user
-    True
-    >>> 'icon_url' in user
-    True
-    """
-
-###############################################################################
 # /api/auth/に関するテスト
 ###############################################################################
 
 
 def test_about_auth():
-    # test_about_api_authと統合できないか?
     u"""
     >>> c = shortcuts.make_client()
 
@@ -161,46 +140,6 @@ def test_about_auth__servererror():
     >>> c = shortcuts.make_client()
     >>> jobj = shortcuts.access_auth_view(c, key='spam', secret='egg')
     >>> jobj['status'] == 'Server Error'
-    True
-    """
-
-
-###############################################################################
-# /api/lecture/getのAPIに関するテスト
-###############################################################################
-def test_about_api_lecture_get():
-    """
-    >>> c = shortcuts.make_client()
-    >>> jobj = shortcuts.access_auth_view(c)
-    >>> jobj = shortcuts.access_lecture_get_view(c)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> 'lectures' in jobj
-    True
-    """
-
-
-###############################################################################
-# /api/lecture/addのAPIに関するテスト
-###############################################################################
-def test_about_api_lecture_add():
-    """
-    >>> name = 'Programming 1'
-    >>> code = '0B123456789'
-    >>> c = shortcuts.make_client()
-    >>> jobj = shortcuts.access_auth_view(c)
-    >>> jobj = shortcuts.access_lecture_add_view(c, name, code)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> 'created' in jobj
-    True
-
-    >>> lecture = jobj['lecture']
-    >>> lecture['name'] == name
-    True
-    >>> lecture['code'] == code
-    True
-    >>> 'id' in lecture
     True
     """
 
@@ -308,81 +247,6 @@ def test_about_lecture__forbidden():
     # authをして初めてlecture/addできます
     >>> jobj4a = shortcuts.access_lecture_add_view(c, name, code)
     >>> jobj4a['status'] == 'OK'
-    True
-    """
-
-
-###############################################################################
-# /api/lecture/timeline/ GET APIに関するテスト
-###############################################################################
-def test_about_api_timeline_get():
-    u"""
-    >>> name = 'Arch1'
-    >>> code = 't001'
-
-    # 下準備（授業の作成）
-    >>> c0 = shortcuts.make_client()
-    >>> jobj0a = shortcuts.access_auth_view(c0)
-    >>> jobj0b = shortcuts.access_lecture_add_view(c0, name, code)
-    >>> lecture_id = jobj0b['lecture']['id']
-
-    >>> c = shortcuts.make_client()
-    >>> jobj = shortcuts.access_auth_view(c)
-    >>> jobj = shortcuts.access_timeline_get_view(c, lecture_id)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> 'posts' in jobj
-    True
-    """
-
-
-###############################################################################
-# /api/lecture/timeline/ POST APIに関するテスト
-###############################################################################
-def test_about_api_timeline_post():
-    u"""
-    >>> name = 'Arch1'
-    >>> code = 't001'
-    >>> body = u'MIPSとは'
-
-    # 下準備（授業の作成）
-    >>> c0 = shortcuts.make_client()
-    >>> jobj0a = shortcuts.access_auth_view(c0)
-    >>> jobj0b = shortcuts.access_lecture_add_view(c0, name, code)
-    >>> lecture_id = jobj0b['lecture']['id']
-
-    >>> c = shortcuts.make_client()
-    >>> jobj = shortcuts.access_auth_view(c)
-    >>> jobj = shortcuts.access_timeline_post_view(c, lecture_id, body,
-    ...                                            before_virtual_ts=1000,
-    ...                                            after_virtual_ts=2000)
-    >>> jobj['status'] == 'OK'
-    True
-    >>> post = jobj['post']
-    >>> 'id' in post
-    True
-
-    # 追加先授業の情報は正しいか
-    >>> lecture = post['lecture']
-    >>> lecture['id'] == lecture_id
-    True
-    >>> lecture['name'] == name
-    True
-    >>> lecture['code'] == code
-    True
-
-    # 投稿内容の情報は正しいか
-    >>> post['body'] == body
-    True
-
-    # 投稿ユーザーの情報は正しいか
-    >>> user = post['user']
-    >>> 'id' in user and 'name' in user and 'icon_url' in user
-    True
-
-    >>> 'time' in post
-    True
-    >>> 'virtual_ts' in post
     True
     """
 
