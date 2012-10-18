@@ -79,7 +79,7 @@ public class AddLectureActivityTest extends RoboGuiceTest {
     public void pressingTheAddButtonShouldCallProxy() throws Exception {
         activity.onCreate(null);
         when(proxy.addLecture("lectureCode", "lectureName")).thenReturn(
-                new Lecture(123, "lectureCode", "lectureName"));
+                new Lecture(123, "lectureName", "lectureCode"));
 
         lectureCodeText.setText("lectureCode");
         lectureNameText.setText("lectureName");
@@ -96,6 +96,8 @@ public class AddLectureActivityTest extends RoboGuiceTest {
                 equalTo(TimelineActivity.class.getName()));
         assertThat(shadowIntent.getIntExtra(TimelineActivity.LECTURE_ID, 0),
                 equalTo(123));
+        assertThat(shadowIntent.getStringExtra(TimelineActivity.LECTURE_NAME),
+                equalTo("lectureName"));
     }
 
     @Test
@@ -121,7 +123,7 @@ public class AddLectureActivityTest extends RoboGuiceTest {
 
         when(proxy.addLecture("lectureCode", "lectureName")).thenThrow(
                 new LectureAlreadyCreatedException(
-                        new Lecture(123, "lectureCode", "lectureName"),
+                        new Lecture(123, "lectureName", "lectureCode"),
                         "Lecture exists"));
         lectureCodeText.setText("lectureCode");
         lectureNameText.setText("lectureName");
@@ -142,6 +144,8 @@ public class AddLectureActivityTest extends RoboGuiceTest {
                 equalTo(TimelineActivity.class.getName()));
         assertThat(shadowIntent.getIntExtra(TimelineActivity.LECTURE_ID, 0),
                 equalTo(123));
+        assertThat(shadowIntent.getStringExtra(TimelineActivity.LECTURE_NAME),
+                equalTo("lectureName"));
     }
 
     private class TestModule extends AbstractModule {

@@ -6,12 +6,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.inject.Inject;
 
 public class TimelineActivity extends RoboActivity {
     @InjectView(R.id.listPost)
     ListView timelineListView;
+    @InjectView(R.id.lectureName)
+    TextView lectureNameTextView;// TODO: id変えたい・・・
     @Inject
     TimelineRecurringUpdater updater;
     @Inject
@@ -20,10 +23,15 @@ public class TimelineActivity extends RoboActivity {
     ImageLoader imageLoader;
 
     public static final String LECTURE_ID = "LECTURE_ID";
+    public static final String LECTURE_NAME = "LECTURE_NAME";
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.timeline);
+
+        String lectureName = getIntent().getStringExtra(LECTURE_NAME);
+        assert lectureName != null;
+        lectureNameTextView.setText(lectureName);
 
         int lectureId = getIntent().getIntExtra(LECTURE_ID, -1);
         assert lectureId != -1;

@@ -47,6 +47,7 @@ public class LectureListActivity extends RoboActivity {
 
                 Intent intent = new Intent(LectureListActivity.this, TimelineActivity.class);
                 intent.putExtra(TimelineActivity.LECTURE_ID, lecture.getId());
+                intent.putExtra(TimelineActivity.LECTURE_NAME, lecture.getName());
                 startActivity(intent);
             }
         });
