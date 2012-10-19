@@ -20,10 +20,12 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+import android.app.Application;
 import android.net.Uri;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.loopj.android.http.PersistentCookieStore;
 
 /**
  * An agent for issuing HttpRequest of API
@@ -36,8 +38,9 @@ public final class APIRequestBuilder {
     private CookieStore cookie_store;
 
     @Inject
-    public APIRequestBuilder(@Named("HQTP API Endpoint URL") String api_gateway) {
+    public APIRequestBuilder(@Named("HQTP API Endpoint URL") String api_gateway, Application application) {
         this.api_gateway = Uri.parse(api_gateway);
+        this.cookie_store = new PersistentCookieStore(application);
     }
 
     /**
