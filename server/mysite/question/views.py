@@ -183,7 +183,7 @@ def lecture_timeline_view(request):
 
     elif request.method == 'POST':
         try:
-            id = request.POST['id']
+            lecture_id = request.POST['id']
         except MultiValueDictKeyError:
             return json_response_bad_request()
 
@@ -192,8 +192,11 @@ def lecture_timeline_view(request):
             # bodyとimageのどちらか一方を指定
             return json_response_bad_request()
 
-        if (('before_virtual_ts' in request.POST)
-            != ('after_virtual_ts' in request.POST)):
+        # boolean flags
+        use_before_vts = ('before_virtual_ts' in request.POST)
+        use_after_vts = ('after_virtual_ts' in request.POST)
+
+        if use_before_vts != use_after_vts:
             # only one is requested and the other one is not
             # NOTE: != is logical exclusive-or
             return json_response_bad_request()
@@ -211,15 +214,13 @@ def lecture_timeline_view(request):
         # CharFieldはデフォルト値が''
         body = request.POST.get('body', '')
 
-        if 'before_virtual_ts' not in request.POST:
-            # 'after_virtual_ts' is not in request.POST, too.
+        if use_before_vts and use_after_vts:
+            # post to between 2 posts
+            vts = Post.calc_mid(int(request.POST['before_virtual_ts']),
+                                int(request.POST['after_virtual_ts']))
+        else:
             # post to latest
             vts = Post.time_to_vts(time())
-        else:
-            # both 'before_virtual_ts' and 'after_virtual_ts' in request.POST
-            # post to between 2 lectures
-            vts = Post.calc_mid(int(request.POST['before_virtual_ts']),
-                                    int(request.POST['after_virtual_ts']))
 
         post = lec.post_set.create(body=body,
                                    added_by=request.user,
@@ -238,7 +239,7 @@ def lecture_timeline_view(request):
             post.save()
 
 
-        return json_response(dict(post=post.to_dict()))
+        return json_response(context=dict(post=post.to_dict()))
 
 
 def _test():
