@@ -70,20 +70,20 @@ def auth_view(request):
 
     try:
         # get twitter account by key and secret
-        tw_account = get_vc(key, secret)
+        vc = get_vc(key, secret)
     except TypeError:
         # Error reason is not well known
         # sending dummy access token key/secret causes error
         return json_response_server_error()
 
-    if tw_account == {}:
+    if vc == {}:
         # 正しいアクセストークンキー、シークレットでなかった場合 など
         return json_response_not_found()
-    user_name = tw_account['id']
+    user_name = vc['id']
 
     # get twitter icon URL and save icon image to local
     # 暫定的に認証時に毎回アイコンを取得
-    twicon = get_img(tw_account['icon_url'])
+    twicon = get_img(vc['icon_url'])
     if twicon is None:
         relative_pathname = 'default_twicon'
     else:
@@ -109,8 +109,8 @@ def auth_view(request):
                                         email='',
                                         password=temp_password)
         profile = user.get_profile()
-        profile.screen_name = tw_account['screen_name']
-        profile.name = tw_account['name']
+        profile.screen_name = vc['screen_name']
+        profile.name = vc['name']
         profile.icon_url = icon_url
         profile.save()
         created = True

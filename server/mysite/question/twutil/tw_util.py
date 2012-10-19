@@ -36,8 +36,9 @@ def get_vc(user_key, user_secret):
     if not vc:
         # 正しいアクセストークンキー、シークレットでなかった場合
         return {}
-    return dict(id=vc.id, screen_name=vc.screen_name, name=vc.name,
+    ret = dict(id=vc.id, screen_name=vc.screen_name, name=vc.name,
                icon_url=vc.profile_image_url)
+    return ret
 
 
 def _test():
