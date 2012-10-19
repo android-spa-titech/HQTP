@@ -13,9 +13,7 @@ class Lecture(models.Model):
         return u'[%s] %s' % (self.code, self.name)
 
     def to_dict(self):
-        return dict(id=self.pk,
-                    name=self.name,
-                    code=self.code)
+        return dict(id=self.pk, name=self.name, code=self.code)
 
 
 class Post(models.Model):
