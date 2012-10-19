@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <EditText
+        android:id="@+id/postBody"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_gravity="fill_vertical"
+        android:layout_weight="1"
+        android:ems="10"
+        android:gravity="top"
+        android:inputType="textMultiLine" >
+
+        <requestFocus />
+    </EditText>
+
+    <Button
+        android:id="@+id/postButton"
+        android:layout_width="160dp"
+        android:layout_height="52dp"
+        android:layout_gravity="center"
+        android:background="@drawable/button_post" />
+
+</LinearLayout>

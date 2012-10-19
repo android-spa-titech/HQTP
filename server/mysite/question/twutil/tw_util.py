@@ -4,10 +4,6 @@ import tweepy
 import consumer_info
 
 
-PROFILE_IMAGE = ('http://api.twitter.com/1/users/profile_image'
-                 + '?screen_name=%s&size=%s')
-
-
 def make_auth():
     return tweepy.OAuthHandler(consumer_info.key, consumer_info.secret)
 
@@ -28,6 +24,8 @@ def get_vc(user_key, user_secret):
     True
     >>> vc['name'] == ci.spa_name
     True
+    >>> vc['icon_url'] == ci.spa_icon_url
+    True
     >>> vc = get_vc('dummy key','dummy secret')
     >>> vc=={}
     True
@@ -38,35 +36,8 @@ def get_vc(user_key, user_secret):
     if not vc:
         # 正しいアクセストークンキー、シークレットでなかった場合
         return {}
-    return dict(id=vc.id, screen_name=vc.screen_name, name=vc.name)
-
-
-def save_img(screen_name, size='bigger'):
-    """
-    get user icon by using twitter official API
-    size is 'bigger'(73px), 'normal'(48px), 'mini'(24px), 'original'
-    """
-
-    url = PROFILE_IMAGE % (screen_name, size)
-
-    # calc save directory (dirname == "HQTP/server/media/twicon")
-    from django.conf import settings
-    import os
-    dirname = settings.MEDIA_ROOT
-
-    import urllib
-    f = urllib.urlopen(url)
-    file_type = f.info().gettype()
-    src = f.read()  # source string (binary)
-    f.close()
-    if 'image' in file_type:  # not error page
-        out = open(os.path.join(dirname, screen_name), 'wb')
-        # 'out' is local directory
-        out.write(src)  # save icon image file from twitter server to local
-        out.close()
-        return url  # returns not local temporary file but icon URL
-    else:  # error page HTML
-        return None
+    return dict(id=vc.id, screen_name=vc.screen_name, name=vc.name,
+               icon_url=vc.profile_image_url)
 
 
 def _test():

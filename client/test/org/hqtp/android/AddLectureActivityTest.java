@@ -21,14 +21,11 @@ import com.xtremelabs.robolectric.shadows.ShadowActivity;
 import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
 
 import static com.xtremelabs.robolectric.Robolectric.shadowOf;
+import static org.junit.Assert.assertThat;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.*;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(HQTPTestRunner.class)
 public class AddLectureActivityTest extends RoboGuiceTest {
@@ -56,9 +53,9 @@ public class AddLectureActivityTest extends RoboGuiceTest {
         Thread.sleep(100);
 
         verify(proxy, never()).addLecture("lectureCode", "lectureName");
-        assertTrue(activity.isFinishing());
+        assertThat(activity.isFinishing(), is(true));
         ShadowActivity shadowActivity = shadowOf(activity);
-        assertNull(shadowActivity.getNextStartedActivity());
+        assertThat(shadowActivity.getNextStartedActivity(), nullValue());
     }
 
     @Test
@@ -72,9 +69,9 @@ public class AddLectureActivityTest extends RoboGuiceTest {
         Thread.sleep(100);
 
         verify(proxy, never()).addLecture("lectureCode", "lectureName");
-        assertTrue(activity.isFinishing());
+        assertThat(activity.isFinishing(), is(true));
         ShadowActivity shadowActivity = shadowOf(activity);
-        assertNull(shadowActivity.getNextStartedActivity());
+        assertThat(shadowActivity.getNextStartedActivity(), nullValue());
     }
 
     @Test

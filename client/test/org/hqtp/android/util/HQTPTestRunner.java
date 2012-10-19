@@ -15,5 +15,7 @@ public class HQTPTestRunner extends RobolectricTestRunner {
         super.bindShadowClasses();
         Robolectric.bindShadowClass(ObservableShadow.class);
         Robolectric.bindShadowClass(DataSetObservableShadow.class);
+        Robolectric.bindShadowClass(HQTPShadowArrayAdapter.class);
+        Robolectric.bindShadowClass(HQTPShadowListView.class);
     }
 }

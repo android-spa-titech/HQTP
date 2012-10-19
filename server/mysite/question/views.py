@@ -13,7 +13,6 @@ import json
 from mysite.question.models import (Post,
                                     user_to_dict,
                                     Lecture)
-from mysite.question.twutil.tw_util import get_vc, save_img
 from time import time
 
 
@@ -57,6 +56,11 @@ def json_response_server_error(context={}):
 
 
 def auth_view(request):
+    from twutil.tw_util import get_vc
+    from mysite.question.image_utils import (get_img, save_bindata,
+                                             build_media_absolute_pathname,
+                                             build_media_absolute_url)
+
     try:
         key = request.GET['access_token_key']
         secret = request.GET['access_token_secret']
@@ -79,7 +83,15 @@ def auth_view(request):
 
     # get twitter icon URL and save icon image to local
     # 暫定的に認証時に毎回アイコンを取得
-    icon_url = save_img(tw_account['screen_name'])
+    twicon = get_img(tw_account['icon_url'])
+    if twicon is None:
+        relative_pathname = 'default_twicon'
+    else:
+        import os
+        relative_pathname = os.path.join('twicon', str(user_name))
+        absolute_pathname = build_media_absolute_pathname(relative_pathname)
+        save_bindata(absolute_pathname, twicon)
+    icon_url = build_media_absolute_url(request, relative_pathname)
 
     # 新規に作成されたユーザーも、登録済みだったユーザーも
     # どちらもパスワードとしてtemp_passwordを設定する
@@ -99,13 +111,7 @@ def auth_view(request):
         profile = user.get_profile()
         profile.screen_name = tw_account['screen_name']
         profile.name = tw_account['name']
-        if icon_url is not None:
-            profile.icon_url = icon_url
-        else:
-            # set default icon
-            # 暫定的にandroid_spaのアイコンを使用
-            from mysite.question.twutil.tw_util import PROFILE_IMAGE
-            profile.icon_url = PROFILE_IMAGE % ('android_spa', 'bigger')
+        profile.icon_url = icon_url
         profile.save()
         created = True
 
