@@ -47,7 +47,7 @@ class Post(models.Model):
                     time=self.posted_at.isoformat(),
                     lecture=self.lecture.to_dict(),
                     virtual_ts=self.virtual_ts,
-                    image=image_url)
+                    image_url=image_url)
 
     @classmethod
     def time_to_vts(cls, t):
