@@ -45,6 +45,7 @@ nosetests.xml
 
 
 media/twicon/*
+media/uploads/*
 
 # test coverage output dir
 .cover

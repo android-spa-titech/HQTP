@@ -18,6 +18,7 @@ from mysite.question.image_utils import (get_img, save_bindata,
                                          build_media_absolute_pathname,
                                          build_media_absolute_url)
 from time import time
+import os
 
 
 def convert_context_to_json(context):
@@ -86,7 +87,6 @@ def auth_view(request):
     if twicon is None:
         relative_pathname = 'default_twicon'
     else:
-        import os
         relative_pathname = os.path.join('twicon', str(user_name))
         absolute_pathname = build_media_absolute_pathname(relative_pathname)
         save_bindata(absolute_pathname, twicon)
@@ -184,8 +184,12 @@ def lecture_timeline_view(request):
     elif request.method == 'POST':
         try:
             lecture_id = request.POST['id']
-            body = request.POST['body']
         except MultiValueDictKeyError:
+            return json_response_bad_request()
+
+        if (('body' in request.POST)
+            == ('image' in request.FILES)):
+            # bodyとimageのどちらか一方を指定
             return json_response_bad_request()
 
         # boolean flags
@@ -207,6 +211,9 @@ def lecture_timeline_view(request):
             # invalid lecture ID
             return json_response_not_found()
 
+        # CharFieldはデフォルト値が''
+        body = request.POST.get('body', '')
+
         if use_before_vts and use_after_vts:
             # post to between 2 posts
             vts = Post.calc_mid(int(request.POST['before_virtual_ts']),
@@ -218,6 +225,20 @@ def lecture_timeline_view(request):
         post = lec.post_set.create(body=body,
                                    added_by=request.user,
                                    virtual_ts=vts)
+
+        if 'image' in request.FILES:
+            # save image file
+            # ユニークなfilenameとして、Postのpkを使う
+            image = request.FILES['image']
+            filename = 'img_' + str(post.pk)
+            relative_pathname = os.path.join('uploads', filename)
+            absolute_pathname = build_media_absolute_pathname(relative_pathname)
+            save_bindata(absolute_pathname, image.read())
+            image_url = build_media_absolute_url(request, relative_pathname)
+            post.image_url = image_url
+            post.save()
+
+
         return json_response(context=dict(post=post.to_dict()))
 
 

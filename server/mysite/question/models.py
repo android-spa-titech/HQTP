@@ -24,17 +24,28 @@ class Post(models.Model):
 
     # 64bit(from -9223372036854775808 to 9223372036854775807)
     virtual_ts = models.BigIntegerField()
+    image_url = models.CharField(max_length=255)
+
 
     def __unicode__(self):
         return self.body
 
     def to_dict(self):
+        # bodyもimage_urlもどちらも''なら、bodyが''の投稿
+        if self.image_url == '':
+            image_url = None
+            body = self.body
+        else:
+            image_url = self.image_url
+            body = None
+
         return dict(id=self.pk,
-                    body=self.body,
+                    body=body,
                     user=user_to_dict(self.added_by),
                     time=self.posted_at.isoformat(),
                     lecture=self.lecture.to_dict(),
-                    virtual_ts=self.virtual_ts)
+                    virtual_ts=self.virtual_ts,
+                    image_url=image_url)
 
     @classmethod
     def time_to_vts(cls, t):

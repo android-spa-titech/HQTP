@@ -48,13 +48,18 @@ def access_timeline_get_view(client, lecture_id):
     return json.loads(response.content)
 
 
-def access_timeline_post_view(client, lecture_id, body,
-                              before_virtual_ts=None, after_virtual_ts=None):
+def access_timeline_post_view(client, lecture_id, body=None,
+                              before_virtual_ts=None, after_virtual_ts=None,
+                              image=None):
     url = '/api/lecture/timeline/'
-    dic = dict(id=lecture_id, body=body)
+    dic = dict(id=lecture_id)
+    if body is not None:
+        dic['body'] = body
     if before_virtual_ts is not None:
         dic['before_virtual_ts'] = before_virtual_ts
     if after_virtual_ts is not None:
         dic['after_virtual_ts'] = after_virtual_ts
+    if image is not None:
+        dic['image'] = image
     response = client.post(url, dic)
     return json.loads(response.content)
