@@ -67,6 +67,17 @@ class Post(models.Model):
         return (vts1 + vts2) / 2
 
 
+class Achievement(models.Model):
+    name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    # point = models.IntegerField()
+
+    def to_dict(self):
+        return dict(id=self.pk,
+                    name=self.name,
+                    created_at=self.created_at.isoformat())
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
 
@@ -74,12 +85,14 @@ class UserProfile(models.Model):
     screen_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     icon_url = models.CharField(max_length=255)
+    total_point = models.IntegerField()
 
 
 def user_to_dict(user):
     return dict(id=user.pk,
                 name=user.get_profile().screen_name,
-                icon_url=user.get_profile().icon_url)
+                icon_url=user.get_profile().icon_url,
+                total_point=user.get_profile().total_point)
 
 
 def create_user_profile(sender, instance, created, **kwargs):
