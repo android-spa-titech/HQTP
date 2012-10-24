@@ -7,6 +7,7 @@ from django.test.client import Client
 from json import loads
 import mysite.question.test_views as test_views
 import mysite.question.twutil.tw_util as tw_util
+import mysite.question.image_utils as image_utils
 
 
 class AuthenticateTests(TestCase):
@@ -14,9 +15,15 @@ class AuthenticateTests(TestCase):
         self.c = Client(enforce_csrf_checks=True)
         self._original_get_vc = tw_util.get_vc
         tw_util.get_vc = test_views.get_vc_mock
+        self._original_get_img = image_utils.get_img
+        image_utils.get_img = test_views.get_img_mock
+        self._original_save_bindata = image_utils.save_bindata
+        image_utils.save_bindata = test_views.save_bindata_mock
 
     def tearDown(self):
         tw_util.get_vc = self._original_get_vc
+        image_utils.get_img = self._original_get_img
+        image_utils.save_bindata = self._original_save_bindata
 
     def test_access_auth_view(self):
         j_auth = sc.access_auth_view(self.c)
@@ -35,9 +42,15 @@ class AuthenticateFailTests(TestCase):
         self.c = Client(enforce_csrf_checks=True)
         self._original_get_vc = tw_util.get_vc
         tw_util.get_vc = test_views.get_vc_mock
+        self._original_get_img = image_utils.get_img
+        image_utils.get_img = test_views.get_img_mock
+        self._original_save_bindata = image_utils.save_bindata
+        image_utils.save_bindata = test_views.save_bindata_mock
 
     def tearDown(self):
         tw_util.get_vc = self._original_get_vc
+        image_utils.get_img = self._original_get_img
+        image_utils.save_bindata = self._original_save_bindata
 
     def test_auth_only_key(self):
         url_key = '/api/auth/?access_token_key=BAD_REQUEST_KEY'
