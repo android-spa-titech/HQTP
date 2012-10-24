@@ -5,11 +5,18 @@ from mysite.question.models import Lecture
 from django.test import TestCase
 from django.test.client import Client
 from json import loads
+import mysite.question.test_views as test_views
+import mysite.question.twutil.tw_util as tw_util
 
 
 class AuthenticateTests(TestCase):
     def setUp(self):
         self.c = Client(enforce_csrf_checks=True)
+        self._original_get_vc = tw_util.get_vc
+        tw_util.get_vc = test_views.get_vc_mock
+
+    def tearDown(self):
+        tw_util.get_vc = self._original_get_vc
 
     def test_access_auth_view(self):
         j_auth = sc.access_auth_view(self.c)
@@ -26,6 +33,11 @@ class AuthenticateTests(TestCase):
 class AuthenticateFailTests(TestCase):
     def setUp(self):
         self.c = Client(enforce_csrf_checks=True)
+        self._original_get_vc = tw_util.get_vc
+        tw_util.get_vc = test_views.get_vc_mock
+
+    def tearDown(self):
+        tw_util.get_vc = self._original_get_vc
 
     def test_auth_only_key(self):
         url_key = '/api/auth/?access_token_key=BAD_REQUEST_KEY'

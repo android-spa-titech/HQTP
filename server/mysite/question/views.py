@@ -13,7 +13,7 @@ import json
 from mysite.question.models import (Post,
                                     user_to_dict,
                                     Lecture)
-from mysite.question.twutil.tw_util import get_vc
+import mysite.question.twutil.tw_util as tw_util
 from mysite.question.image_utils import (get_img, save_bindata,
                                          build_media_absolute_pathname,
                                          build_media_absolute_url)
@@ -69,7 +69,7 @@ def auth_view(request):
 
     try:
         # get twitter account by key and secret
-        tw_account = get_vc(key, secret)
+        tw_account = tw_util.get_vc(key, secret)
     except TypeError:
         # Error reason is not well known
         # sending dummy access token key/secret causes error
