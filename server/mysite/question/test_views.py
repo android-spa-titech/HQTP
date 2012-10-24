@@ -65,6 +65,14 @@ def get_vc_mock(user_key, user_secret):
 ###############################################################################
 
 
+def get_img_mock(url):
+    return '/tmp/test'
+
+
+def save_bindata_mock(absolute_pathname, data):
+    pass
+
+
 def test_about_auth():
     u"""
     >>> c = shortcuts.make_client()
@@ -542,6 +550,7 @@ def test_about_user_profile():
 from mysite.question.models import Lecture, Post
 from django.contrib.auth.models import User
 import mysite.question.twutil.tw_util as tw_util
+import mysite.question.image_utils as image_utils
 import mysite.question.shortcuts as shortcuts
 
 
@@ -555,9 +564,17 @@ def setup(test):
     test.globs['real_get_vc'] = tw_util.get_vc
     tw_util.get_vc = get_vc_mock
 
+    test.globs['real_get_img'] = image_utils.get_img
+    image_utils.get_img = get_img_mock
+
+    test.globs['real_save_bindata'] = image_utils.save_bindata
+    image_utils.save_bindata = save_bindata_mock
+
 
 def teardown(test):
     tw_util.get_vc = test.globs['real_get_vc']
+    image_utils.get_img = test.globs['real_get_img']
+    image_utils.save_bindata = test.globs['real_save_bindata']
 
 
 def load_tests(loader, tests, ignore):
