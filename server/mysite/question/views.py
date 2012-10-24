@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 
+# Django imports
 from django.http import (HttpResponse,
                          HttpResponseNotFound,
                          HttpResponseForbidden,
@@ -9,7 +10,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.utils.datastructures import MultiValueDictKeyError
+
+# Python module imports
 import json
+import os
+import doctest
+from time import time
+
+# mysite imports
 from mysite.question.models import (Post,
                                     user_to_dict,
                                     Lecture)
@@ -17,7 +25,7 @@ from mysite.question.twutil.tw_util import get_vc
 from mysite.question.image_utils import (get_img, save_bindata,
                                          build_media_absolute_pathname,
                                          build_media_absolute_url)
-from time import time
+from mysite.question.achive_utils import give_achievement
 
 
 def convert_context_to_json(context):
@@ -86,7 +94,6 @@ def auth_view(request):
     if twicon is None:
         relative_pathname = 'default_twicon'
     else:
-        import os
         relative_pathname = os.path.join('twicon', str(user_name))
         absolute_pathname = build_media_absolute_pathname(relative_pathname)
         save_bindata(absolute_pathname, twicon)
@@ -111,7 +118,10 @@ def auth_view(request):
         profile.screen_name = tw_account['screen_name']
         profile.name = tw_account['name']
         profile.icon_url = icon_url
+        first_point = 0
+        profile.total_point = first_point
         profile.save()
+        give_achievement('first_login', user)
         created = True
 
     auth_user = authenticate(username=user_name, password=temp_password)
@@ -153,6 +163,7 @@ def lecture_add_view(request):
     # get_or_create(): 新規作成したらcreated = True
     lec, created = Lecture.objects.get_or_create(
         code=code, defaults=dict(name=name))
+    give_achievement('add_lecture', request.user)
     return json_response(context=dict(created=created, lecture=lec.to_dict()))
 
 
@@ -218,9 +229,9 @@ def lecture_timeline_view(request):
         post = lec.post_set.create(body=body,
                                    added_by=request.user,
                                    virtual_ts=vts)
+        give_achievement('one_post', request.user)
         return json_response(context=dict(post=post.to_dict()))
 
 
 def _test():
-    import doctest
     doctest.testmod()

@@ -3,7 +3,6 @@
 import mysite.question.shortcuts as sc
 from mysite.question.models import Lecture
 from django.test import TestCase
-from django.test.client import Client
 from json import loads
 
 
@@ -15,7 +14,8 @@ class AuthenticateTests(TestCase):
     def test_access_auth_view_second(self):
         # second log-in user
         sc.access_auth_view(self.client)
-        client2 = Client(enforce_csrf_checks=True)
+        from django.test.client import Client
+        client2 = Client()
         j_auth2 = sc.access_auth_view(client2)
         self.assertFalse(j_auth2['created'])
 
@@ -166,3 +166,9 @@ class TimeLineFailTests(TestCase):
         j_post_fbd = sc.access_timeline_post_view(self.client, lecture_id=1,
             body=u'認証が切れたら、俺は投稿もできないのかよ')
         self.assertEqual(j_post_fbd['status'], 'Forbidden')
+
+
+class AchievementTests(TestCase):
+    def test_first_login(self):
+        j_first = sc.access_auth_view(self.client)
+        self.assertEqual(j_first['total_point'], 100)

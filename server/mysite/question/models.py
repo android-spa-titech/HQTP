@@ -70,7 +70,8 @@ class Post(models.Model):
 class Achievement(models.Model):
     name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
-    # point = models.IntegerField()
+    point = models.IntegerField()
+    achieved_by = models.ForeignKey(User)
 
     def to_dict(self):
         return dict(id=self.pk,

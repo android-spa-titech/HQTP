@@ -10,7 +10,7 @@ def make_client():
     >>> c = make_client()
     """
 
-    return Client(enforce_csrf_checks=True)
+    return Client()
 
 
 def access_auth_view(client, key=None, secret=None):
