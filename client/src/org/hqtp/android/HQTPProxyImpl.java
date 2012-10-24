@@ -1,5 +1,6 @@
 package org.hqtp.android;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -125,5 +126,12 @@ public class HQTPProxyImpl implements HQTPProxy {
 
     private static boolean isCreated(JSONObject json) throws JSONException {
         return json.has("created") && json.getBoolean("created");
+    }
+
+    @Override
+    public Post postTimeline(File image, int lectureId, long prevVirtualTimestamp, long nextVirtualTimestamp)
+            throws IOException, HQTPAPIException, JSONException, ParseException {
+        // TODO implement
+        return null;
     }
 }
