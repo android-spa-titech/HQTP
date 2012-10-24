@@ -39,7 +39,7 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
     public void setUpFixture() throws Exception {
         testUser = new User(1, "testUser", "http://example.com/icon.png");
         testLecture = new Lecture(2, "testLecture", "testLectureCode");
-        testPost = new Post(3, "body", new Date(), 1000, testUser, testLecture);
+        testPost = new Post(3, "body", new Date(), 1000, testUser, testLecture, null);
         testPosts = new ArrayList<Post>();
         testPosts.add(testPost);
     }

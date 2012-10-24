@@ -72,10 +72,10 @@ public class TimelineAdapterTest extends RoboGuiceTest {
     public void setUpFixture() throws Exception {
         testUser = new User(1, "testUser", "http://example.com/icon.png");
         testLecture = new Lecture(2, "testLecture", "testLectureCode");
-        testOldPost = new Post(4, "body", new Date(0), 0, testUser, testLecture);
+        testOldPost = new Post(4, "body", new Date(0), 0, testUser, testLecture, null);
         Date d = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
         testPost = new Post(3, "body", new Date(), Post.dateToVirtualTimestamp(d),
-                testUser, testLecture);
+                testUser, testLecture, null);
         testPosts = new ArrayList<Post>();
         testPosts.add(testOldPost);
         testPosts.add(testPost);

@@ -18,6 +18,7 @@ public class Post {
     private long virtualTimestamp;
     private User user;
     private Lecture lecture;
+    private String imageURL;
 
     public int getId() {
         return id;
@@ -44,8 +45,12 @@ public class Post {
         return lecture;
     }
 
+    public String getImageURL() {
+        return imageURL;
+    }
+
     public Post(int id, String body, Date time, long virtualTimestamp,
-            User user, Lecture lecture) {
+            User user, Lecture lecture, String imageURL) {
         this.id = id;
         this.body = body;
         this.time = time;
@@ -59,13 +64,20 @@ public class Post {
         df.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
         User user = User.fromJSON(json.getJSONObject("user"));
         Lecture lecture = Lecture.fromJSON(json.getJSONObject("lecture"));
+        String body = null, imageURL = null;
+        if (json.has("image_url") && !json.isNull("image_url")) {
+            imageURL = json.getString("image_url");
+        } else {
+            body = json.getString("body");
+        }
         Post post = new Post(
                 json.getInt("id"),
-                json.getString("body"),
+                body,
                 df.parse(json.getString("time")),
                 json.getLong("virtual_ts"),
                 user,
-                lecture
+                lecture,
+                imageURL
                 );
         return post;
     }
