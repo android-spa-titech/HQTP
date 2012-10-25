@@ -25,7 +25,7 @@ from mysite.question.twutil.tw_util import get_vc
 from mysite.question.image_utils import (get_img, save_bindata,
                                          build_media_absolute_pathname,
                                          build_media_absolute_url)
-from mysite.question.achive_utils import give_achievement
+from mysite.question.achieve_utils import give_achievement
 
 
 def convert_context_to_json(context):
