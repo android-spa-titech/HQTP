@@ -2,23 +2,21 @@ package org.hqtp.android;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.nio.charset.Charset;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.StringBody;
 
 import android.app.Application;
 import android.net.Uri;
@@ -155,7 +153,7 @@ public final class APIRequestBuilder {
      */
     private final class POSTRequest extends APIRequest {
         private final String uri;
-        private List<NameValuePair> params = new ArrayList<NameValuePair>();
+        private MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 
         public POSTRequest(String path) {
             Uri.Builder builder = api_gateway.buildUpon();
@@ -165,20 +163,20 @@ public final class APIRequestBuilder {
 
         @Override
         public APIRequest param(String key, String value) {
-            params.add(new BasicNameValuePair(key, value));
+            try {
+                entity.addPart(key, new StringBody(value, Charset.forName("UTF-8")));
+            } catch (UnsupportedEncodingException e) {
+                // Maybe unreachable...
+                e.printStackTrace();
+            }
             return this;
         }
 
         @Override
         public String send() throws ClientProtocolException, IOException, HQTPAPIException {
             HttpPost request = new HttpPost(uri);
-            if (params.size() != 0) {
-                try {
-                    request.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    throw new HQTPAPIException("Cannot encode some value in creating post request.");
-                }
-            }
+            //TODO: check entity is empty?
+            request.setEntity(entity);
             return send(request);
         }
     }
