@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import mysite.question.image_utils as image_utils
+import mysite.question.twutil.consumer_info as ci
+
 
 def get_vc_mock(user_key, user_secret):
     """
@@ -66,11 +69,15 @@ def get_vc_mock(user_key, user_secret):
 
 
 def get_img_mock(url):
-    return '/tmp/test'
-
-
-def save_bindata_mock(absolute_pathname, data):
-    pass
+    valid_urls = {ci.spa_icon_url}
+    if url in valid_urls:
+        relative_pathname = 'default_twicon'
+        absolute_pathname = (
+            image_utils.build_media_absolute_pathname(relative_pathname))
+        image = open(absolute_pathname)
+        return image.read()
+    else:
+        return None
 
 
 def test_about_auth():
@@ -567,14 +574,10 @@ def setup(test):
     test.globs['real_get_img'] = image_utils.get_img
     image_utils.get_img = get_img_mock
 
-    test.globs['real_save_bindata'] = image_utils.save_bindata
-    image_utils.save_bindata = save_bindata_mock
-
 
 def teardown(test):
     tw_util.get_vc = test.globs['real_get_vc']
     image_utils.get_img = test.globs['real_get_img']
-    image_utils.save_bindata = test.globs['real_save_bindata']
 
 
 def load_tests(loader, tests, ignore):
