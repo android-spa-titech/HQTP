@@ -1,5 +1,6 @@
 package org.hqtp.android;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -16,6 +17,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 
 import android.app.Application;
@@ -71,6 +73,11 @@ public final class APIRequestBuilder {
         }
 
         public abstract APIRequest param(String key, String value);
+
+        public APIRequest param(String key, File value) throws Exception
+        {
+            throw new Exception("Not Implemented");
+        }
 
         public abstract String send() throws ClientProtocolException, IOException, HQTPAPIException;
 
@@ -173,9 +180,16 @@ public final class APIRequestBuilder {
         }
 
         @Override
+        public APIRequest param(String key, File value) throws Exception {
+            FileBody body = new FileBody(value);
+            entity.addPart(key, body);
+            return this;
+        };
+
+        @Override
         public String send() throws ClientProtocolException, IOException, HQTPAPIException {
             HttpPost request = new HttpPost(uri);
-            //TODO: check entity is empty?
+            // TODO: check entity is empty?
             request.setEntity(entity);
             return send(request);
         }

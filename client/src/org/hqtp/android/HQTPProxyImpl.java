@@ -80,6 +80,31 @@ public class HQTPProxyImpl implements HQTPProxy {
         return Post.fromJSON(json.getJSONObject("post"));
     }
 
+    // TODO: ↑と↓のコードをまとめたほうが見通しがよいかも
+    @Override
+    public Post postTimeline(File image, int lectureId, long prevVirtualTimestamp, long nextVirtualTimestamp)
+            throws IOException, HQTPAPIException, JSONException, ParseException {
+        APIRequestBuilder.APIRequest request = builder.post("lecture/timeline/").param("id", lectureId);
+        try {
+            request.param("image", image);
+        } catch (Exception e) { // Maybe unreachable
+            e.printStackTrace();
+        }
+        if (prevVirtualTimestamp >= 0) {
+            request.param("before_virtual_ts", prevVirtualTimestamp);
+        }
+        if (nextVirtualTimestamp >= 0) {
+            request.param("after_virtual_ts", nextVirtualTimestamp);
+        }
+
+        JSONObject json = new JSONObject(request.send());
+        if (!isStatusOK(json)) {
+            throw new HQTPAPIException("Posting to timeline failed. : POST /api/lecture/timeline/ returned status="
+                    + json.getString("status"));
+        }
+        return Post.fromJSON(json.getJSONObject("post"));
+    }
+
     @Override
     public Lecture addLecture(String lectureCode, String lectureName) throws HQTPAPIException, IOException,
             JSONException, java.text.ParseException {
@@ -126,12 +151,5 @@ public class HQTPProxyImpl implements HQTPProxy {
 
     private static boolean isCreated(JSONObject json) throws JSONException {
         return json.has("created") && json.getBoolean("created");
-    }
-
-    @Override
-    public Post postTimeline(File image, int lectureId, long prevVirtualTimestamp, long nextVirtualTimestamp)
-            throws IOException, HQTPAPIException, JSONException, ParseException {
-        // TODO implement
-        return null;
     }
 }
