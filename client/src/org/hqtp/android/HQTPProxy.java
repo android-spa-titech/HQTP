@@ -1,5 +1,6 @@
 package org.hqtp.android;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
@@ -28,6 +29,20 @@ public interface HQTPProxy {
      * @throws ParseException
      */
     public abstract Post postTimeline(String body, int lectureId, long prevVirtualTimestamp,
+            long nextVirtualTimestamp) throws IOException, HQTPAPIException, JSONException, ParseException;
+
+    /**
+     * @param image 投稿する画像ファイル
+     * @param lectureId 授業ID
+     * @param prevVirtualTimestamp 挿入したい時間の前の投稿。指定しない場合は負数を指定する
+     * @param nextVirtualTimestamp 挿入したい時間の次の投稿。指定しない場合は負数を指定する
+     * @return 投稿したPostを返す
+     * @throws IOException
+     * @throws HQTPAPIException
+     * @throws JSONException
+     * @throws ParseException
+     */
+    public abstract Post postTimeline(File image, int lectureId, long prevVirtualTimestamp,
             long nextVirtualTimestamp) throws IOException, HQTPAPIException, JSONException, ParseException;
 
     public abstract List<Lecture> getLectures() throws HQTPAPIException, IOException, JSONException, ParseException;

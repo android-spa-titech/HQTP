@@ -1,5 +1,6 @@
 package org.hqtp.android;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -61,9 +62,29 @@ public class HQTPProxyImpl implements HQTPProxy {
     @Override
     public Post postTimeline(String body, int lectureId, long prevVirtualTimestamp, long nextVirtualTimestamp)
             throws HQTPAPIException, IOException, JSONException, java.text.ParseException {
-        APIRequestBuilder.APIRequest request = builder.post("lecture/timeline/")
-            .param("id", lectureId)
-            .param("body", body);
+        return postTimeline(body, null, lectureId, prevVirtualTimestamp, nextVirtualTimestamp);
+    }
+
+    @Override
+    public Post postTimeline(File image, int lectureId, long prevVirtualTimestamp, long nextVirtualTimestamp)
+            throws IOException, HQTPAPIException, JSONException, ParseException {
+        return postTimeline(null, image, lectureId, prevVirtualTimestamp, nextVirtualTimestamp);
+    }
+
+    private Post postTimeline(String body, File image, int lectureId, long prevVirtualTimestamp,
+            long nextVirtualTimestamp)
+            throws IOException, HQTPAPIException, JSONException, ParseException {
+        APIRequestBuilder.APIRequest request = builder.post("lecture/timeline/").param("id", lectureId);
+        if (body != null) {
+            request.param("body", body);
+        }
+        if (image != null) {
+            try {
+                request.param("image", image);
+            } catch (Exception e) { // Maybe unreachable
+                e.printStackTrace();
+            }
+        }
         if (prevVirtualTimestamp >= 0) {
             request.param("before_virtual_ts", prevVirtualTimestamp);
         }

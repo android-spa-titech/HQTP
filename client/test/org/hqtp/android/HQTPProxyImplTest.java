@@ -1,5 +1,6 @@
 package org.hqtp.android;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import com.xtremelabs.robolectric.Robolectric;
 import static org.junit.Assert.*;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(HQTPTestRunner.class)
 public class HQTPProxyImplTest extends RoboGuiceTest {
@@ -98,6 +100,30 @@ public class HQTPProxyImplTest extends RoboGuiceTest {
                 "\"virtual_ts\":\"1234567890\"}}");
 
         Post res = proxy.postTimeline("test content", 1, 1234567890, 1234568910);
+
+        HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
+        assertThat(sentHttpRequest.getMethod(), equalTo("POST"));
+        assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
+        assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/lecture/timeline/"));
+        // TODO: クエリパラメータの検査もしたい
+        assertThat(res, notNullValue());
+    }
+
+    @Test
+    public void postTimelineWithImageFileShouldCallAPI() throws Exception
+    {
+        Robolectric.clearHttpResponseRules();
+        Robolectric.clearPendingHttpResponses();
+        Robolectric.addPendingHttpResponse(200, "{\"status\":\"OK\",\"post\":" +
+                "{\"id\":\"1\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
+                "\"body\": null," +
+                "\"image_url\": \"http://example.com/image/hoge.png\"," +
+                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"time\":\"2012-06-22T17:44:23.092839\"," +
+                "\"virtual_ts\":\"1234567890\"}}");
+
+        File file = mock(File.class);
+        Post res = proxy.postTimeline(file, 1, 1234567890, 1234568910);
 
         HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
         assertThat(sentHttpRequest.getMethod(), equalTo("POST"));
