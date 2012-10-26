@@ -9,5 +9,6 @@
 	<classpathentry kind="lib" path="libs/javax.inject-1.jar"/>
 	<classpathentry kind="lib" path="libs/roboguice-2.0.jar"/>
 	<classpathentry kind="lib" path="libs/android-async-http-1.4.2.jar"/>
+	<classpathentry kind="lib" path="libs/httpmime-4.2.1.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
