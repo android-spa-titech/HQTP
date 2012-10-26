@@ -5,7 +5,7 @@
 """
 
 import urllib
-import os
+from os import path
 from django.conf import settings
 
 
@@ -37,7 +37,7 @@ def build_media_absolute_pathname(relative_pathname):
     """
     ローカルの相対パスにMEDIA_ROOTをつけてローカルの絶対パスにする
     """
-    return os.path.join(settings.MEDIA_ROOT, relative_pathname)
+    return path.join(settings.MEDIA_ROOT, relative_pathname)
 
 
 def build_media_absolute_url(request, relative_pathname):
