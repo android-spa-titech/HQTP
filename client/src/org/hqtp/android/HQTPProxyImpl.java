@@ -62,33 +62,28 @@ public class HQTPProxyImpl implements HQTPProxy {
     @Override
     public Post postTimeline(String body, int lectureId, long prevVirtualTimestamp, long nextVirtualTimestamp)
             throws HQTPAPIException, IOException, JSONException, java.text.ParseException {
-        APIRequestBuilder.APIRequest request = builder.post("lecture/timeline/")
-            .param("id", lectureId)
-            .param("body", body);
-        if (prevVirtualTimestamp >= 0) {
-            request.param("before_virtual_ts", prevVirtualTimestamp);
-        }
-        if (nextVirtualTimestamp >= 0) {
-            request.param("after_virtual_ts", nextVirtualTimestamp);
-        }
-
-        JSONObject json = new JSONObject(request.send());
-        if (!isStatusOK(json)) {
-            throw new HQTPAPIException("Posting to timeline failed. : POST /api/lecture/timeline/ returned status="
-                    + json.getString("status"));
-        }
-        return Post.fromJSON(json.getJSONObject("post"));
+        return postTimeline(body, null, lectureId, prevVirtualTimestamp, nextVirtualTimestamp);
     }
 
-    // TODO: ↑と↓のコードをまとめたほうが見通しがよいかも
     @Override
     public Post postTimeline(File image, int lectureId, long prevVirtualTimestamp, long nextVirtualTimestamp)
             throws IOException, HQTPAPIException, JSONException, ParseException {
+        return postTimeline(null, image, lectureId, prevVirtualTimestamp, nextVirtualTimestamp);
+    }
+
+    private Post postTimeline(String body, File image, int lectureId, long prevVirtualTimestamp,
+            long nextVirtualTimestamp)
+            throws IOException, HQTPAPIException, JSONException, ParseException {
         APIRequestBuilder.APIRequest request = builder.post("lecture/timeline/").param("id", lectureId);
-        try {
-            request.param("image", image);
-        } catch (Exception e) { // Maybe unreachable
-            e.printStackTrace();
+        if (body != null) {
+            request.param("body", body);
+        }
+        if (image != null) {
+            try {
+                request.param("image", image);
+            } catch (Exception e) { // Maybe unreachable
+                e.printStackTrace();
+            }
         }
         if (prevVirtualTimestamp >= 0) {
             request.param("before_virtual_ts", prevVirtualTimestamp);

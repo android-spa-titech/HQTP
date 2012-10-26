@@ -12,7 +12,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -22,6 +21,7 @@ import com.xtremelabs.robolectric.Robolectric;
 import static org.junit.Assert.*;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(HQTPTestRunner.class)
 public class HQTPProxyImplTest extends RoboGuiceTest {
@@ -122,7 +122,7 @@ public class HQTPProxyImplTest extends RoboGuiceTest {
                 "\"time\":\"2012-06-22T17:44:23.092839\"," +
                 "\"virtual_ts\":\"1234567890\"}}");
 
-        File file = Mockito.mock(File.class);
+        File file = mock(File.class);
         Post res = proxy.postTimeline(file, 1, 1234567890, 1234568910);
 
         HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
