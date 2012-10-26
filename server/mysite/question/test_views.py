@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import mysite.question.image_utils as image_utils
+import mysite.question.twutil.consumer_info as ci
+
 
 def get_vc_mock(user_key, user_secret):
     """
@@ -63,6 +66,18 @@ def get_vc_mock(user_key, user_secret):
 ###############################################################################
 # /api/auth/に関するテスト
 ###############################################################################
+
+
+def get_img_mock(url):
+    valid_urls = {ci.spa_icon_url}
+    if url in valid_urls:
+        relative_pathname = 'default_twicon'
+        absolute_pathname = (
+            image_utils.build_media_absolute_pathname(relative_pathname))
+        image = open(absolute_pathname)
+        return image.read()
+    else:
+        return None
 
 
 def test_about_auth():
@@ -542,6 +557,7 @@ def test_about_user_profile():
 from mysite.question.models import Lecture, Post
 from django.contrib.auth.models import User
 import mysite.question.twutil.tw_util as tw_util
+import mysite.question.image_utils as image_utils
 import mysite.question.shortcuts as shortcuts
 
 
@@ -555,9 +571,13 @@ def setup(test):
     test.globs['real_get_vc'] = tw_util.get_vc
     tw_util.get_vc = get_vc_mock
 
+    test.globs['real_get_img'] = image_utils.get_img
+    image_utils.get_img = get_img_mock
+
 
 def teardown(test):
     tw_util.get_vc = test.globs['real_get_vc']
+    image_utils.get_img = test.globs['real_get_img']
 
 
 def load_tests(loader, tests, ignore):
