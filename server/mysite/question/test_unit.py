@@ -5,6 +5,9 @@ from mysite.question.models import Lecture
 from django.test import TestCase
 from django.test.client import Client
 from json import loads
+import re
+import os
+import image_utils
 
 
 class AuthenticateTests(TestCase):
@@ -176,3 +179,47 @@ class TimeLineFailTests(TestCase):
         j_post_fbd = sc.access_timeline_post_view(self.c, lecture_id=1,
             body=u'認証が切れたら、俺は投稿もできないのかよ')
         self.assertEqual(j_post_fbd['status'], 'Forbidden')
+
+
+class ImagePostTests(TestCase):
+    """
+    Timelineへの画像の投稿に関して
+    """
+    # 前提条件: すでに1つだけ授業が登録してあり、ユーザーが認証済み
+    fixtures = ['test_user.json', 'test_lecture.json']
+
+    def setUp(self):
+        self.c = Client(enforce_csrf_checks=True)
+        self.c.login(username='testuser', password='testpassword')
+
+        # Uploadするファイルの絶対パス
+        relative_pathname_src = 'default_twicon'
+        self.absolute_pathname_src = (
+            image_utils.build_media_absolute_pathname(relative_pathname_src))
+
+        # 存在確認
+        errmsg = 'File [%s] is not Found' % relative_pathname_src
+        assert os.path.exists(self.absolute_pathname_src), errmsg
+
+        # 保存後のファイルの絶対パス
+        relative_pathname = os.path.join('uploads', 'img_1')
+        self.absolute_pathname = (
+            image_utils.build_media_absolute_pathname(relative_pathname))
+
+        # テストなどで保存された画像ファイルがあれば削除
+        if os.path.exists(self.absolute_pathname):
+            os.remove(self.absolute_pathname)
+
+    def test_post_image(self):
+        image = open(self.absolute_pathname_src)
+        j_post_image = sc.access_timeline_post_view(
+            self.c, lecture_id=1, image=image)
+
+        # image_urlが適切に設定されていることを確認
+        image_url = j_post_image['post']['image_url']
+        ptn = re.compile('http://.+/site_media/uploads/img_(\d)')
+        img_id = int(ptn.match(image_url).group(1))
+        self.assertEqual(img_id, j_post_image['post']['id'])
+
+        # 画像がちゃんと保存されていることを確認
+        self.assertTrue(os.path.exists(self.absolute_pathname))
