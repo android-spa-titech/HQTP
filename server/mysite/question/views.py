@@ -13,10 +13,8 @@ import json
 from mysite.question.models import (Post,
                                     user_to_dict,
                                     Lecture)
-from mysite.question.twutil.tw_util import get_vc
-from mysite.question.image_utils import (get_img, save_bindata,
-                                         build_media_absolute_pathname,
-                                         build_media_absolute_url)
+import mysite.question.twutil.tw_util as tw_util
+import mysite.question.image_utils as image_utils
 from time import time
 import os
 
@@ -70,7 +68,7 @@ def auth_view(request):
 
     try:
         # get twitter account by key and secret
-        tw_account = get_vc(key, secret)
+        tw_account = tw_util.get_vc(key, secret)
     except TypeError:
         # Error reason is not well known
         # sending dummy access token key/secret causes error
@@ -83,14 +81,15 @@ def auth_view(request):
 
     # get twitter icon URL and save icon image to local
     # 暫定的に認証時に毎回アイコンを取得
-    twicon = get_img(tw_account['icon_url'])
+    twicon = image_utils.get_img(tw_account['icon_url'])
     if twicon is None:
         relative_pathname = 'default_twicon'
     else:
         relative_pathname = os.path.join('twicon', str(user_name))
-        absolute_pathname = build_media_absolute_pathname(relative_pathname)
-        save_bindata(absolute_pathname, twicon)
-    icon_url = build_media_absolute_url(request, relative_pathname)
+        absolute_pathname = image_utils.build_media_absolute_pathname(
+            relative_pathname)
+        image_utils.save_bindata(absolute_pathname, twicon)
+    icon_url = image_utils.build_media_absolute_url(request, relative_pathname)
 
     # 新規に作成されたユーザーも、登録済みだったユーザーも
     # どちらもパスワードとしてtemp_passwordを設定する
@@ -232,12 +231,13 @@ def lecture_timeline_view(request):
             image = request.FILES['image']
             filename = 'img_' + str(post.pk)
             relative_pathname = os.path.join('uploads', filename)
-            absolute_pathname = build_media_absolute_pathname(relative_pathname)
-            save_bindata(absolute_pathname, image.read())
-            image_url = build_media_absolute_url(request, relative_pathname)
+            absolute_pathname = image_utils.build_media_absolute_pathname(
+                relative_pathname)
+            image_utils.save_bindata(absolute_pathname, image.read())
+            image_url = image_utils.build_media_absolute_url(
+                request, relative_pathname)
             post.image_url = image_url
             post.save()
-
 
         return json_response(context=dict(post=post.to_dict()))
 
