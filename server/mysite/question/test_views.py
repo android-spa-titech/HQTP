@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import mysite.question.image_utils as image_utils
 import mysite.question.twutil.consumer_info as ci
 
@@ -574,10 +575,24 @@ def setup(test):
     test.globs['real_get_img'] = image_utils.get_img
     image_utils.get_img = get_img_mock
 
+    # 既にtwiconが保存されていれば削除
+    relative_pathname = os.path.join('twicon', str(ci.spa_id))
+    absolute_pathname = (
+        image_utils.build_media_absolute_pathname(relative_pathname))
+    if os.path.exists(absolute_pathname):
+        os.remove(absolute_pathname)
+
 
 def teardown(test):
     tw_util.get_vc = test.globs['real_get_vc']
     image_utils.get_img = test.globs['real_get_img']
+
+    # テストで保存されたtwiconを削除
+    relative_pathname = os.path.join('twicon', str(ci.spa_id))
+    absolute_pathname = (
+        image_utils.build_media_absolute_pathname(relative_pathname))
+    if os.path.exists(absolute_pathname):
+        os.remove(absolute_pathname)
 
 
 def load_tests(loader, tests, ignore):

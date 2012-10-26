@@ -231,12 +231,13 @@ def lecture_timeline_view(request):
             image = request.FILES['image']
             filename = 'img_' + str(post.pk)
             relative_pathname = os.path.join('uploads', filename)
-            absolute_pathname = build_media_absolute_pathname(relative_pathname)
-            save_bindata(absolute_pathname, image.read())
-            image_url = build_media_absolute_url(request, relative_pathname)
+            absolute_pathname = image_utils.build_media_absolute_pathname(
+                relative_pathname)
+            image_utils.save_bindata(absolute_pathname, image.read())
+            image_url = image_utils.build_media_absolute_url(
+                request, relative_pathname)
             post.image_url = image_url
             post.save()
-
 
         return json_response(context=dict(post=post.to_dict()))
 

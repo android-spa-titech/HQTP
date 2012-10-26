@@ -10,6 +10,7 @@ import os
 import mysite.question.test_views as test_views
 import mysite.question.twutil.tw_util as tw_util
 import mysite.question.image_utils as image_utils
+import mysite.question.twutil.consumer_info as ci
 
 
 class AuthenticateTests(TestCase):
@@ -20,9 +21,20 @@ class AuthenticateTests(TestCase):
         self._original_get_img = image_utils.get_img
         image_utils.get_img = test_views.get_img_mock
 
+        # 既にtwiconが保存されていれば削除
+        relative_pathname = os.path.join('twicon', str(ci.spa_id))
+        self.absolute_pathname = (
+            image_utils.build_media_absolute_pathname(relative_pathname))
+        if os.path.exists(self.absolute_pathname):
+            os.remove(self.absolute_pathname)
+
     def tearDown(self):
         tw_util.get_vc = self._original_get_vc
         image_utils.get_img = self._original_get_img
+
+        # テストで保存されたtwiconを削除
+        if os.path.exists(self.absolute_pathname):
+            os.remove(self.absolute_pathname)
 
     def test_access_auth_view(self):
         j_auth = sc.access_auth_view(self.c)
@@ -225,6 +237,11 @@ class ImagePostTests(TestCase):
             image_utils.build_media_absolute_pathname(relative_pathname))
 
         # テストなどで保存された画像ファイルがあれば削除
+        if os.path.exists(self.absolute_pathname):
+            os.remove(self.absolute_pathname)
+
+    def tearDown(self):
+        # テストで保存された画像ファイルを削除
         if os.path.exists(self.absolute_pathname):
             os.remove(self.absolute_pathname)
 
