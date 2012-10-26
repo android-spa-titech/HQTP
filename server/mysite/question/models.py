@@ -76,6 +76,7 @@ class Achievement(models.Model):
     def to_dict(self):
         return dict(id=self.pk,
                     name=self.name,
+                    point=self.point,
                     created_at=self.created_at.isoformat())
 
 
@@ -86,7 +87,7 @@ class UserProfile(models.Model):
     screen_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     icon_url = models.CharField(max_length=255)
-    total_point = models.IntegerField()
+    total_point = models.IntegerField(default=0)
 
 
 def user_to_dict(user):

@@ -14,5 +14,5 @@ def give_achievement(name, user):
 
     Achievement.objects.create(name=name, point=achieve_dict[name],
                                achieved_by=user)
-    user.total_point += achieve_dict[name]
+    user.get_profile().total_point += achieve_dict[name]
     user.save()

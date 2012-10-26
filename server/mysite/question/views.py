@@ -118,8 +118,6 @@ def auth_view(request):
         profile.screen_name = tw_account['screen_name']
         profile.name = tw_account['name']
         profile.icon_url = icon_url
-        first_point = 0
-        profile.total_point = first_point
         profile.save()
         give_achievement('first_login', user)
         created = True
