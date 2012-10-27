@@ -222,7 +222,7 @@ def lecture_timeline_view(request):
 
 
 def user_view(request):
-    # ユーザー情報取得API
+    u"""ユーザー情報取得API"""
     if request.method == 'GET':
         try:
             user_id = request.GET['id']
