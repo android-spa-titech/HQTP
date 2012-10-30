@@ -140,6 +140,28 @@ public class HQTPProxyImpl implements HQTPProxy {
         return lectures;
     }
 
+    @Override
+    public AchievementResponse getAchievements(int user_id) throws HQTPAPIException, IOException, JSONException,
+            ParseException {
+        return getAchievements(user_id, -1);
+    }
+
+    @Override
+    public AchievementResponse getAchievements(int user_id, int since_id) throws HQTPAPIException, IOException,
+            JSONException, ParseException {
+        APIRequestBuilder.APIRequest request = builder.get("user/achievement/").param("id", user_id);
+        if (since_id > -1) {
+            request.param("since_id", since_id);
+        }
+        JSONObject json = new JSONObject(request.send());
+        ArrayList<Achievement> achievements = new ArrayList<Achievement>();
+        JSONArray array = json.getJSONArray("achievements");
+        for (int i = 0, length = array.length(); i < length; i++) {
+            achievements.add(Achievement.fromJSON(array.getJSONObject(i)));
+        }
+        return new AchievementResponse(achievements, json.getInt("total_point"));
+    }
+
     private static boolean isStatusOK(JSONObject json) throws JSONException {
         return json.has("status") && json.getString("status").equals("OK");
     }
