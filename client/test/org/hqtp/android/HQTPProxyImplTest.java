@@ -220,6 +220,72 @@ public class HQTPProxyImplTest extends RoboGuiceTest {
         }
     }
 
+    @Test
+    public void getAchievementsShouldCallAPI() throws Exception {
+        Robolectric.clearHttpResponseRules();
+        Robolectric.clearPendingHttpResponses();
+        Robolectric.addPendingHttpResponse(200, "{" +
+                "\"status\":\"OK\"," +
+                "\"total_point\":100," +
+                "\"achievements\":[{" +
+                "\"id\":1234," +
+                "\"name\":\"test name\"," +
+                "\"point\":12," +
+                "\"created_at\":\"2012-06-22T17:44:23.092839\"" +
+                "}]}");
+
+        AchievementResponse res = proxy.getAchievements(0);
+
+        HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
+        assertThat(sentHttpRequest.getMethod(), equalTo("GET"));
+        assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
+        assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/user/achievement/"));
+
+        assertThat(res, notNullValue());
+        assertThat(res.getTotalPoint(), equalTo(100));
+
+        List<Achievement> achievements = res.getAchievements();
+
+        assertThat(achievements, notNullValue());
+        assertThat(achievements.size(), equalTo(1));
+        assertThat(achievements.get(0).getId(), equalTo(1234));
+        assertThat(achievements.get(0).getName(), equalTo("test name"));
+        assertThat(achievements.get(0).getPoint(), equalTo(12));
+    }
+
+    @Test
+    public void getAchievementsWithSinceIdShouldCallAPI() throws Exception {
+        Robolectric.clearHttpResponseRules();
+        Robolectric.clearPendingHttpResponses();
+        Robolectric.addPendingHttpResponse(200, "{" +
+                "\"status\":\"OK\"," +
+                "\"total_point\":100," +
+                "\"achievements\":[{" +
+                "\"id\":1234," +
+                "\"name\":\"test name\"," +
+                "\"point\":12," +
+                "\"created_at\":\"2012-06-22T17:44:23.092839\"" +
+                "}]}");
+
+        AchievementResponse res = proxy.getAchievements(0, 123);
+
+        HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
+        assertThat(sentHttpRequest.getMethod(), equalTo("GET"));
+        assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
+        assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/user/achievement/"));
+
+        assertThat(res, notNullValue());
+        assertThat(res.getTotalPoint(), equalTo(100));
+
+        List<Achievement> achievements = res.getAchievements();
+
+        assertThat(achievements, notNullValue());
+        assertThat(achievements.size(), equalTo(1));
+        assertThat(achievements.get(0).getId(), equalTo(1234));
+        assertThat(achievements.get(0).getName(), equalTo("test name"));
+        assertThat(achievements.get(0).getPoint(), equalTo(12));
+    }
+
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
