@@ -50,11 +50,9 @@ public interface HQTPProxy {
     public abstract Lecture addLecture(String lectureCode, String lectureName) throws HQTPAPIException, IOException,
             JSONException, LectureAlreadyCreatedException, ParseException;
 
-    // TODO: total_pointも返せるようにしたい
-    public abstract List<Achievement> getAchievements(int user_id) throws HQTPAPIException, IOException, JSONException,
-            ParseException;
-
-    // TODO: total_pointも返せるようにしたい
-    public abstract List<Achievement> getAchievements(int user_id,int since_id) throws HQTPAPIException, IOException,
+    public abstract AchievementResponse getAchievements(int user_id) throws HQTPAPIException, IOException,
             JSONException, ParseException;
+
+    public abstract AchievementResponse getAchievements(int user_id, int since_id) throws HQTPAPIException,
+            IOException, JSONException, ParseException;
 }
