@@ -30,6 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="fill_vertical"
             android:text="Post Content"
+            android:autoLink="web"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
