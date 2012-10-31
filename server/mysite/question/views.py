@@ -210,9 +210,6 @@ def lecture_timeline_view(request):
             # invalid lecture ID
             return json_response_not_found()
 
-        # CharFieldはデフォルト値が''
-        body = request.POST.get('body', '')
-
         if use_before_vts and use_after_vts:
             # post to between 2 posts
             vts = Post.calc_mid(int(request.POST['before_virtual_ts']),
@@ -221,11 +218,12 @@ def lecture_timeline_view(request):
             # post to latest
             vts = Post.time_to_vts(time())
 
-        post = lec.post_set.create(body=body,
-                                   added_by=request.user,
+        post = lec.post_set.create(added_by=request.user,
                                    virtual_ts=vts)
-
-        if 'image' in request.FILES:
+        if 'body' in request.POST:
+            post.body = request.POST['body']
+            post.save()
+        else:  # 'image' in request.FILES:
             # save image file
             # ユニークなfilenameとして、Postのpkを使う
             image = request.FILES['image']
