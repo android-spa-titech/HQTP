@@ -176,3 +176,21 @@ class TimeLineFailTests(TestCase):
         j_post_fbd = sc.access_timeline_post_view(self.c, lecture_id=1,
             body=u'認証が切れたら、俺は投稿もできないのかよ')
         self.assertEqual(j_post_fbd['status'], 'Forbidden')
+
+
+class UserGetTests(TestCase):
+    fixtures = ['test_user.json', 'test_user_profile.json']
+    # 認証は必要ありません
+
+    def test_get_user_info(self):
+        j_user = sc.access_user_get_view(self.client, 1)
+        self.assertEqual(j_user['user']['name'], 'android_spa')
+
+    def test_get_user__bad_request(self):
+        response = self.client.get('/api/user/')
+        j_bad = loads(response.content)
+        self.assertEqual(j_bad['status'], 'Bad Request')
+
+    def test_get_user__not_found(self):
+        j_not = sc.access_user_get_view(self.client, 42)
+        self.assertEqual(j_not['status'], 'Not Found')
