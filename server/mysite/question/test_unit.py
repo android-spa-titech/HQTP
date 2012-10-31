@@ -180,7 +180,9 @@ class TimeLineFailTests(TestCase):
 
 class UserGetTests(TestCase):
     fixtures = ['test_user.json', 'test_user_profile.json']
-    # 認証は必要ありません
+
+    def setUp(self):
+        self.client.login(username='testuser', password='testpassword')
 
     def test_get_user_info(self):
         j_user = sc.access_user_get_view(self.client, 1)
@@ -190,6 +192,11 @@ class UserGetTests(TestCase):
         response = self.client.get('/api/user/')
         j_bad = loads(response.content)
         self.assertEqual(j_bad['status'], 'Bad Request')
+
+    def test_get_user__forbidden(self):
+        self.client.logout()
+        j_forbidden = sc.access_user_get_view(self.client, 1)
+        self.assertEqual(j_forbidden['status'], 'Forbidden')
 
     def test_get_user__not_found(self):
         j_not = sc.access_user_get_view(self.client, 42)

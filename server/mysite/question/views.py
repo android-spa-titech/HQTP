@@ -18,7 +18,7 @@ from mysite.question.image_utils import (get_img, save_bindata,
                                          build_media_absolute_pathname,
                                          build_media_absolute_url)
 from time import time
-from os import path
+import os
 
 
 def convert_context_to_json(context):
@@ -87,7 +87,7 @@ def auth_view(request):
     if twicon is None:
         relative_pathname = 'default_twicon'
     else:
-        relative_pathname = path.join('twicon', str(user_name))
+        relative_pathname = os.path.join('twicon', str(user_name))
         absolute_pathname = build_media_absolute_pathname(relative_pathname)
         save_bindata(absolute_pathname, twicon)
     icon_url = build_media_absolute_url(request, relative_pathname)
@@ -228,6 +228,9 @@ def user_view(request):
             user_id = request.GET['id']
         except MultiValueDictKeyError:
             return json_response_bad_request()
+
+        if not request.user.is_authenticated():
+            return json_response_forbidden()
 
         try:
             user = User.objects.get(pk=user_id)
