@@ -28,6 +28,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
     private final int FORM_CELL = 0;
     private final int POST_CELL = 1;
     private final int DATE_SEPARATOR_CELL = 2;
+    private final int IMAGE_POST_CELL = 3;
 
     @Inject
     LayoutInflater inflater;
@@ -90,7 +91,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
 
     @Override
     public int getViewTypeCount() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -178,7 +179,11 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
                 }
                 prevDate = currentDate;
 
-                prevCell = new PostCell(post);
+                if (post.getImageURL() == null) {
+                    prevCell = new PostCell(post);
+                } else {
+                    prevCell = new ImagePostCell(post);
+                }
                 cells.add(prevCell);
                 if (!formCellAdded && prevCell.getItemId() == beforeFormCellId) {
                     cells.add(formCell);
@@ -327,6 +332,66 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
         @Override
         public int getItemViewType() {
             return POST_CELL;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return true;
+        }
+
+        @Override
+        public long getVirtualTimestamp() {
+            return post.getVirtualTimestamp();
+        }
+    }
+
+    private class ImagePostCell extends ListCell {
+        private final Post post;
+
+        public ImagePostCell(Post post) {
+            this.post = post;
+        }
+
+        @Override
+        public View getView(View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = inflater.inflate(R.layout.timeline_image_post_cell, null);
+            }
+            TextView userNameView = (TextView) convertView.findViewById(R.id.userName);
+            TextView postedTimeView = (TextView) convertView.findViewById(R.id.postedTime);
+            ImageView iconView = (ImageView) convertView.findViewById(R.id.userIcon);
+            ImageView postImageView = (ImageView) convertView.findViewById(R.id.postImage);
+
+            userNameView.setText(post.getUser().getName());
+            iconView.setTag(post.getUser().getIconURL());
+            imageLoader.displayImage(iconView, TimelineAdapter.this.activity);
+            postImageView.setTag(post.getImageURL());
+            imageLoader.displayImage(postImageView, TimelineAdapter.this.activity);
+
+            final Date postedDate = post.getTime();
+            final long diffMillis = new Date().getTime() - postedDate.getTime();
+            if (diffMillis < ONE_HOUR_MILLIS) {
+                postedTimeView.setText((diffMillis / 1000 / 60) + "分前");
+            } else {
+                postedTimeView.setText(dateFormat.format(postedDate));
+            }
+
+            return convertView;
+        }
+
+        @Override
+        public Object getItem() {
+            return post;
+        }
+
+        @Override
+        public long getItemId() {
+            return post.getId();
+        }
+
+        @Override
+        public int getItemViewType() {
+            return IMAGE_POST_CELL;
         }
 
         @Override

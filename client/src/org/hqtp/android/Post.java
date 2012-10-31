@@ -57,6 +57,7 @@ public class Post {
         this.virtualTimestamp = virtualTimestamp;
         this.user = user;
         this.lecture = lecture;
+        this.imageURL = imageURL;
     }
 
     public static Post fromJSON(JSONObject json) throws JSONException, ParseException {
