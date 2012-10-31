@@ -63,3 +63,9 @@ def access_timeline_post_view(client, lecture_id, body=None,
         dic['image'] = image
     response = client.post(url, dic)
     return json.loads(response.content)
+
+
+def access_user_get_view(client, user_id):
+    url = '/api/user/?id=%d'
+    response = client.get(url % user_id)
+    return json.loads(response.content)

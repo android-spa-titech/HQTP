@@ -1,0 +1,12 @@
+[
+	{
+		"pk": 1,
+		"model": "question.userprofile",
+		"fields": {
+			"icon_url": "http://testserver/site_media/twicon/580619600",
+			"user": 1,
+			"name": "android_spa",
+			"screen_name": "android_spa"
+		}
+	}
+]

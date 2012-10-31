@@ -240,6 +240,27 @@ def lecture_timeline_view(request):
         return json_response(context=dict(post=post.to_dict()))
 
 
+def user_view(request):
+    # ユーザー情報取得API
+    if request.method == 'GET':
+        try:
+            user_id = request.GET['id']
+        except MultiValueDictKeyError:
+            return json_response_bad_request()
+
+        if not request.user.is_authenticated():
+            return json_response_forbidden()
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            # ID が不正だったら Not Found
+            return json_response_not_found()
+
+        user_info = user_to_dict(user)
+        return json_response(context=dict(user=user_info))
+
+
 def _test():
     import doctest
     doctest.testmod()
