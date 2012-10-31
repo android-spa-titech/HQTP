@@ -223,7 +223,7 @@ def lecture_timeline_view(request):
         if 'body' in request.POST:
             post.body = request.POST['body']
             post.save()
-        elif 'image' in request.FILES:
+        else:  # 'image' in request.FILES:
             # save image file
             # ユニークなfilenameとして、Postのpkを使う
             image = request.FILES['image']
