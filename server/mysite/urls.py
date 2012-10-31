@@ -18,6 +18,8 @@ urlpatterns = patterns('',
         'mysite.question.views.lecture_add_view'),
     url(r'^api/lecture/timeline/?$',
         'mysite.question.views.lecture_timeline_view'),
+    url(r'^api/user/achievement/?$',
+        'mysite.question.views.achievement_view'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

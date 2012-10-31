@@ -231,5 +231,40 @@ def lecture_timeline_view(request):
         return json_response(context=dict(post=post.to_dict()))
 
 
+def achievement_view(request):
+    if request.method == 'GET':
+        try:
+            user_id = request.GET['id']
+        except MultiValueDictKeyError:
+            return json_response_bad_request()
+
+        try:
+            since_id = int(request.GET['since_id'])
+        except MultiValueDictKeyError:
+            since_id = 1  # Not Bad Request
+        except TypeError:
+            return json_response_bad_request()
+
+        if not request.user.is_authenticated():
+            return json_response_forbidden()
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return json_response_not_found()
+
+        achievements = [a.to_dict() for a in
+                        user.achievement_set.filter(pk__gte=since_id)]
+
+        # Calculate the total point
+        total_point = 0
+        for a in achievements:
+            total_point += a['point']
+
+        return json_response(context=dict(
+            # total_point=request.user.get_profile().total_point,
+            total_point=total_point, achievements=achievements))
+
+
 def _test():
     doctest.testmod()

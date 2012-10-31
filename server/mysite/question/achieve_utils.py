@@ -3,16 +3,20 @@
 from mysite.question.models import Achievement
 
 
+achieve_dict = dict(first_login=100,
+                    add_lecture=30,
+                    one_post=1,
+                    )
+
+
 def give_achievement(name, user):
-    u"""
-    実績とユーザーを指定し、ユーザーに実績を与える
-    """
+    profile = user.get_profile()
+    try:
+        point = achieve_dict[name]
+    except KeyError:
+        print 'No such achievement'
+        return
 
-    achieve_dict = dict(first_login=100,
-                        add_lecture=30,
-                        one_post=1)
-
-    Achievement.objects.create(name=name, point=achieve_dict[name],
-                               achieved_by=user)
-    user.get_profile().total_point += achieve_dict[name]
-    user.save()
+    Achievement.objects.create(name=name, point=point, achieved_by=user)
+    profile.total_point += point
+    profile.save()

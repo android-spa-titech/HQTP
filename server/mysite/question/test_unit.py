@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import mysite.question.shortcuts as sc
-from mysite.question.models import Lecture
+from mysite.question.models import Lecture, user_to_dict
 from django.test import TestCase
 from json import loads
+from django.contrib.auth.models import User
 
 
 class AuthenticateTests(TestCase):
@@ -169,6 +170,65 @@ class TimeLineFailTests(TestCase):
 
 
 class AchievementTests(TestCase):
-    def test_first_login(self):
+    fixtures = ['test_user.json', 'test_lecture.json']
+
+    def get_user_dict_from_db(self, pk=1):
+        return user_to_dict(User.objects.get(pk=pk))
+
+    def setUp(self):
+        self.client.login(username='testuser', password='testpassword')
+
+    def test_achievement_first_login(self):
+        self.client.logout()
+        # access_auth_viewを使うため一旦ログアウト
         j_first = sc.access_auth_view(self.client)
-        self.assertEqual(j_first['total_point'], 100)
+        self.assertEqual(j_first['user']['total_point'], 100)
+
+    def test_achievement_add_lecture(self):
+        sc.access_lecture_add_view(self.client, name='Test', code='77777')
+        j_after = self.get_user_dict_from_db()
+        self.assertEqual(j_after['total_point'], 30)
+
+    def test_achievement_one_post(self):
+        sc.access_timeline_post_view(self.client, lecture_id=1, body='Hello')
+        j_after = self.get_user_dict_from_db()
+        self.assertEqual(j_after['total_point'], 1)
+
+
+class AchievementGetTests(TestCase):
+    fixtures = ['test_user.json', 'test_achievements.json']
+
+    def setUp(self):
+        self.client.login(username='testuser', password='testpassword')
+
+    def test_achieve_get_all(self):
+        # since_id を指定しないと achievement 全取得
+        j_achieve = sc.access_achievement_get_view(self.client, id=1)
+        self.assertEqual(len(j_achieve['achievements']), 3)
+
+    def test_achievement_total_point(self):
+        j_achieve = sc.access_achievement_get_view(self.client, id=1)
+        self.assertEqual(j_achieve['total_point'], 131)
+
+    def test_achievement_with_since_id(self):
+        # since_id を指定すると、それ以降の id を持つ achievement を取得
+        j_achieve = sc.access_achievement_get_view(
+            self.client, id=1, since_id=2)
+        self.assertEqual(len(j_achieve['achievements']), 2)
+
+
+class AchievementFailTests(TestCase):
+    fixtures = ['test_user.json', 'test_achievements.json']
+
+    def test_achievement_without_id(self):
+        j_bad = sc.access_achievement_get_view(self.client)
+        self.assertEqual(j_bad['status'], 'Bad Request')
+
+    def test_achievement_without_auth(self):
+        j_fbd = sc.access_achievement_get_view(self.client, id=1)
+        self.assertEqual(j_fbd['status'], 'Forbidden')
+
+    def test_achievement__not_found(self):
+        self.client.login(username='testuser', password='testpassword')
+        j_not = sc.access_achievement_get_view(self.client, id=42)
+        self.assertEqual(j_not['status'], 'Not Found')

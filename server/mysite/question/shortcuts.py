@@ -58,3 +58,9 @@ def access_timeline_post_view(client, lecture_id, body,
         dic['after_virtual_ts'] = after_virtual_ts
     response = client.post(url, dic)
     return json.loads(response.content)
+
+
+def access_achievement_get_view(client, **ids):
+    url = '/api/user/achievement/'
+    response = client.get(url, ids)
+    return json.loads(response.content)
