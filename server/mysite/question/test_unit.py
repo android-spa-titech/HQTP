@@ -258,3 +258,29 @@ class ImagePostTests(TestCase):
 
         # 画像がちゃんと保存されていることを確認
         self.assertTrue(os.path.exists(self.absolute_pathname))
+
+
+class UserGetTests(TestCase):
+    fixtures = ['test_user.json', 'test_user_profile.json']
+
+    def setUp(self):
+        self.client.login(username='testuser', password='testpassword')
+
+    def test_get_user_info(self):
+        j_user = sc.access_user_get_view(self.client, 1)
+        self.assertEqual(j_user['user']['name'], 'android_spa')
+
+    def test_get_user__not_found(self):
+        j_not = sc.access_user_get_view(self.client, 42)
+        self.assertEqual(j_not['status'], 'Not Found')
+
+
+class UserGetFailTests(TestCase):
+    def test_get_user__bad_request(self):
+        response = self.client.get('/api/user/')
+        j_bad = loads(response.content)
+        self.assertEqual(j_bad['status'], 'Bad Request')
+
+    def test_get_user__forbidden(self):
+        j_forbidden = sc.access_user_get_view(self.client, 1)
+        self.assertEqual(j_forbidden['status'], 'Forbidden')
