@@ -211,10 +211,10 @@ class AchievementGetTests(TestCase):
         self.assertEqual(j_achieve['total_point'], 131)
 
     def test_achievement_with_since_id(self):
-        # since_id を指定すると、それ以降の id を持つ achievement を取得
+        # since_id を指定すると、それより大きい id を持つ achievement を取得
         j_achieve = sc.access_achievement_get_view(
             self.client, id=1, since_id=2)
-        self.assertEqual(len(j_achieve['achievements']), 2)
+        self.assertEqual(len(j_achieve['achievements']), 1)
 
 
 class AchievementFailTests(TestCase):

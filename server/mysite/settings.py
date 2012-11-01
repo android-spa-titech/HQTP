@@ -19,9 +19,6 @@ DATABASES = {
         # Or path to database file if using sqlite3.
         'NAME': 'mydb.sqlite',
 
-        # Database for test
-        'TEST_NAME': 'testdb.sqlite',
-
         # Not used with sqlite3.
         'USER': '',
 

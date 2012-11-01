@@ -232,18 +232,21 @@ def lecture_timeline_view(request):
 
 
 def achievement_view(request):
+    u"実績一覧取得API"
+
     if request.method == 'GET':
         try:
             user_id = request.GET['id']
         except MultiValueDictKeyError:
             return json_response_bad_request()
 
-        try:
-            since_id = int(request.GET['since_id'])
-        except MultiValueDictKeyError:
-            since_id = 1  # Not Bad Request
-        except TypeError:
-            return json_response_bad_request()
+        if 'since_id' in request.GET:
+            try:
+                since_id = int(request.GET['since_id'])
+            except ValueError:
+                return json_response_bad_request()
+        else:
+            since_id = 0
 
         if not request.user.is_authenticated():
             return json_response_forbidden()
@@ -254,7 +257,7 @@ def achievement_view(request):
             return json_response_not_found()
 
         achievements = [a.to_dict() for a in
-                        user.achievement_set.filter(pk__gte=since_id)]
+                        user.achievement_set.filter(pk__gt=since_id)]
 
         # Calculate the total point
         total_point = 0
