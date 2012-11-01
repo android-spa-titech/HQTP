@@ -184,9 +184,8 @@ def lecture_timeline_view(request):
             return json_response_not_found()
 
         # successfully get timeline
-        posts = [q.to_dict()
-                 for q in lec.post_set.filter(pk__gt=since_id)
-                 .order_by('virtual_ts')]
+        posts = [q.to_dict() for q in
+                 lec.post_set.filter(pk__gt=since_id).order_by('virtual_ts')]
         return json_response(context=dict(posts=posts))
 
     elif request.method == 'POST':

@@ -172,6 +172,26 @@ class TimeLineTests(TestCase):
                               timeline[2]['id'],
                               timeline[1]['id'])
 
+    def test_timeline_get_view_since(self):
+        # since_id=0以下の場合、since_idを指定しない（全取得）と等しい
+        j_all = sc.access_timeline_get_view(self.c, lecture_id=1)
+        j_since0 = sc.access_timeline_get_view(self.c, lecture_id=1, since_id=0)
+        self.assertEqual(j_all, j_since0)
+        j_since_neg = sc.access_timeline_get_view(
+            self.c, lecture_id=1, since_id=-10)
+        self.assertEqual(j_all, j_since_neg)
+
+        # since_id=1の場合、長さ1のタイムラインが返ってくる
+        j_since1 = sc.access_timeline_get_view(self.c, lecture_id=1, since_id=1)
+        self.assertEqual(len(j_since1['posts']), 1)
+
+        # since_id=2以上の場合、長さ0のタイムラインが返ってくる
+        j_since2 = sc.access_timeline_get_view(self.c, lecture_id=1, since_id=2)
+        self.assertEqual(len(j_since2['posts']), 0)
+        j_since_large = sc.access_timeline_get_view(
+            self.c, lecture_id=1, since_id=10)
+        self.assertEqual(len(j_since_large['posts']), 0)
+
     def test_timeline_get__not_found(self):
         # 存在しない授業にget/postしようとすると Not Found
         j_get_not = sc.access_timeline_get_view(self.c, lecture_id=42)
@@ -199,6 +219,12 @@ class TimeLineFailTests(TestCase):
         j_only_after = sc.access_timeline_post_view(self.c, lecture_id=1,
             body=u'投稿できないよ!', after_virtual_ts=65536)
         self.assertEqual(j_only_after['status'], 'Bad Request')
+
+    def test_get_invalid_since_id(self):
+        # 整数値でなければBad Request
+        j_invalid_since_id = sc.access_timeline_get_view(
+            self.c, lecture_id=1, since_id='invalid since_id')
+        self.assertEqual(j_invalid_since_id['status'], 'Bad Request')
 
     def test_timeline_get_without_auth(self):
         # 認証しないで timeline get/post したら Forbidden
