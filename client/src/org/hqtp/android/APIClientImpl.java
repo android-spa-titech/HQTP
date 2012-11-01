@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class HQTPProxyImpl implements HQTPProxy {
+public class APIClientImpl implements APIClient {
     @Inject
     APIRequestBuilder builder;
 

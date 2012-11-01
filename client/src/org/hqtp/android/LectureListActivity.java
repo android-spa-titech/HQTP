@@ -22,7 +22,7 @@ import com.google.inject.Inject;
 
 public class LectureListActivity extends RoboActivity {
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
     @Inject
     Alerter alerter;
     @Inject

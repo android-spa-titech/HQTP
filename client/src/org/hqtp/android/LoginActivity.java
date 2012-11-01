@@ -37,7 +37,7 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
     @Inject
     OAuthAuthorization oauth;
     @Inject
-    private HQTPProxy proxy;
+    private APIClient proxy;
     @Inject
     Alerter alerter;
 
@@ -73,7 +73,7 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
         } else if (v.getId() == R.id.changeEndpointButton) {// DEBUG: change endpoint(for local test)
             String new_endpoint = endpointText.getText().toString();
             if (!new_endpoint.isEmpty()) {
-                ((HQTPProxyImpl) proxy).setEndpoint(new_endpoint);
+                ((APIClientImpl) proxy).setEndpoint(new_endpoint);
             }
         }
     }

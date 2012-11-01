@@ -40,7 +40,7 @@ public class LoginActivityTest extends RoboGuiceTest {
     @Inject
     OAuthAuthorization oauth;
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
     @InjectView(R.id.twitter_login)
     Button loginButton;
 
@@ -167,7 +167,7 @@ public class LoginActivityTest extends RoboGuiceTest {
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
+            bind(APIClient.class).toInstance(mock(APIClient.class));
             bind(OAuthAuthorization.class).toInstance(mock(OAuthAuthorization.class));
             bind(LoginActivity.class).toInstance(activity);
             bind(Activity.class).toInstance(activity);

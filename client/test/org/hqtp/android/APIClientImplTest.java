@@ -24,9 +24,9 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(HQTPTestRunner.class)
-public class HQTPProxyImplTest extends RoboGuiceTest {
+public class APIClientImplTest extends RoboGuiceTest {
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
 
     @Test
     public void authenticateShouldCallAPI() throws Exception {
@@ -289,7 +289,7 @@ public class HQTPProxyImplTest extends RoboGuiceTest {
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(HQTPProxy.class).to(HQTPProxyImpl.class);
+            bind(APIClient.class).to(APIClientImpl.class);
             bind(String.class).annotatedWith(
                     Names.named("HQTP API Endpoint URL")).toInstance(
                     "http://www.hqtp.org/api/");

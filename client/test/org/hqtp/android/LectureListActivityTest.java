@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
 @RunWith(HQTPTestRunner.class)
 public class LectureListActivityTest extends RoboGuiceTest {
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
     @Inject
     LectureListActivity activity;
     @InjectView(R.id.lecture_list)
@@ -96,7 +96,7 @@ public class LectureListActivityTest extends RoboGuiceTest {
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
+            bind(APIClient.class).toInstance(mock(APIClient.class));
             bind(LectureListActivity.class).toInstance(activity);
             bind(Activity.class).toInstance(activity);
         }

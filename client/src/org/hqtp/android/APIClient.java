@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.json.JSONException;
 
-public interface HQTPProxy {
+public interface APIClient {
 
     // Instance methods
     // TODO: 認証の成否は例外によって知られるべき。何を戻り値にするか検討が必要。

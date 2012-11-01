@@ -26,7 +26,7 @@ public class AddLectureActivity extends RoboActivity implements
     Button cancelButton;
 
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
     @Inject
     Alerter alerter;
 

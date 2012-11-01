@@ -32,7 +32,7 @@ public class ProfileView extends LinearLayout {
     @Inject
     private Activity activity;
     @Inject
-    private HQTPProxy proxy;
+    private APIClient proxy;
 
     public ProfileView(Context context, AttributeSet attrs) {
         super(context, attrs);

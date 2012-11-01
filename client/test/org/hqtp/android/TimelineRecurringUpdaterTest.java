@@ -28,7 +28,7 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
     @Inject
     TimelineRecurringUpdater updater;
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
 
     private Post testPost;
     private User testUser;
@@ -147,7 +147,7 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
+            bind(APIClient.class).toInstance(mock(APIClient.class));
             bind(TimelineRecurringUpdater.class).to(TimelineRecurringUpdaterImpl.class);
             bind(Long.class).annotatedWith(Names.named("TimelineUpdatePeriod")).toInstance(
                     Long.valueOf(500));

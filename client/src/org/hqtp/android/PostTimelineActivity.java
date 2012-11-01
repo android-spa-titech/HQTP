@@ -32,7 +32,7 @@ public class PostTimelineActivity extends RoboActivity {
     public static final String SAVED_POST_BODY = "SAVED_POST_BODY";
 
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
     @Inject
     Alerter alerter;
     @InjectView(R.id.postBody)
