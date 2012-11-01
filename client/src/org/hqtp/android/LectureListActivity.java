@@ -8,6 +8,7 @@ import roboguice.util.RoboAsyncTask;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,8 @@ public class LectureListActivity extends RoboActivity {
     Button addLectureButton;
     @InjectView(R.id.refresh)
     Button refreshButton;
+    @InjectView(R.id.profileView)
+    ProfileView profileView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,6 +73,20 @@ public class LectureListActivity extends RoboActivity {
         });
 
         new RefreshTask().execute();
+    }
+
+    @Override
+    protected void onStart() {
+        Log.d("lecturelist", "onstart");
+        super.onStart();
+        profileView.startRecurringUpdate();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d("lecturelist", "onstop");
+        super.onStop();
+        profileView.stop();
     }
 
     private static class LectureListAdapter extends ArrayAdapter<Lecture> {
