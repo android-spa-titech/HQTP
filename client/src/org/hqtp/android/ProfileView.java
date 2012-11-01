@@ -5,14 +5,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import roboguice.RoboGuice;
 import roboguice.util.SafeAsyncTask;
 
 import com.google.inject.Inject;
-
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -28,11 +27,11 @@ public class ProfileView extends LinearLayout {
     private AtomicBoolean stopped = new AtomicBoolean(false);
 
     @Inject
-    private ImageLoader loader;
+    ImageLoader loader;
     @Inject
-    private Activity activity;
+    Activity activity;
     @Inject
-    private APIClient proxy;
+    APIClient proxy;
 
     public ProfileView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -40,6 +39,7 @@ public class ProfileView extends LinearLayout {
         inflater.inflate(R.layout.profileview, this);
         initView();
         updateView(null);
+        RoboGuice.getInjector(getContext()).injectMembers(this);
     }
 
     private void initView()
@@ -65,7 +65,6 @@ public class ProfileView extends LinearLayout {
 
     public synchronized void startRecurringUpdate()
     {
-        Log.d("profileView", "startRecurringUpdate");
         stopped.set(false);
         executor = Executors.newSingleThreadScheduledExecutor();
         task = new RecurringTask();
@@ -75,7 +74,6 @@ public class ProfileView extends LinearLayout {
     // When activity's onPause/onStop is called, this method should be called.
     public synchronized void stop()
     {
-        Log.d("profileView", "stop");
         if (executor != null) {
             stopped.set(true);
             executor.shutdown();
@@ -85,8 +83,8 @@ public class ProfileView extends LinearLayout {
     private class RecurringTask extends SafeAsyncTask<User> {
         @Override
         public User call() throws Exception {
-            Log.d("RecurringTask", "call(user)");
-            return null;// TODO: call proxy.getUser();
+            int id = proxy.getUserId();
+            return null;// TODO: call proxy.getUser(id);
         }
 
         @Override

@@ -14,6 +14,10 @@ public interface APIClient {
     public abstract User authenticate(String access_token_key, String access_token_secret) throws IOException,
             JSONException, HQTPAPIException;
 
+    public abstract void setUserId(int userId);
+
+    public abstract int getUserId();
+
     public abstract List<Post> getTimeline(int lectureId) throws IOException, HQTPAPIException, JSONException,
             ParseException;
 

@@ -10,13 +10,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 public class APIClientImpl implements APIClient {
+    private static final String PREFS = "APIClientPrefs";
+    private static final String PREF_NAME_USER_ID = "userId";
     @Inject
     APIRequestBuilder builder;
+    @Inject
+    Context context;
 
     // DEBUG: デバッグ用のエンドポイント切り替え
     public void setEndpoint(String api_gateway) {
@@ -38,6 +43,20 @@ public class APIClientImpl implements APIClient {
         }
 
         return User.fromJSON(json.getJSONObject("user"));
+    }
+
+    @Override
+    public void setUserId(int userId) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putInt(PREF_NAME_USER_ID, userId)
+            .commit();
+    }
+
+    @Override
+    public int getUserId() {
+        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getInt(PREF_NAME_USER_ID, -1);
     }
 
     @Override
@@ -169,4 +188,5 @@ public class APIClientImpl implements APIClient {
     private static boolean isCreated(JSONObject json) throws JSONException {
         return json.has("created") && json.getBoolean("created");
     }
+
 }

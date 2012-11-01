@@ -124,7 +124,8 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
                 e.putString(SAVED_AUTH_TOKEN_SECRET, tokenSecret);
                 e.commit();
             }
-            proxy.authenticate(token, tokenSecret);
+            User user = proxy.authenticate(token, tokenSecret);
+            proxy.setUserId(user.getId());
             return null;
         }
 
