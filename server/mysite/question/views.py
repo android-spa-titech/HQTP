@@ -26,6 +26,7 @@ from mysite.question.image_utils import (get_img, save_bindata,
                                          build_media_absolute_pathname,
                                          build_media_absolute_url)
 from mysite.question.achieve_utils import give_achievement
+from django.db.models.aggregates import Sum
 
 
 def convert_context_to_json(context):
@@ -256,17 +257,13 @@ def achievement_view(request):
         except User.DoesNotExist:
             return json_response_not_found()
 
+        # Get the total point
+        context = user.achievement_set.aggregate(total_point=Sum('point'))
+
         achievements = [a.to_dict() for a in
                         user.achievement_set.filter(pk__gt=since_id)]
-
-        # Calculate the total point
-        total_point = 0
-        for a in achievements:
-            total_point += a['point']
-
-        return json_response(context=dict(
-            # total_point=request.user.get_profile().total_point,
-            total_point=total_point, achievements=achievements))
+        context['achievements'] = achievements
+        return json_response(context)
 
 
 def _test():

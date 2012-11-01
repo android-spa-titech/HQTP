@@ -10,7 +10,6 @@ achieve_dict = dict(first_login=100,
 
 
 def give_achievement(name, user):
-    profile = user.get_profile()
     try:
         point = achieve_dict[name]
     except KeyError:
@@ -18,5 +17,3 @@ def give_achievement(name, user):
         return
 
     Achievement.objects.create(name=name, point=point, achieved_by=user)
-    profile.total_point += point
-    profile.save()
