@@ -29,6 +29,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
     private final int POST_CELL = 1;
     private final int DATE_SEPARATOR_CELL = 2;
     private final int IMAGE_POST_CELL = 3;
+    private final int CELL_KINDS = 4;
 
     @Inject
     LayoutInflater inflater;
@@ -91,7 +92,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
 
     @Override
     public int getViewTypeCount() {
-        return 4;
+        return CELL_KINDS;
     }
 
     @Override
