@@ -10,18 +10,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
+import android.content.SharedPreferences;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 public class APIClientImpl implements APIClient {
-    private static final String PREFS = "APIClientPrefs";
     private static final String PREF_NAME_USER_ID = "userId";
     @Inject
     APIRequestBuilder builder;
     @Inject
-    Context context;
+    SharedPreferences preferences;
 
     // DEBUG: デバッグ用のエンドポイント切り替え
     public void setEndpoint(String api_gateway) {
@@ -47,7 +47,7 @@ public class APIClientImpl implements APIClient {
 
     @Override
     public void setUserId(int userId) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        preferences
             .edit()
             .putInt(PREF_NAME_USER_ID, userId)
             .commit();
@@ -55,8 +55,7 @@ public class APIClientImpl implements APIClient {
 
     @Override
     public int getUserId() {
-        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getInt(PREF_NAME_USER_ID, -1);
+        return preferences.getInt(PREF_NAME_USER_ID, -1);
     }
 
     @Override

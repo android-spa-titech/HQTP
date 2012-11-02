@@ -12,6 +12,7 @@ import com.google.inject.Inject;
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,7 +40,7 @@ public class ProfileView extends LinearLayout {
         inflater.inflate(R.layout.profileview, this);
         initView();
         updateView(null);
-        RoboGuice.getInjector(getContext()).injectMembers(this);
+        RoboGuice.getInjector(context).injectMembers(this);
     }
 
     private void initView()
@@ -84,6 +85,7 @@ public class ProfileView extends LinearLayout {
         @Override
         public User call() throws Exception {
             int id = proxy.getUserId();
+            Log.d("user_id",id+"");
             return null;// TODO: call proxy.getUser(id);
         }
 
