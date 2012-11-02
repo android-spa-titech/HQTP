@@ -15,6 +15,8 @@ public class TimelineActivity extends RoboActivity {
     ListView timelineListView;
     @InjectView(R.id.lectureName)
     TextView lectureNameTextView;// TODO: id変えたい・・・
+    @InjectView(R.id.profileView)
+    ProfileView profileView;
     @Inject
     TimelineRecurringUpdater updater;
     @Inject
@@ -49,6 +51,7 @@ public class TimelineActivity extends RoboActivity {
         super.onStart();
         updater.registerTimelineObserver(adapter);
         updater.startRecurringUpdateTimeline();
+        profileView.startRecurringUpdate();
     }
 
     @Override
@@ -56,6 +59,7 @@ public class TimelineActivity extends RoboActivity {
         super.onPause();
         updater.stop();
         updater.unregisterTimelineObserver(adapter);
+        profileView.stop();
     }
 
     @Override

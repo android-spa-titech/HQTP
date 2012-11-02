@@ -24,6 +24,8 @@ public class AddLectureActivity extends RoboActivity implements
     Button addButton;
     @InjectView(R.id.lecture_add_cancel_button)
     Button cancelButton;
+    @InjectView(R.id.profileView)
+    ProfileView profileView;
 
     @Inject
     APIClient proxy;
@@ -38,6 +40,18 @@ public class AddLectureActivity extends RoboActivity implements
 
         addButton.setOnClickListener(this);
         cancelButton.setOnClickListener(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        profileView.startRecurringUpdate();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        profileView.stop();
     }
 
     @Override
