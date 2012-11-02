@@ -173,9 +173,24 @@ class TimeLineTests(TestCase):
                               timeline[1]['id'])
 
     def test_timeline_get_view_since(self):
+        # since_id=0以下の場合、since_idを指定しない（全取得）と等しい
+        j_all = sc.access_timeline_get_view(self.c, lecture_id=1)
+        j_since0 = sc.access_timeline_get_view(self.c, lecture_id=1, since_id=0)
+        self.assertEqual(j_all, j_since0)
+        j_since_neg = sc.access_timeline_get_view(
+            self.c, lecture_id=1, since_id=-10)
+        self.assertEqual(j_all, j_since_neg)
+
         # since_id=1の場合、長さ1のタイムラインが返ってくる
         j_since1 = sc.access_timeline_get_view(self.c, lecture_id=1, since_id=1)
         self.assertEqual(len(j_since1['posts']), 1)
+
+        # since_id=2以上の場合、長さ0のタイムラインが返ってくる
+        j_since2 = sc.access_timeline_get_view(self.c, lecture_id=1, since_id=2)
+        self.assertEqual(len(j_since2['posts']), 0)
+        j_since_large = sc.access_timeline_get_view(
+            self.c, lecture_id=1, since_id=10)
+        self.assertEqual(len(j_since_large['posts']), 0)
 
     def test_timeline_get__not_found(self):
         # 存在しない授業にget/postしようとすると Not Found
