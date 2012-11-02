@@ -3,6 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from django.db.models.aggregates import Sum
 
 
 class Lecture(models.Model):
@@ -90,9 +91,11 @@ class UserProfile(models.Model):
 
 
 def user_to_dict(user):
+    point = user.achievement_set.aggregate(Sum('point'))['point__sum']
     return dict(id=user.pk,
                 name=user.get_profile().screen_name,
-                icon_url=user.get_profile().icon_url)
+                icon_url=user.get_profile().icon_url,
+                total_point=point)
 
 
 def create_user_profile(sender, instance, created, **kwargs):

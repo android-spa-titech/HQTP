@@ -214,6 +214,12 @@ class AchievementGetTests(TestCase):
             self.client, id=1, since_id=2)
         self.assertEqual(len(j_achieve['achievements']), 1)
 
+    def test_achievement_with_since_id_total_point(self):
+        # since_id を指定した場合でも total_point は全ポイントの合計
+        j_achieve = sc.access_achievement_get_view(
+            self.client, id=1, since_id=2)
+        self.assertEqual(j_achieve['total_point'], 131)
+
 
 class AchievementFailTests(TestCase):
     fixtures = ['test_user.json', 'test_achievements.json']
