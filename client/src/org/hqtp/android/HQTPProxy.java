@@ -17,6 +17,9 @@ public interface HQTPProxy {
     public abstract List<Post> getTimeline(int lectureId) throws IOException, HQTPAPIException, JSONException,
             ParseException;
 
+    public abstract List<Post> getTimeline(int lectureId, int sinceId) throws IOException, HQTPAPIException, JSONException,
+            ParseException;
+
     /**
      * @param body 送信する投稿本文
      * @param lectureId 授業ID
