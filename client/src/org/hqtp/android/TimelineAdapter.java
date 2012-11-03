@@ -385,6 +385,12 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
                 postedTimeView.setText(dateFormat.format(postedDate));
             }
 
+            if (diffMillis < FIVE_MINUTES_MILLIS) {
+                convertView.setBackgroundResource(R.drawable.cell_highlight_background);
+            } else {
+                convertView.setBackgroundColor(Color.TRANSPARENT);
+            }
+
             return convertView;
         }
 
