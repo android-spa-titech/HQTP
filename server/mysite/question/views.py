@@ -165,6 +165,14 @@ def lecture_timeline_view(request):
             # key 'id' is not requested
             return json_response_bad_request()
 
+        if 'since_id' in request.GET:
+            try:
+                since_id = int(request.GET['since_id'])
+            except ValueError:
+                return json_response_bad_request()
+        else:
+            since_id = 0
+
         if not request.user.is_authenticated():
             # get need authentication
             return json_response_forbidden()
@@ -174,11 +182,11 @@ def lecture_timeline_view(request):
         except Lecture.DoesNotExist:
             # invalid lecture ID
             return json_response_not_found()
-        else:
-            # successfully get timeline
-            posts = [q.to_dict()
-                     for q in lec.post_set.order_by('virtual_ts')]
-            return json_response(context=dict(posts=posts))
+
+        # successfully get timeline
+        posts = [q.to_dict() for q in
+                 lec.post_set.filter(pk__gt=since_id).order_by('virtual_ts')]
+        return json_response(context=dict(posts=posts))
 
     elif request.method == 'POST':
         try:

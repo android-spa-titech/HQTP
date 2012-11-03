@@ -42,9 +42,14 @@ def access_lecture_add_view(client, name, code):
     return json.loads(response.content)
 
 
-def access_timeline_get_view(client, lecture_id):
-    url = '/api/lecture/timeline/?id=%s'
-    response = client.get(url % lecture_id)
+def access_timeline_get_view(client, lecture_id, since_id=None):
+    if since_id is not None:
+        url_template = '/api/lecture/timeline/?id=%s&since_id=%s'
+        url = url_template % (lecture_id, since_id)
+    else:
+        url_template = '/api/lecture/timeline/?id=%s'
+        url = url_template % lecture_id
+    response = client.get(url)
     return json.loads(response.content)
 
 
