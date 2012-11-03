@@ -17,35 +17,28 @@ class Lecture(models.Model):
 
 
 class Post(models.Model):
-    body = models.TextField()
+    body = models.TextField(null=True)
     added_by = models.ForeignKey(User)
     posted_at = models.DateTimeField(auto_now_add=True)
     lecture = models.ForeignKey(Lecture)
 
     # 64bit(from -9223372036854775808 to 9223372036854775807)
     virtual_ts = models.BigIntegerField()
-    image_url = models.CharField(max_length=255)
-
+    image_url = models.CharField(max_length=255, null=True)
 
     def __unicode__(self):
-        return self.body
+        if self.body is not None:
+            return self.body
+        return self.image_url
 
     def to_dict(self):
-        # bodyもimage_urlもどちらも''なら、bodyが''の投稿
-        if self.image_url == '':
-            image_url = None
-            body = self.body
-        else:
-            image_url = self.image_url
-            body = None
-
         return dict(id=self.pk,
-                    body=body,
+                    body=self.body,
                     user=user_to_dict(self.added_by),
                     time=self.posted_at.isoformat(),
                     lecture=self.lecture.to_dict(),
                     virtual_ts=self.virtual_ts,
-                    image_url=image_url)
+                    image_url=self.image_url)
 
     @classmethod
     def time_to_vts(cls, t):

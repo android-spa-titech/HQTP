@@ -12,6 +12,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +49,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
     private SimpleDateFormat dateFormat;
     private SimpleDateFormat dateSeparatorFormat;
     private final long ONE_HOUR_MILLIS = 60 * 60 * 1000;
+    private final long FIVE_MINUTES_MILLIS = 5 * 60 * 1000;
 
     public TimelineAdapter() {
         dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
@@ -315,6 +317,12 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
                 postedTimeView.setText((diffMillis / 1000 / 60) + "分前");
             } else {
                 postedTimeView.setText(dateFormat.format(postedDate));
+            }
+
+            if (diffMillis < FIVE_MINUTES_MILLIS) {
+                convertView.setBackgroundResource(R.drawable.cell_highlight_background);
+            } else {
+                convertView.setBackgroundColor(Color.TRANSPARENT);
             }
 
             return convertView;
