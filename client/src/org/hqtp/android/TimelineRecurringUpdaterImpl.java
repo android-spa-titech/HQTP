@@ -90,9 +90,12 @@ public class TimelineRecurringUpdaterImpl implements TimelineRecurringUpdater {
 
             @Override
             protected void onSuccess(List<Post> new_posts) throws Exception {
-                if (new_posts.size() != 0) {
+                // In this task manager, only one instance of this task is run.
+                // We don't need to lock posts member.
+                if (!new_posts.isEmpty()) {
                     posts.addAll(new_posts);
-                    since_id = posts.last().getId();
+                    // NOTE: since_id is the last retrieved post's id, not sorted posts' last item's id.
+                    since_id = new_posts.get(new_posts.size() - 1).getId();
 
                     if (!stopped.get()) {
                         for (TimelineObserver observer : observers) {
