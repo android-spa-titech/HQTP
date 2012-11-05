@@ -1,0 +1,30 @@
+[
+	{
+		"pk": 1,
+		"model": "question.achievement",
+		"fields": {
+			"created_at": "2012-11-01T02:28:12.564",
+			"name": "first_login",
+			"achieved_by": 1,
+			"point": 100
+		}
+	}, {
+		"pk": 2,
+		"model": "question.achievement",
+		"fields": {
+			"created_at": "2012-11-01T02:37:01.744",
+			"name": "add_lecture",
+			"achieved_by": 1,
+			"point": 30
+		}
+	}, {
+		"pk": 3,
+		"model": "question.achievement",
+		"fields": {
+			"created_at": "2012-11-01T02:41:38.471",
+			"name": "one_post",
+			"achieved_by": 1,
+			"point": 1
+		}
+	}
+]
