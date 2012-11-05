@@ -1,5 +1,6 @@
 package org.hqtp.android;
 
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -12,7 +13,6 @@ import com.google.inject.Inject;
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,6 +26,8 @@ public class ProfileView extends LinearLayout {
     private ScheduledExecutorService executor;
     private RecurringTask task;
     private AtomicBoolean stopped = new AtomicBoolean(false);
+    private int since_id = 0;
+    private AtomicBoolean already_get_user_info = new AtomicBoolean(false);
 
     @Inject
     ImageLoader loader;
@@ -39,7 +41,7 @@ public class ProfileView extends LinearLayout {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.profileview, this);
         initView();
-        updateView(null);
+        updateUserInfo(null);
         RoboGuice.getInjector(context).injectMembers(this);
     }
 
@@ -50,22 +52,44 @@ public class ProfileView extends LinearLayout {
         total_point_view = (TextView) findViewById(R.id.totalPoint);
     }
 
-    private void updateView(User user)
+    private void updateUserInfo(User user)
     {
         if (user != null) {
             username_view.setText(user.getName());
-            total_point_view.setText("? pt");// TODO: show user's point
+            updateTotalPoint(0);// TODO: show user's point
             icon_view.setTag(user.getIconURL());
             loader.displayImage(icon_view, this.activity);
         } else {
             username_view.setText("--");
-            total_point_view.setText("-- pt");
+            updateTotalPoint(0);
             icon_view.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
+        }
+    }
+
+    private void updateTotalPoint(int total_point)
+    {
+        total_point_view.setText(total_point + " pt");
+    }
+
+    private class LoadUserInfoTask extends SafeAsyncTask<User> {
+        @Override
+        public User call() throws Exception {
+            int user_id = proxy.getUserId();
+            // TODO: return proxy.getUser(user_id);
+            return null;
+        }
+
+        @Override
+        protected void onSuccess(User user) throws Exception {
+            updateUserInfo(user);
+            already_get_user_info.set(true);
         }
     }
 
     public synchronized void startRecurringUpdate()
     {
+        new LoadUserInfoTask().execute();
+        // TODO: restore since_id from sharedPreferences
         stopped.set(false);
         executor = Executors.newSingleThreadScheduledExecutor();
         task = new RecurringTask();
@@ -79,19 +103,27 @@ public class ProfileView extends LinearLayout {
             stopped.set(true);
             executor.shutdown();
         }
+        // TODO: save since_id to sharedPreferences
     }
 
-    private class RecurringTask extends SafeAsyncTask<User> {
+    private class RecurringTask extends SafeAsyncTask<AchievementResponse> {
         @Override
-        public User call() throws Exception {
-            int id = proxy.getUserId();
-            Log.d("user_id",id+"");
-            return null;// TODO: call proxy.getUser(id);
+        public AchievementResponse call() throws Exception {
+            int user_id = proxy.getUserId();
+            return proxy.getAchievements(user_id, since_id);
         }
 
         @Override
-        protected void onSuccess(User user) throws Exception {
-            updateView(user);
+        protected void onSuccess(AchievementResponse achievement_response) throws Exception {
+            if (already_get_user_info.get()) {
+                updateTotalPoint(achievement_response.getTotalPoint());
+            }
+            List<Achievement> achievements = achievement_response.getAchievements();
+            int size = achievements.size();
+            if (size > 0) {
+                // TODO: 実績通知
+                since_id = achievements.get(size - 1).getId();
+            }
         }
 
         @Override
