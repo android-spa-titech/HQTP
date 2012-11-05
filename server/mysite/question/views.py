@@ -5,7 +5,6 @@ from django.http import (HttpResponse,
                          HttpResponseForbidden,
                          HttpResponseBadRequest,
                          HttpResponseServerError)
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.utils.datastructures import MultiValueDictKeyError
@@ -137,7 +136,6 @@ def lecture_get_view(request):
     return json_response(context=dict(lectures=lecs))
 
 
-@csrf_exempt
 def lecture_add_view(request):
     try:
         code = request.POST['code']
@@ -155,7 +153,6 @@ def lecture_add_view(request):
     return json_response(context=dict(created=created, lecture=lec.to_dict()))
 
 
-@csrf_exempt
 def lecture_timeline_view(request):
     if request.method == 'GET':
         try:

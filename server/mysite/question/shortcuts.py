@@ -1,16 +1,7 @@
 # -*- coding:utf-8 -*-
 
 from mysite.question.twutil.consumer_info import spa_key, spa_secret
-from django.test.client import Client
 import json
-
-
-def make_client():
-    """
-    >>> c = make_client()
-    """
-
-    return Client(enforce_csrf_checks=True)
 
 
 def access_auth_view(client, key=None, secret=None):
