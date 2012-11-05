@@ -40,7 +40,6 @@ def get_vc_mock(user_key, user_secret):
     TypeError: character mapping must return integer, None or unicode
 
     """
-    import mysite.question.twutil.consumer_info as ci
     twitter_database = {
         ci.spa_key: dict(secret=ci.spa_secret,
                       vc=dict(id=ci.spa_id,
@@ -83,7 +82,7 @@ def get_img_mock(url):
 
 def test_about_auth():
     u"""
-    >>> c = shortcuts.make_client()
+    >>> c = Client()
 
     # create user first time
     >>> jobj1 = shortcuts.access_auth_view(c)
@@ -108,7 +107,7 @@ def test_about_auth():
     True
 
     # user is crated only first time
-    >>> c2 = shortcuts.make_client()
+    >>> c2 = Client()
     >>> jobj2 = shortcuts.access_auth_view(c2)
     >>> jobj2['status'] == 'OK'
     True
@@ -123,7 +122,7 @@ def test_about_auth__badrequest():
 
     >>> import json
 
-    >>> c = shortcuts.make_client()
+    >>> c = Client()
 
     >>> url1 = '/api/auth/?access_token_key=KEY'
     >>> response = c.get(url1)
@@ -143,7 +142,7 @@ def test_about_auth__notfound():
     u"""
     TwitterのOAuthの正しくないkey, secretの場合Not Foundを返す
 
-    >>> c = shortcuts.make_client()
+    >>> c = Client()
     >>> jobj = shortcuts.access_auth_view(
     ...     c, key='dummy key', secret='dummy secret')
     >>> jobj['status'] == 'Not Found'
@@ -155,7 +154,7 @@ def test_about_auth__servererror():
     u"""
     key, sercretによってはServer Errorを返す
 
-    >>> c = shortcuts.make_client()
+    >>> c = Client()
     >>> jobj = shortcuts.access_auth_view(c, key='spam', secret='egg')
     >>> jobj['status'] == 'Server Error'
     True
@@ -172,7 +171,7 @@ def test_about_lecture():
     >>> name2 = u'並行システム論'
     >>> code2 = '0X123456790'
 
-    >>> c = shortcuts.make_client()
+    >>> c = Client()
 
     # authします
     >>> jobj1 = shortcuts.access_auth_view(c)
@@ -242,7 +241,7 @@ def test_about_lecture__forbidden():
     >>> name = 'Programming 1'
     >>> code = '0X123456789'
 
-    >>> c = shortcuts.make_client()
+    >>> c = Client()
 
     # lecture/[get|add]はauthしていないとできません(Forbidden)
     >>> jobj1a = shortcuts.access_lecture_get_view(c)
@@ -285,12 +284,12 @@ def test_about_timeline():
 
 
     # 下準備（授業の作成）
-    >>> c0 = shortcuts.make_client()
+    >>> c0 = Client()
     >>> jobj0a = shortcuts.access_auth_view(c0)
     >>> jobj0b = shortcuts.access_lecture_add_view(c0, name, code)
     >>> lecture_id = jobj0b['lecture']['id']
 
-    >>> c = shortcuts.make_client()
+    >>> c = Client()
 
     # authをします
     >>> jobj1 = shortcuts.access_auth_view(c)
@@ -406,7 +405,7 @@ def test_about_timeline__badrequest():
     before_virtual_ts, after_virtual_tsの片方だけ
     指定した場合はBad Requestを返す
 
-    >>> c = shortcuts.make_client()
+    >>> c = Client()
 
     # before_virtual_tsだけ指定します
     >>> jobj1 = shortcuts.access_timeline_post_view(
@@ -430,12 +429,12 @@ def test_about_timeline__forbidden():
     >>> code = 't001'
 
     # 下準備（授業の作成）
-    >>> c0 = shortcuts.make_client()
+    >>> c0 = Client()
     >>> jobj0a = shortcuts.access_auth_view(c0)
     >>> jobj0b = shortcuts.access_lecture_add_view(c0, name=name, code=code)
     >>> lecture_id = jobj0b['lecture']['id']
 
-    >>> c = shortcuts.make_client()
+    >>> c = Client()
 
     # lecture/timeline/(method [get|post])はauthしていないとできません
     # (Forbidden)
@@ -469,7 +468,7 @@ def test_about_timeline__notfound():
     u"""
     存在しない授業IDでget/postした場合はNot Foundを返す
 
-    >>> c = shortcuts.make_client()
+    >>> c = Client()
 
     # authをします
     >>> jobj1 = shortcuts.access_auth_view(c)
@@ -537,7 +536,7 @@ def test_about_user_profile():
     >>> from django.contrib.auth.models import User
 
 
-    >>> c = shortcuts.make_client()
+    >>> c = Client()
     >>> jobj = shortcuts.access_auth_view(c)
     >>> jobj['status'] == 'OK'
     True
@@ -558,8 +557,8 @@ def test_about_user_profile():
 from mysite.question.models import Lecture, Post
 from django.contrib.auth.models import User
 import mysite.question.twutil.tw_util as tw_util
-import mysite.question.image_utils as image_utils
 import mysite.question.shortcuts as shortcuts
+from django.test.client import Client
 
 
 def setup(test):
@@ -568,6 +567,7 @@ def setup(test):
     User.objects.all().delete()
 
     test.globs['shortcuts'] = shortcuts
+    test.globs['Client'] = Client
 
     test.globs['real_get_vc'] = tw_util.get_vc
     tw_util.get_vc = get_vc_mock
