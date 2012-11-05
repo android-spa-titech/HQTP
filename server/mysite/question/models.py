@@ -3,6 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from django.db.models.aggregates import Sum
 
 
 class Lecture(models.Model):
@@ -71,6 +72,19 @@ class Post(models.Model):
         return (vts1 + vts2) / 2
 
 
+class Achievement(models.Model):
+    name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    point = models.IntegerField()
+    achieved_by = models.ForeignKey(User)
+
+    def to_dict(self):
+        return dict(id=self.pk,
+                    name=self.name,
+                    point=self.point,
+                    created_at=self.created_at.isoformat())
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
 
@@ -81,9 +95,11 @@ class UserProfile(models.Model):
 
 
 def user_to_dict(user):
+    point = user.achievement_set.aggregate(Sum('point'))['point__sum']
     return dict(id=user.pk,
                 name=user.get_profile().screen_name,
-                icon_url=user.get_profile().icon_url)
+                icon_url=user.get_profile().icon_url,
+                total_point=point)
 
 
 def create_user_profile(sender, instance, created, **kwargs):

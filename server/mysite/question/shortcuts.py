@@ -65,3 +65,9 @@ def access_user_get_view(client, user_id):
     url = '/api/user/?id=%d'
     response = client.get(url % user_id)
     return json.loads(response.content)
+
+
+def access_achievement_get_view(client, **ids):
+    url = '/api/user/achievement/'
+    response = client.get(url, ids)
+    return json.loads(response.content)
