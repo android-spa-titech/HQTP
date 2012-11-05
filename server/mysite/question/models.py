@@ -78,6 +78,9 @@ class Achievement(models.Model):
     point = models.IntegerField()
     achieved_by = models.ForeignKey(User)
 
+    def __unicode__(self):
+        return u'%s (%s)' % (self.name, self.point)
+
     def to_dict(self):
         return dict(id=self.pk,
                     name=self.name,

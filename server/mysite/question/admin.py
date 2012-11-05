@@ -3,7 +3,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
-from mysite.question.models import Post, Lecture, UserProfile
+from mysite.question.models import Post, Lecture, Achievement, UserProfile
 
 
 class PostAdmin(admin.ModelAdmin):
@@ -17,6 +17,13 @@ class LectureAdmin(admin.ModelAdmin):
     search_fields = ['name', 'code']
 
 admin.site.register(Lecture, LectureAdmin)
+
+
+class AchievementAdmin(admin.ModelAdmin):
+    search_fields = ['name']
+    date_hierarchy = 'created_at'
+
+admin.site.register(Achievement, AchievementAdmin)
 
 
 class UserProfileInline(admin.StackedInline):
