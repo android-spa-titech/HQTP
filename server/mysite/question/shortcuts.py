@@ -4,70 +4,49 @@ from mysite.question.twutil.consumer_info import spa_key, spa_secret
 import json
 
 
-def access_auth_view(client, key=None, secret=None):
-    # どちらもNoneかどちらもnot Noneでなければいけない
-    error_msg = 'Usage: access_auth_view({KEY}, {SECRET})'
-    assert not((key is None) != (secret is None)), error_msg
-
-    # for convenient, key and secret are allowed blank
-    # if blank then use android_spa's key and secret
-    if key is None and secret is None:
-        key = spa_key
-        secret = spa_secret
-
-    url_template = '/api/auth/?access_token_key=%s&access_token_secret=%s'
-    url = url_template % (key, secret)
-    response = client.get(url)
+def access_template(method, api_name, **kwargs):
+    url = '/api/' + api_name + '/'
+    response = method(url, kwargs)
     return json.loads(response.content)
+
+
+def access_auth_view(client, **key_and_secret):
+    if key_and_secret == {}:
+        return access_template(client.get, 'auth', access_token_key=spa_key,
+                               access_token_secret=spa_secret)
+    else:
+        return access_template(client.get, 'auth', **key_and_secret)
 
 
 def access_lecture_get_view(client):
-    url = '/api/lecture/get/'
-    response = client.get(url)
-    return json.loads(response.content)
+    return access_template(client.get, 'lecture/get')
 
 
 def access_lecture_add_view(client, name, code):
-    url = '/api/lecture/add/'
-    response = client.post(url, dict(name=name, code=code))
-    return json.loads(response.content)
+    return access_template(client.post, 'lecture/add', name=name, code=code)
 
 
-def access_timeline_get_view(client, lecture_id, since_id=None):
-    if since_id is not None:
-        url_template = '/api/lecture/timeline/?id=%s&since_id=%s'
-        url = url_template % (lecture_id, since_id)
-    else:
-        url_template = '/api/lecture/timeline/?id=%s'
-        url = url_template % lecture_id
-    response = client.get(url)
-    return json.loads(response.content)
+def access_timeline_get_view(client, lecture_id, **since_id):
+    return access_template(client.get, 'lecture/timeline',
+                           id=lecture_id, **since_id)
 
 
-def access_timeline_post_view(client, lecture_id, body=None,
-                              before_virtual_ts=None, after_virtual_ts=None,
-                              image=None):
-    url = '/api/lecture/timeline/'
-    dic = dict(id=lecture_id)
-    if body is not None:
-        dic['body'] = body
-    if before_virtual_ts is not None:
-        dic['before_virtual_ts'] = before_virtual_ts
-    if after_virtual_ts is not None:
-        dic['after_virtual_ts'] = after_virtual_ts
-    if image is not None:
-        dic['image'] = image
-    response = client.post(url, dic)
-    return json.loads(response.content)
+def access_timeline_post_view(client, lecture_id,
+                              body=None, image=None, **vts):
+    if (body is not None) == (image is not None):
+        assert 'Usage: \'body\' or \'image\' must be needed.'
+    elif body is not None:
+        return access_template(client.post, 'lecture/timeline', id=lecture_id,
+                               body=body, **vts)
+    elif image is not None:
+        return access_template(client.post, 'lecture/timeline', id=lecture_id,
+                               image=image, **vts)
 
 
 def access_user_get_view(client, user_id):
-    url = '/api/user/?id=%d'
-    response = client.get(url % user_id)
-    return json.loads(response.content)
+    return access_template(client.get, 'user', id=user_id)
 
 
-def access_achievement_get_view(client, **ids):
-    url = '/api/user/achievement/'
-    response = client.get(url, ids)
-    return json.loads(response.content)
+def access_achievement_get_view(client, user_id, **since_id):
+    return access_template(client.get, 'user/achievement',
+                           id=user_id, **since_id)
