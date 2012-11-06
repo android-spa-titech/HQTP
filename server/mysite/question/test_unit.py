@@ -216,11 +216,30 @@ class TimeLineFailTests(TestCase):
             body=u'投稿できないよ!', after_virtual_ts=65536)
         self.assertEqual(j_only_after['status'], 'Bad Request')
 
+    def test_get_invalid_lecture_id(self):
+        # 整数値でなければBad Request
+        j_invalid_lecture_id_get = sc.access_timeline_get_view(
+            self.client, lecture_id='invalid lecture_id')
+        self.assertEqual(j_invalid_lecture_id_get['status'], 'Bad Request')
+
+        j_invalid_lecture_id_post = sc.access_timeline_post_view(
+            self.client, lecture_id='invalid lecture_id',
+            body=u'投稿できないよ!')
+        self.assertEqual(j_invalid_lecture_id_post['status'], 'Bad Request')
+
     def test_get_invalid_since_id(self):
         # 整数値でなければBad Request
         j_invalid_since_id = sc.access_timeline_get_view(
             self.client, lecture_id=1, since_id='invalid since_id')
         self.assertEqual(j_invalid_since_id['status'], 'Bad Request')
+
+    def test_post_invalid_vts(self):
+        # 整数値でなければBad Request
+        j_invalid_vts = sc.access_timeline_post_view(
+            self.client, lecture_id=1, body=u'投稿できないよ!',
+            before_virtual_ts='invalid vts',
+            after_virtual_ts='invalid vts')
+        self.assertEqual(j_invalid_vts['status'], 'Bad Request')
 
     def test_timeline_get_without_auth(self):
         # 認証しないで timeline get/post したら Forbidden
@@ -302,6 +321,12 @@ class UserGetFailTests(TestCase):
         j_bad = loads(response.content)
         self.assertEqual(j_bad['status'], 'Bad Request')
 
+    def test_get_invalid_user_id(self):
+        # 整数値でなければBad Request
+        j_invalid_user_id = sc.access_user_get_view(
+            self.client, user_id='invalid user_id')
+        self.assertEqual(j_invalid_user_id['status'], 'Bad Request')
+
     def test_get_user__forbidden(self):
         j_forbidden = sc.access_user_get_view(self.client, 1)
         self.assertEqual(j_forbidden['status'], 'Forbidden')
@@ -365,6 +390,18 @@ class AchievementFailTests(TestCase):
     def test_achievement_without_id(self):
         j_bad = sc.access_achievement_get_view(self.client)
         self.assertEqual(j_bad['status'], 'Bad Request')
+
+    def test_get_invalid_user_id(self):
+        # 整数値でなければBad Request
+        j_invalid_user_id = sc.access_achievement_get_view(
+            self.client, id='invalid user_id')
+        self.assertEqual(j_invalid_user_id['status'], 'Bad Request')
+
+    def test_get_invalid_since_id(self):
+        # 整数値でなければBad Request
+        j_invalid_since_id = sc.access_achievement_get_view(
+            self.client, id=1, since_id='invalid since_id')
+        self.assertEqual(j_invalid_since_id['status'], 'Bad Request')
 
     def test_achievement_without_auth(self):
         j_fbd = sc.access_achievement_get_view(self.client, id=1)
