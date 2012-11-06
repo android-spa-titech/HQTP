@@ -10,7 +10,6 @@ import org.json.JSONException;
 public interface APIClient {
 
     // Instance methods
-    // TODO: 認証の成否は例外によって知られるべき。何を戻り値にするか検討が必要。
     public abstract User authenticate(String access_token_key, String access_token_secret) throws IOException,
             JSONException, HQTPAPIException;
 
@@ -59,4 +58,6 @@ public interface APIClient {
 
     public abstract AchievementResponse getAchievements(int user_id, int since_id) throws HQTPAPIException,
             IOException, JSONException, ParseException;
+
+    public abstract User getUser(int user_id) throws HQTPAPIException, IOException, JSONException, ParseException;
 }

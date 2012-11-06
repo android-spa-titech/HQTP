@@ -33,7 +33,8 @@ public class APIClientImplTest extends RoboGuiceTest {
         Robolectric.clearHttpResponseRules();
         Robolectric.clearPendingHttpResponses();
         Robolectric.addPendingHttpResponse(200, "{\"status\":\"OK\",\"created\":false," +
-                "\"user\":{\"id\":12,\"name\":\"test user\",\"icon_url\":\"http://example.com/test.png\"}}");
+                "\"user\":{\"id\":12,\"name\":\"test user\",\"icon_url\":\"http://example.com/test.png\"," +
+                "\"total_point\":42}}");
 
         User res = proxy.authenticate("DUMMY_ACCESS_TOKEN_KEY", "DUMMY_ACCESS_TOKEN_SECRET");
 
@@ -49,6 +50,8 @@ public class APIClientImplTest extends RoboGuiceTest {
         assertThat(res.getId(), equalTo(12));
         assertThat(res.getName(), equalTo("test user"));
         assertThat(res.getIconURL(), equalTo("http://example.com/test.png"));
+        // TODO: toggle comment when server returns total_point
+        // assertThat(res.getTotalPoint(), equalTo(42));
     }
 
     @Test(expected = HQTPAPIException.class)
@@ -284,6 +287,29 @@ public class APIClientImplTest extends RoboGuiceTest {
         assertThat(achievements.get(0).getId(), equalTo(1234));
         assertThat(achievements.get(0).getName(), equalTo("test name"));
         assertThat(achievements.get(0).getPoint(), equalTo(12));
+    }
+
+    @Test
+    public void getUserShouldCallAPI() throws Exception {
+        Robolectric.clearHttpResponseRules();
+        Robolectric.clearPendingHttpResponses();
+        Robolectric.addPendingHttpResponse(200, "{\"status\":\"OK\"," +
+                "\"user\":{\"id\":12,\"name\":\"test user\"," +
+                "\"icon_url\":\"http://example.com/test.png\",\"total_point\":42}}");
+
+        User res = proxy.getUser(1);
+
+        HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
+        assertThat(sentHttpRequest.getMethod(), equalTo("GET"));
+        assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
+        assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/user/"));
+
+        assertThat(res, notNullValue());
+        assertThat(res.getId(), equalTo(12));
+        assertThat(res.getName(), equalTo("test user"));
+        assertThat(res.getIconURL(), equalTo("http://example.com/test.png"));
+        // TODO: toggle comment when server returns total_point
+        // assertThat(res.getTotalPoint(), equalTo(42));
     }
 
     private class TestModule extends AbstractModule {

@@ -56,7 +56,7 @@ public class ProfileView extends LinearLayout {
     {
         if (user != null) {
             username_view.setText(user.getName());
-            updateTotalPoint(0);// TODO: show user's point
+            updateTotalPoint(user.getTotalPoint());// TODO: show user's point
             icon_view.setTag(user.getIconURL());
             loader.displayImage(icon_view, this.activity);
         } else {
@@ -75,8 +75,7 @@ public class ProfileView extends LinearLayout {
         @Override
         public User call() throws Exception {
             int user_id = proxy.getUserId();
-            // TODO: return proxy.getUser(user_id);
-            return null;
+            return proxy.getUser(user_id);
         }
 
         @Override

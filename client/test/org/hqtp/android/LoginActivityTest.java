@@ -85,7 +85,7 @@ public class LoginActivityTest extends RoboGuiceTest {
         AccessToken accessToken = new AccessToken("123-accessToken", "accessTokenSecret");
         when(oauth.getOAuthAccessToken(requestToken, "verifier")).thenReturn(accessToken);
         when(proxy.authenticate("123-accessToken", "accessTokenSecret")).thenReturn(
-                new User(1, "test", "http://example.com/hoge.png"));
+                new User(1, "test", "http://example.com/hoge.png", 0));
 
         activity.onNewIntent(new Intent(Intent.ACTION_VIEW,
                 Uri.parse("hqtp://request_callback?oauth_verifier=verifier")));
@@ -135,7 +135,7 @@ public class LoginActivityTest extends RoboGuiceTest {
         e.putBoolean(LoginActivity.SAVED_AUTH_TOKEN_STATE, true);
         e.commit();
         when(proxy.authenticate("123-accessToken", "accessTokenSecret")).thenReturn(
-                new User(1, "test", "http://example.com/hoge.png"));
+                new User(1, "test", "http://example.com/hoge.png", 0));
 
         activity.onCreate(null);
         loginButton.performClick();

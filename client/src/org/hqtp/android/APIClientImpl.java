@@ -180,6 +180,17 @@ public class APIClientImpl implements APIClient {
         return new AchievementResponse(achievements, json.getInt("total_point"));
     }
 
+    @Override
+    public User getUser(int user_id) throws HQTPAPIException, IOException, JSONException, ParseException {
+        String response = builder.get("user/").param("id", user_id).send();
+        JSONObject json = new JSONObject(response);
+        if (!isStatusOK(json)) {
+            throw new HQTPAPIException("Getting user was failed. : GET /api/user/ returned status="
+                    + json.getString("status"));
+        }
+        return User.fromJSON(json.getJSONObject("user"));
+    }
+
     private static boolean isStatusOK(JSONObject json) throws JSONException {
         return json.has("status") && json.getString("status").equals("OK");
     }
@@ -187,5 +198,4 @@ public class APIClientImpl implements APIClient {
     private static boolean isCreated(JSONObject json) throws JSONException {
         return json.has("created") && json.getBoolean("created");
     }
-
 }
