@@ -143,8 +143,8 @@ def test_about_auth__notfound():
     TwitterのOAuthの正しくないkey, secretの場合Not Foundを返す
 
     >>> c = Client()
-    >>> jobj = shortcuts.access_auth_view(
-    ...     c, key='dummy key', secret='dummy secret')
+    >>> jobj = shortcuts.access_auth_view(c,
+    ...     access_token_key='dummy key', access_token_secret='dummy secret')
     >>> jobj['status'] == 'Not Found'
     True
     """
@@ -155,7 +155,8 @@ def test_about_auth__servererror():
     key, sercretによってはServer Errorを返す
 
     >>> c = Client()
-    >>> jobj = shortcuts.access_auth_view(c, key='spam', secret='egg')
+    >>> jobj = shortcuts.access_auth_view(c,
+    ...    access_token_key='spam', access_token_secret='egg')
     >>> jobj['status'] == 'Server Error'
     True
     """
