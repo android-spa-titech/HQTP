@@ -167,9 +167,10 @@ def lecture_timeline_view(request):
     if request.method == 'GET':
         try:
             # get timeline
-            lecture_id = request.GET['id']
-        except MultiValueDictKeyError:
+            lecture_id = int(request.GET['id'])
+        except (MultiValueDictKeyError, ValueError):
             # key 'id' is not requested
+            # or id is not integer
             return json_response_bad_request()
 
         if 'since_id' in request.GET:
@@ -197,8 +198,8 @@ def lecture_timeline_view(request):
 
     elif request.method == 'POST':
         try:
-            lecture_id = request.POST['id']
-        except MultiValueDictKeyError:
+            lecture_id = int(request.POST['id'])
+        except (MultiValueDictKeyError, ValueError):
             return json_response_bad_request()
 
         if (('body' in request.POST)
@@ -215,6 +216,17 @@ def lecture_timeline_view(request):
             # NOTE: != is logical exclusive-or
             return json_response_bad_request()
 
+        if use_before_vts and use_after_vts:
+            # post to between 2 posts
+            try:
+                vts = Post.calc_mid(int(request.POST['before_virtual_ts']),
+                                    int(request.POST['after_virtual_ts']))
+            except ValueError:
+                return json_response_bad_request()
+        else:
+            # post to latest
+            vts = Post.time_to_vts(time())
+
         if not request.user.is_authenticated():
             # get need authentication
             return json_response_forbidden()
@@ -224,14 +236,6 @@ def lecture_timeline_view(request):
         except Lecture.DoesNotExist:
             # invalid lecture ID
             return json_response_not_found()
-
-        if use_before_vts and use_after_vts:
-            # post to between 2 posts
-            vts = Post.calc_mid(int(request.POST['before_virtual_ts']),
-                                int(request.POST['after_virtual_ts']))
-        else:
-            # post to latest
-            vts = Post.time_to_vts(time())
 
         post = lec.post_set.create(added_by=request.user,
                                    virtual_ts=vts)
@@ -260,8 +264,8 @@ def user_view(request):
     # ユーザー情報取得API
     if request.method == 'GET':
         try:
-            user_id = request.GET['id']
-        except MultiValueDictKeyError:
+            user_id = int(request.GET['id'])
+        except (MultiValueDictKeyError, ValueError):
             return json_response_bad_request()
 
         if not request.user.is_authenticated():
@@ -282,8 +286,8 @@ def achievement_view(request):
 
     if request.method == 'GET':
         try:
-            user_id = request.GET['id']
-        except MultiValueDictKeyError:
+            user_id = int(request.GET['id'])
+        except (MultiValueDictKeyError, ValueError):
             return json_response_bad_request()
 
         if 'since_id' in request.GET:
