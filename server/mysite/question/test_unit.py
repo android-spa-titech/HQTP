@@ -393,13 +393,13 @@ class AchievementFailTests(TestCase):
     def test_get_invalid_user_id(self):
         # 整数値でなければBad Request
         j_invalid_user_id = sc.access_achievement_get_view(
-            self.client, id='invalid user_id')
+            self.client, user_id='invalid user_id')
         self.assertEqual(j_invalid_user_id['status'], 'Bad Request')
 
     def test_get_invalid_since_id(self):
         # 整数値でなければBad Request
         j_invalid_since_id = sc.access_achievement_get_view(
-            self.client, id=1, since_id='invalid since_id')
+            self.client, user_id=1, since_id='invalid since_id')
         self.assertEqual(j_invalid_since_id['status'], 'Bad Request')
 
     def test_achievement_without_auth(self):
