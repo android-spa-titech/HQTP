@@ -1,22 +1,29 @@
 # -*- coding:utf-8 -*-
 
+# Django imports
 from django.http import (HttpResponse,
                          HttpResponseNotFound,
                          HttpResponseForbidden,
                          HttpResponseBadRequest,
                          HttpResponseServerError)
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.utils.datastructures import MultiValueDictKeyError
+
+# Python module imports
 import json
+import os
+import doctest
+from time import time
+
+# mysite imports
 from mysite.question.models import (Post,
                                     user_to_dict,
                                     Lecture)
 import mysite.question.twutil.tw_util as tw_util
 import mysite.question.image_utils as image_utils
-from time import time
-import os
+from mysite.question.achieve_utils import give_achievement
+from django.db.models.aggregates import Sum
 
 
 def convert_context_to_json(context):
@@ -111,6 +118,7 @@ def auth_view(request):
         profile.name = tw_account['name']
         profile.icon_url = icon_url
         profile.save()
+        give_achievement('first_login', user)
         created = True
 
     auth_user = authenticate(username=user_name, password=temp_password)
@@ -137,7 +145,6 @@ def lecture_get_view(request):
     return json_response(context=dict(lectures=lecs))
 
 
-@csrf_exempt
 def lecture_add_view(request):
     try:
         code = request.POST['code']
@@ -152,10 +159,10 @@ def lecture_add_view(request):
     # get_or_create(): 新規作成したらcreated = True
     lec, created = Lecture.objects.get_or_create(
         code=code, defaults=dict(name=name))
+    give_achievement('add_lecture', request.user)
     return json_response(context=dict(created=created, lecture=lec.to_dict()))
 
 
-@csrf_exempt
 def lecture_timeline_view(request):
     if request.method == 'GET':
         try:
@@ -164,6 +171,14 @@ def lecture_timeline_view(request):
         except MultiValueDictKeyError:
             # key 'id' is not requested
             return json_response_bad_request()
+
+        if 'since_id' in request.GET:
+            try:
+                since_id = int(request.GET['since_id'])
+            except ValueError:
+                return json_response_bad_request()
+        else:
+            since_id = 0
 
         if not request.user.is_authenticated():
             # get need authentication
@@ -174,11 +189,11 @@ def lecture_timeline_view(request):
         except Lecture.DoesNotExist:
             # invalid lecture ID
             return json_response_not_found()
-        else:
-            # successfully get timeline
-            posts = [q.to_dict()
-                     for q in lec.post_set.order_by('virtual_ts')]
-            return json_response(context=dict(posts=posts))
+
+        # successfully get timeline
+        posts = [q.to_dict() for q in
+                 lec.post_set.filter(pk__gt=since_id).order_by('virtual_ts')]
+        return json_response(context=dict(posts=posts))
 
     elif request.method == 'POST':
         try:
@@ -237,6 +252,7 @@ def lecture_timeline_view(request):
             post.image_url = image_url
             post.save()
 
+        give_achievement('one_post', request.user)
         return json_response(context=dict(post=post.to_dict()))
 
 
@@ -261,6 +277,39 @@ def user_view(request):
         return json_response(context=dict(user=user_info))
 
 
+def achievement_view(request):
+    u"実績一覧取得API"
+
+    if request.method == 'GET':
+        try:
+            user_id = request.GET['id']
+        except MultiValueDictKeyError:
+            return json_response_bad_request()
+
+        if 'since_id' in request.GET:
+            try:
+                since_id = int(request.GET['since_id'])
+            except ValueError:
+                return json_response_bad_request()
+        else:
+            since_id = 0
+
+        if not request.user.is_authenticated():
+            return json_response_forbidden()
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return json_response_not_found()
+
+        # Get the total point
+        context = user.achievement_set.aggregate(total_point=Sum('point'))
+
+        achievements = [a.to_dict() for a in
+                        user.achievement_set.filter(pk__gt=since_id)]
+        context['achievements'] = achievements
+        return json_response(context)
+
+
 def _test():
-    import doctest
     doctest.testmod()

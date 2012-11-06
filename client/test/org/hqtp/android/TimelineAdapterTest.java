@@ -1,10 +1,10 @@
 package org.hqtp.android;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.hqtp.android.util.HQTPTestRunner;
 import org.hqtp.android.util.RoboGuiceTest;
@@ -49,7 +49,7 @@ public class TimelineAdapterTest extends RoboGuiceTest {
     private Post imagePost;
     private User testUser;
     private Lecture testLecture;
-    private List<Post> testPosts;
+    private SortedSet<Post> testPosts;
 
     private static final int INITIAL_FORM = 1;
     private static final int NUM_INITIAL_CELLS = 2;
@@ -82,7 +82,7 @@ public class TimelineAdapterTest extends RoboGuiceTest {
         Date d2 = new Date(new Date().getTime() - 12 * 60 * 60 * 1000);
         imagePost = new Post(5, null, new Date(), Post.dateToVirtualTimestamp(d2),
                 testUser, testLecture, "http://example.com/image.png");
-        testPosts = new ArrayList<Post>();
+        testPosts = new TreeSet<Post>();
         testPosts.add(testOldPost);
         testPosts.add(testPost);
         testPosts.add(imagePost);

@@ -1,16 +1,7 @@
 # -*- coding:utf-8 -*-
 
 from mysite.question.twutil.consumer_info import spa_key, spa_secret
-from django.test.client import Client
 import json
-
-
-def make_client():
-    """
-    >>> c = make_client()
-    """
-
-    return Client(enforce_csrf_checks=True)
 
 
 def access_auth_view(client, key=None, secret=None):
@@ -42,9 +33,14 @@ def access_lecture_add_view(client, name, code):
     return json.loads(response.content)
 
 
-def access_timeline_get_view(client, lecture_id):
-    url = '/api/lecture/timeline/?id=%s'
-    response = client.get(url % lecture_id)
+def access_timeline_get_view(client, lecture_id, since_id=None):
+    if since_id is not None:
+        url_template = '/api/lecture/timeline/?id=%s&since_id=%s'
+        url = url_template % (lecture_id, since_id)
+    else:
+        url_template = '/api/lecture/timeline/?id=%s'
+        url = url_template % lecture_id
+    response = client.get(url)
     return json.loads(response.content)
 
 
@@ -68,4 +64,10 @@ def access_timeline_post_view(client, lecture_id, body=None,
 def access_user_get_view(client, user_id):
     url = '/api/user/?id=%d'
     response = client.get(url % user_id)
+    return json.loads(response.content)
+
+
+def access_achievement_get_view(client, **ids):
+    url = '/api/user/achievement/'
+    response = client.get(url, ids)
     return json.loads(response.content)

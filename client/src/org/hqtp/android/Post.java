@@ -9,7 +9,7 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Post {
+public class Post implements Comparable<Post> {
     private final static int VIRTUAL_TS_SCALE = 100000;
 
     private int id;
@@ -89,5 +89,16 @@ public class Post {
 
     public static long dateToVirtualTimestamp(Date date) {
         return date.getTime() * VIRTUAL_TS_SCALE;
+    }
+
+    @Override
+    public int compareTo(Post another) {
+        if (this.virtualTimestamp < another.virtualTimestamp) {
+            return -1;
+        } else if (this.virtualTimestamp == another.virtualTimestamp) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
 }

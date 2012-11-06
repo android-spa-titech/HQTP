@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.SortedSet;
 import java.util.TimeZone;
 
 import roboguice.inject.ContextSingleton;
@@ -156,7 +157,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
     }
 
     @Override
-    public void onUpdate(List<Post> posts) {
+    public void onUpdate(SortedSet<Post> posts) {
         synchronized (cells) {
             boolean formCellAdded = false;
             long beforeFormCellId = Long.MAX_VALUE;
