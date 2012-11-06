@@ -172,20 +172,23 @@ class TimeLineTests(TestCase):
 
     def test_timeline_get_view_since_full(self):
         # since_id=0の場合、since_idを指定しない（全取得）と等しい
-        j_all = sc.access_timeline_get_view(self.c, lecture_id=1)
-        j_since0 = sc.access_timeline_get_view(self.c, lecture_id=1, since_id=0)
+        j_all = sc.access_timeline_get_view(self.client, lecture_id=1)
+        j_since0 = sc.access_timeline_get_view(
+            self.client, lecture_id=1, since_id=0)
         self.assertEqual(j_all, j_since0)
 
     def test_timeline_get_view_since1(self):
         # since_id=1の場合
         # pk>1を満たすポストを含む長さ1のタイムラインが返ってくる
-        j_since1 = sc.access_timeline_get_view(self.c, lecture_id=1, since_id=1)
+        j_since1 = sc.access_timeline_get_view(
+            self.client, lecture_id=1, since_id=1)
         self.assertEqual(len(j_since1['posts']), 1)
 
     def test_timeine_get_view_sicne_empty(self):
         # since_id=2の場合
         # pk>2を満たすポストが存在しないので長さ0のタイムラインが返ってくる
-        j_since2 = sc.access_timeline_get_view(self.c, lecture_id=1, since_id=2)
+        j_since2 = sc.access_timeline_get_view(
+            self.client, lecture_id=1, since_id=2)
         self.assertEqual(len(j_since2['posts']), 0)
 
     def test_timeline_get__not_found(self):
@@ -216,7 +219,7 @@ class TimeLineFailTests(TestCase):
     def test_get_invalid_since_id(self):
         # 整数値でなければBad Request
         j_invalid_since_id = sc.access_timeline_get_view(
-            self.c, lecture_id=1, since_id='invalid since_id')
+            self.client, lecture_id=1, since_id='invalid since_id')
         self.assertEqual(j_invalid_since_id['status'], 'Bad Request')
 
     def test_timeline_get_without_auth(self):
