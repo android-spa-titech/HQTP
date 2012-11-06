@@ -34,7 +34,7 @@ def access_timeline_get_view(client, lecture_id, **since_id):
 def access_timeline_post_view(client, lecture_id,
                               body=None, image=None, **vts):
     if (body is not None) == (image is not None):
-        assert 'Usage: \'body\' or \'image\' must be needed.'
+        assert "Usage: 'body' or 'image' must be needed."
     elif body is not None:
         return access_template(client.post, 'lecture/timeline', id=lecture_id,
                                body=body, **vts)
