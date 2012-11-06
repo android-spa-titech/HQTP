@@ -39,6 +39,8 @@ public class PostTimelineActivity extends RoboActivity {
     TextView postBody;
     @InjectView(R.id.postButton)
     Button postButton;
+    @InjectView(R.id.profileView)
+    ProfileView profileView;
     @InjectExtra(LECTURE_ID)
     int lectureId;
     @InjectExtra(PREV_VIRTUAL_TS)
@@ -69,6 +71,18 @@ public class PostTimelineActivity extends RoboActivity {
         if (savedInstanceState != null) {
             postBody.setText(savedInstanceState.getString(SAVED_POST_BODY));
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        profileView.startRecurringUpdate();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        profileView.stop();
     }
 
     @Override
