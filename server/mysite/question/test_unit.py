@@ -60,20 +60,19 @@ class AuthenticateFailTests(TestCase):
         image_utils.get_img = self._original_get_img
 
     def test_auth_only_key(self):
-        url_key = '/api/auth/?access_token_key=BAD_REQUEST_KEY'
-        response = self.client.get(url_key)
-        j_only_key = loads(response.content)
+        j_only_key = sc.access_auth_view(
+            self.client, access_token_key='BAD_REQUEST_KEY')
         self.assertEqual(j_only_key['status'], 'Bad Request')
 
     def test_auth_only_secret(self):
-        url_secret = '/api/auth/?access_token_secret=BAD_REQUEST_SECRET'
-        response = self.client.get(url_secret)
-        j_only_secret = loads(response.content)
+        j_only_secret = sc.access_auth_view(
+            self.client, access_token_secret='BAD_REQUEST_SECRET')
         self.assertEqual(j_only_secret['status'], 'Bad Request')
 
     def test_invalid_key_and_secret(self):
         # 値によっては Server Error
-        j_not_found = sc.access_auth_view(self.client, 'spam', 'egg')
+        j_not_found = sc.access_auth_view(
+            self.client, access_token_key='spam', access_token_secret='egg')
         self.assertEqual(j_not_found['status'], 'Server Error')
 
 
@@ -368,19 +367,19 @@ class AchievementGetTests(TestCase):
 
     def test_achieve_get_all(self):
         # since_id を指定しないと achievement 全取得
-        j_achieve = sc.access_achievement_get_view(self.client, id=1)
+        j_achieve = sc.access_achievement_get_view(self.client, 1)
         self.assertEqual(len(j_achieve['achievements']), 3)
 
     def test_achievement_with_since_id(self):
         # since_id を指定すると、それより大きい id を持つ achievement を取得
         j_achieve = sc.access_achievement_get_view(
-            self.client, id=1, since_id=2)
+            self.client, 1, since_id=2)
         self.assertEqual(len(j_achieve['achievements']), 1)
 
     def test_achievement_with_since_id_total_point(self):
         # since_id を指定した場合でも total_point は全ポイントの合計
         j_achieve = sc.access_achievement_get_view(
-            self.client, id=1, since_id=2)
+            self.client, 1, since_id=2)
         self.assertEqual(j_achieve['total_point'], 131)
 
 
@@ -388,7 +387,7 @@ class AchievementFailTests(TestCase):
     fixtures = ['test_user.json', 'test_achievements.json']
 
     def test_achievement_without_id(self):
-        j_bad = sc.access_achievement_get_view(self.client)
+        j_bad = sc.access_template(self.client.get, 'user/achievement')
         self.assertEqual(j_bad['status'], 'Bad Request')
 
     def test_get_invalid_user_id(self):
@@ -404,10 +403,10 @@ class AchievementFailTests(TestCase):
         self.assertEqual(j_invalid_since_id['status'], 'Bad Request')
 
     def test_achievement_without_auth(self):
-        j_fbd = sc.access_achievement_get_view(self.client, id=1)
+        j_fbd = sc.access_achievement_get_view(self.client, 1)
         self.assertEqual(j_fbd['status'], 'Forbidden')
 
     def test_achievement__not_found(self):
         self.client.login(username='testuser', password='testpassword')
-        j_not = sc.access_achievement_get_view(self.client, id=42)
+        j_not = sc.access_achievement_get_view(self.client, 42)
         self.assertEqual(j_not['status'], 'Not Found')
