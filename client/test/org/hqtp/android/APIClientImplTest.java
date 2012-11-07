@@ -50,8 +50,7 @@ public class APIClientImplTest extends RoboGuiceTest {
         assertThat(res.getId(), equalTo(12));
         assertThat(res.getName(), equalTo("test user"));
         assertThat(res.getIconURL(), equalTo("http://example.com/test.png"));
-        // TODO: toggle comment when server returns total_point
-        // assertThat(res.getTotalPoint(), equalTo(42));
+        assertThat(res.getTotalPoint(), equalTo(42));
     }
 
     @Test(expected = HQTPAPIException.class)
@@ -71,12 +70,12 @@ public class APIClientImplTest extends RoboGuiceTest {
         Robolectric.addPendingHttpResponse(200, "{\"status\":\"OK\",\"posts\":[" +
                 "{\"id\":\"1\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
                 "\"body\":\"test content\"," +
-                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\",\"total_point\":42}," +
                 "\"time\":\"2012-06-22T17:44:23.092839\"," +
                 "\"virtual_ts\":\"1234567890\"}," +
                 "{\"id\":\"2\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
                 "\"body\":\"test content\"," +
-                "\"user\":{\"id\":\"2\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"user\":{\"id\":\"2\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\",\"total_point\":42}," +
                 "\"time\":\"2012-06-22T17:44:23.092839\",\"virtual_ts\":\"1234568890\"}" +
                 "]}");
 
@@ -98,7 +97,7 @@ public class APIClientImplTest extends RoboGuiceTest {
         Robolectric.addPendingHttpResponse(200, "{\"status\":\"OK\",\"post\":" +
                 "{\"id\":\"1\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
                 "\"body\":\"test content\"," +
-                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\",\"total_point\":42}," +
                 "\"time\":\"2012-06-22T17:44:23.092839\"," +
                 "\"virtual_ts\":\"1234567890\"}}");
 
@@ -121,7 +120,7 @@ public class APIClientImplTest extends RoboGuiceTest {
                 "{\"id\":\"1\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
                 "\"body\": null," +
                 "\"image_url\": \"http://example.com/image/hoge.png\"," +
-                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\",\"total_point\":42}," +
                 "\"time\":\"2012-06-22T17:44:23.092839\"," +
                 "\"virtual_ts\":\"1234567890\"}}");
 
@@ -308,8 +307,7 @@ public class APIClientImplTest extends RoboGuiceTest {
         assertThat(res.getId(), equalTo(12));
         assertThat(res.getName(), equalTo("test user"));
         assertThat(res.getIconURL(), equalTo("http://example.com/test.png"));
-        // TODO: toggle comment when server returns total_point
-        // assertThat(res.getTotalPoint(), equalTo(42));
+        assertThat(res.getTotalPoint(), equalTo(42));
     }
 
     private class TestModule extends AbstractModule {

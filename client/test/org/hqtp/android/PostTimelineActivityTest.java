@@ -116,6 +116,7 @@ public class PostTimelineActivityTest extends RoboGuiceTest {
         @Override
         protected void configure() {
             bind(APIClient.class).toInstance(mock(APIClient.class));
+            bind(ImageLoader.class).toInstance(mock(ImageLoader.class));
         }
     }
 

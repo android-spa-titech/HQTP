@@ -42,8 +42,7 @@ public class User {
                 json.getInt("id"),
                 json.getString("name"),
                 json.getString("icon_url"),
-                // TODO: replace with json.getInt("total_point")
-                0
+                json.getInt("total_point")
                 );
         return user;
     }
