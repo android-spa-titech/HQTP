@@ -353,6 +353,13 @@ class AchievementTests(TestCase):
         j_after = self.get_achevements_from_db()[0]
         self.assertEqual(j_after['point'], 30)
 
+    def test_achievement_add_lecture_not_created(self):
+        # 既存の授業を追加しても実績は追加されない
+        sc.access_lecture_add_view(self.client, name='Software Test',
+                                   code='76036')  # existing code
+        achievement_list = self.get_achevements_from_db()
+        self.assertListEqual(achievement_list, [])
+
     def test_achievement_one_post(self):
         sc.access_timeline_post_view(self.client, lecture_id=1, body='Hello')
         j_after = self.get_achevements_from_db()[0]

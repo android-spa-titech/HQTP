@@ -7,6 +7,9 @@ expect ">>>"
 send "from django.test.client import Client\n"
 
 expect ">>>"
+send "import mysite.question.shortcuts as sc\n"
+
+expect ">>>"
 send "c = Client()\n"
 
 expect ">>>"
