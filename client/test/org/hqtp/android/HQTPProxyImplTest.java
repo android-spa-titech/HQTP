@@ -73,8 +73,12 @@ public class HQTPProxyImplTest extends RoboGuiceTest {
                 "\"virtual_ts\":\"1234567890\"}," +
                 "{\"id\":\"2\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
                 "\"body\":\"test content\"," +
-                "\"user\":{\"id\":\"2\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\"}," +
-                "\"time\":\"2012-06-22T17:44:23.092839\",\"virtual_ts\":\"1234568890\"}" +
+                "\"user\":{\"id\":\"2\",\"name\":\"another user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"time\":\"2012-06-23T17:44:23.092839\",\"virtual_ts\":\"1234568900\"}," +
+                "{\"id\":\"3\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
+                "\"image_url\":\"http://example.com/test.png\"," +
+                "\"user\":{\"id\":\"2\",\"name\":\"another user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"time\":\"2012-06-24T17:44:23.092839\",\"virtual_ts\":\"1234568990\"}," +
                 "]}");
 
         List<Post> res = proxy.getTimeline(1);
@@ -84,7 +88,7 @@ public class HQTPProxyImplTest extends RoboGuiceTest {
         assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
         assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/lecture/timeline/"));
         Assert.assertNotNull(res);
-        Assert.assertEquals(2, res.size());
+        Assert.assertEquals(3, res.size());
     }
 
     @Test
