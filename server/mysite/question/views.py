@@ -159,7 +159,8 @@ def lecture_add_view(request):
     # get_or_create(): 新規作成したらcreated = True
     lec, created = Lecture.objects.get_or_create(
         code=code, defaults=dict(name=name))
-    give_achievement('add_lecture', request.user)
+    if created:
+        give_achievement('add_lecture', request.user)
     return json_response(context=dict(created=created, lecture=lec.to_dict()))
 
 
