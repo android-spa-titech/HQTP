@@ -80,7 +80,9 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
             }
         } else if (v.getId() == R.id.clearLoginInfoButton) {
             Editor e = preferences.edit();
-            e.putBoolean(SAVED_AUTH_TOKEN_STATE, false);
+            e.remove(SAVED_AUTH_TOKEN_STATE);
+            e.remove(SAVED_AUTH_TOKEN);
+            e.remove(SAVED_AUTH_TOKEN_SECRET);
             e.commit();
             alerter.alert("HQTP", "ログイン情報を消去しました");
         }
