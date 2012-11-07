@@ -24,13 +24,20 @@
             android:text="userName"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
+        <ImageView
+            android:id="@+id/postImage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_vertical"
+            android:contentDescription="Post Image" />
+
         <TextView
             android:id="@+id/postContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="fill_vertical"
-            android:text="Post Content"
             android:autoLink="web"
+            android:text="Post Content"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView

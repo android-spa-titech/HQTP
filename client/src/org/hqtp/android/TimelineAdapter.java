@@ -30,6 +30,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
     private final int FORM_CELL = 0;
     private final int POST_CELL = 1;
     private final int DATE_SEPARATOR_CELL = 2;
+    private final int CELL_KINDS = 3;
 
     @Inject
     LayoutInflater inflater;
@@ -93,7 +94,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
 
     @Override
     public int getViewTypeCount() {
-        return 3;
+        return CELL_KINDS;
     }
 
     @Override
@@ -301,8 +302,23 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
             TextView userNameView = (TextView) convertView.findViewById(R.id.userName);
             TextView postedTimeView = (TextView) convertView.findViewById(R.id.postedTime);
             ImageView imageView = (ImageView) convertView.findViewById(R.id.userIcon);
+            ImageView postImageView = (ImageView) convertView.findViewById(R.id.postImage);
 
-            bodyView.setText(post.getBody());
+            if (post.getImageURL() != null) {
+                postImageView.setTag(post.getImageURL());
+                imageLoader.displayImage(postImageView, TimelineAdapter.this.activity);
+                postImageView.setVisibility(View.VISIBLE);
+            } else {
+                postImageView.setImageDrawable(null);
+                postImageView.setVisibility(View.INVISIBLE);
+            }
+            if (post.getBody() != null) {
+                bodyView.setText(post.getBody());
+                bodyView.setVisibility(View.VISIBLE);
+            } else {
+                bodyView.setText(null);
+                bodyView.setVisibility(View.INVISIBLE);
+            }
             userNameView.setText(post.getUser().getName());
             imageView.setTag(post.getUser().getIconURL());
             imageLoader.displayImage(imageView, TimelineAdapter.this.activity);
