@@ -275,7 +275,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
                     }
                 }
 
-                if (prevVirtualTimestamp != -1 && nextVirtualTimestamp != 1 &&
+                if (prevVirtualTimestamp != -1 && nextVirtualTimestamp != -1 &&
                         !isSameDate(Post.virtualTimestampToDate(prevVirtualTimestamp),
                                 Post.virtualTimestampToDate(nextVirtualTimestamp))) {
                     // Make sure to make a post not to beyond a day.
