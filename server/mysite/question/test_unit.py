@@ -14,6 +14,17 @@ import mysite.question.twutil.consumer_info as ci
 from django.contrib.auth.models import User
 
 
+def get_achevements_from_db(user_pk=1):
+    user = User.objects.get(pk=user_pk)
+    return [a.to_dict() for a in user.achievement_set.all()]
+
+
+def get_timeline_from_db(lecture_id):
+    # 授業IDを指定し、データベースから直接タイムラインを取得
+    lec = Lecture.objects.get(pk=lecture_id)
+    return [p.to_dict() for p in lec.post_set.order_by('virtual_ts')]
+
+
 class AuthenticateTests(TestCase):
     def setUp(self):
         self._original_get_vc = tw_util.get_vc
@@ -137,11 +148,6 @@ class TimeLineTests(TestCase):
     def assertListSorted(self, *args):
         self.assertListEqual(sorted(args), list(args))
 
-    def get_timeline_from_db(self, lecture_id):
-        # 授業IDを指定し、データベースから直接タイムラインを取得
-        lec = Lecture.objects.get(pk=lecture_id)
-        return [p.to_dict() for p in lec.post_set.order_by('virtual_ts')]
-
     def test_timeline_get_view(self):
         # GETに成功すれば、長さ2のタイムラインが返ってくる
         j_get = sc.access_timeline_get_view(self.client, lecture_id=1)
@@ -151,7 +157,7 @@ class TimeLineTests(TestCase):
         # 最新のタイムラインに投稿
         sc.access_timeline_post_view(
             self.client, lecture_id=1, body=u'3rd post')
-        timeline = self.get_timeline_from_db(lecture_id=1)
+        timeline = get_timeline_from_db(lecture_id=1)
         # NOTE: タイムラインは仮想タイムスタンプの順にソートされる
         self.assertListSorted(timeline[0]['id'],
                               timeline[1]['id'],
@@ -163,7 +169,7 @@ class TimeLineTests(TestCase):
             self.client, lecture_id=1, body=u'1.5th post',
             before_virtual_ts=135044899528200600,
             after_virtual_ts=135044902317511100)
-        timeline = self.get_timeline_from_db(lecture_id=1)
+        timeline = get_timeline_from_db(lecture_id=1)
         # 仮想タイムスタンプと投稿ID(通し番号)の順番が異なる
         self.assertListSorted(timeline[0]['id'],
                               timeline[2]['id'],
@@ -298,6 +304,13 @@ class ImagePostTests(TestCase):
         # 画像がちゃんと保存されていることを確認
         self.assertTrue(os.path.exists(self.absolute_pathname))
 
+    def test_achievement_post_image(self):
+        # 画像を投稿した時に実績が追加されている事を確認
+        image = open(self.absolute_pathname_src)
+        sc.access_timeline_post_view(self.client, lecture_id=1, image=image)
+        j_achieve_image = get_achevements_from_db()[0]
+        self.assertEqual(j_achieve_image['point'], 10)
+
 
 class UserGetTests(TestCase):
     fixtures = ['test_user.json', 'test_user_profile.json']
@@ -334,10 +347,6 @@ class UserGetFailTests(TestCase):
 class AchievementTests(TestCase):
     fixtures = ['test_user.json', 'test_lecture.json']
 
-    def get_achevements_from_db(self, user_pk=1):
-        user = User.objects.get(pk=user_pk)
-        return [a.to_dict() for a in user.achievement_set.all()]
-
     def setUp(self):
         self.client.login(username='testuser', password='testpassword')
 
@@ -345,24 +354,24 @@ class AchievementTests(TestCase):
         self.client.logout()
         # access_auth_viewを使うため一旦ログアウト
         sc.access_auth_view(self.client)
-        j_first = self.get_achevements_from_db(user_pk=2)[0]
+        j_first = get_achevements_from_db(user_pk=2)[0]
         self.assertEqual(j_first['point'], 100)
 
     def test_achievement_add_lecture(self):
         sc.access_lecture_add_view(self.client, name='Test', code='77777')
-        j_after = self.get_achevements_from_db()[0]
+        j_after = get_achevements_from_db()[0]
         self.assertEqual(j_after['point'], 30)
 
     def test_achievement_add_lecture_not_created(self):
         # 既存の授業を追加しても実績は追加されない
         sc.access_lecture_add_view(self.client, name='Software Test',
                                    code='76036')  # existing code
-        achievement_list = self.get_achevements_from_db()
+        achievement_list = get_achevements_from_db()
         self.assertListEqual(achievement_list, [])
 
     def test_achievement_one_post(self):
         sc.access_timeline_post_view(self.client, lecture_id=1, body='Hello')
-        j_after = self.get_achevements_from_db()[0]
+        j_after = get_achevements_from_db()[0]
         self.assertEqual(j_after['point'], 1)
 
 
