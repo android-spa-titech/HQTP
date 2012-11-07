@@ -10,13 +10,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.SharedPreferences;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class HQTPProxyImpl implements HQTPProxy {
+public class APIClientImpl implements APIClient {
+    private static final String PREF_NAME_USER_ID = "userId";
     @Inject
     APIRequestBuilder builder;
+    @Inject
+    SharedPreferences preferences;
 
     // DEBUG: デバッグ用のエンドポイント切り替え
     public void setEndpoint(String api_gateway) {
@@ -38,6 +43,19 @@ public class HQTPProxyImpl implements HQTPProxy {
         }
 
         return User.fromJSON(json.getJSONObject("user"));
+    }
+
+    @Override
+    public void setUserId(int userId) {
+        preferences
+            .edit()
+            .putInt(PREF_NAME_USER_ID, userId)
+            .commit();
+    }
+
+    @Override
+    public int getUserId() {
+        return preferences.getInt(PREF_NAME_USER_ID, -1);
     }
 
     @Override
@@ -167,6 +185,17 @@ public class HQTPProxyImpl implements HQTPProxy {
             achievements.add(Achievement.fromJSON(array.getJSONObject(i)));
         }
         return new AchievementResponse(achievements, json.getInt("total_point"));
+    }
+
+    @Override
+    public User getUser(int user_id) throws HQTPAPIException, IOException, JSONException, ParseException {
+        String response = builder.get("user/").param("id", user_id).send();
+        JSONObject json = new JSONObject(response);
+        if (!isStatusOK(json)) {
+            throw new HQTPAPIException("Getting user was failed. : GET /api/user/ returned status="
+                    + json.getString("status"));
+        }
+        return User.fromJSON(json.getJSONObject("user"));
     }
 
     private static boolean isStatusOK(JSONObject json) throws JSONException {

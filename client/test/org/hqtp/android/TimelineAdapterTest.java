@@ -73,7 +73,7 @@ public class TimelineAdapterTest extends RoboGuiceTest {
 
     @Before
     public void setUpFixture() throws Exception {
-        testUser = new User(1, "testUser", "http://example.com/icon.png");
+        testUser = new User(1, "testUser", "http://example.com/icon.png", 0);
         testLecture = new Lecture(2, "testLecture", "testLectureCode");
         testOldPost = new Post(4, "body", new Date(0), 0, testUser, testLecture, null);
         Date d = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);

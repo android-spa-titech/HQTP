@@ -19,7 +19,7 @@ import com.google.inject.name.Named;
 @ContextSingleton
 public class TimelineRecurringUpdaterImpl implements TimelineRecurringUpdater {
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
     @Inject
     @Named("TimelineUpdatePeriod")
     Long timeline_update_period;
