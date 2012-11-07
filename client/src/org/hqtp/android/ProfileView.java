@@ -35,6 +35,8 @@ public class ProfileView extends LinearLayout {
     Activity activity;
     @Inject
     APIClient proxy;
+    @Inject
+    Alerter alerter;
 
     public ProfileView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -56,7 +58,7 @@ public class ProfileView extends LinearLayout {
     {
         if (user != null) {
             username_view.setText(user.getName());
-            updateTotalPoint(user.getTotalPoint());// TODO: show user's point
+            updateTotalPoint(user.getTotalPoint());
             icon_view.setTag(user.getIconURL());
             loader.displayImage(icon_view, this.activity);
         } else {
@@ -120,7 +122,9 @@ public class ProfileView extends LinearLayout {
             List<Achievement> achievements = achievement_response.getAchievements();
             int size = achievements.size();
             if (size > 0) {
-                // TODO: 実績通知
+                for (Achievement achieve : achievements) {
+                    alerter.toastShort(Achievement.getDescription(achieve) + "！ +" + achieve.getPoint() + "pt!");
+                }
                 since_id = achievements.get(size - 1).getId();
             }
         }

@@ -4,6 +4,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.json.JSONException;
@@ -50,5 +52,22 @@ public class Achievement {
                 json.getString("name"),
                 json.getInt("point"),
                 df.parse(json.getString("created_at")));
+    }
+
+    private static final Map<String, String> nameToDescription = new HashMap<String, String>();
+    static {
+        nameToDescription.put("first_login", "はじめてのろぐいん");
+        nameToDescription.put("add_lecture", "講義追加");
+        nameToDescription.put("one_post", "投稿");
+        nameToDescription.put("upload_image", "画像付き");
+        nameToDescription.put("upload_url", "URL付き");
+        nameToDescription.put("consecutive_post", "またお前か");
+        nameToDescription.put("easter_egg", "？？？？");
+        nameToDescription.put("post_inserted", "りぷらい");
+        nameToDescription.put("attend_lecture", "出席");
+    }
+
+    public static String getDescription(Achievement achievement) {
+        return nameToDescription.get(achievement.getName());
     }
 }
