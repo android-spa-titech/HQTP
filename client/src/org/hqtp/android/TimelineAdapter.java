@@ -275,6 +275,19 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
                     }
                 }
 
+                if (prevVirtualTimestamp != -1 && nextVirtualTimestamp != -1 &&
+                        !isSameDate(Post.virtualTimestampToDate(prevVirtualTimestamp),
+                                Post.virtualTimestampToDate(nextVirtualTimestamp))) {
+                    // Make sure to make a post not to beyond a day.
+                    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Tokyo"));
+                    cal.setTime(Post.virtualTimestampToDate(prevVirtualTimestamp));
+                    cal.set(Calendar.HOUR, 23);
+                    cal.set(Calendar.MINUTE, 59);
+                    cal.set(Calendar.SECOND, 59);
+                    cal.set(Calendar.MILLISECOND, 999);
+                    nextVirtualTimestamp = Post.dateToVirtualTimestamp(cal.getTime());
+                }
+
                 Intent intent = new Intent(activity, PostTimelineActivity.class);
                 intent.putExtra(PostTimelineActivity.LECTURE_ID, lectureId);
                 intent.putExtra(PostTimelineActivity.PREV_VIRTUAL_TS, prevVirtualTimestamp);
