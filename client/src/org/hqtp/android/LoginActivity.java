@@ -6,6 +6,7 @@ import roboguice.util.SafeAsyncTask;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.OAuthAuthorization;
 import twitter4j.auth.RequestToken;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -96,9 +97,10 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
     private class AfterTwitterAuthorizationTask extends SafeAsyncTask<Void>
     {
-        String token;
-        String tokenSecret;
-        Uri uri;
+        private String token;
+        private String tokenSecret;
+        private Uri uri;
+        private ProgressDialog dialog;
 
         AfterTwitterAuthorizationTask(Uri uri) {
             super();
@@ -109,6 +111,15 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
             super();
             this.token = token;
             this.tokenSecret = tokenSecret;
+        }
+
+        @Override
+        protected void onPreExecute() throws Exception {
+            dialog = new ProgressDialog(LoginActivity.this);
+            dialog.setTitle("HQTPサーバー");
+            dialog.setMessage("通信中です");
+            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            dialog.show();
         }
 
         @Override
@@ -130,12 +141,6 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
         }
 
         @Override
-        protected void onException(Exception e) {
-            alerter.alert(getString(R.string.authentication_failed_title),
-                    getString(R.string.authentication_failed_message));
-        }
-
-        @Override
         protected void onSuccess(Void v) {
             if (!preferences.getBoolean(SAVED_AUTH_TOKEN_STATE, false)) {
                 Editor e = preferences.edit();
@@ -149,10 +154,38 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
             // http://stackoverflow.com/questions/3473168/clear-the-entire-history-stack-and-start-a-new-activity-on-android/10015648#10015648
             finish();
         }
+
+        @Override
+        protected void onException(Exception e) {
+            dialog.dismiss();
+            dialog = null;
+            alerter.alert(getString(R.string.authentication_failed_title),
+                    getString(R.string.authentication_failed_message));
+        }
+
+        @Override
+        protected void onFinally() throws RuntimeException {
+            if (dialog != null) {
+                dialog.dismiss();
+                dialog = null;
+            }
+        }
+
     }
 
     private class TwitterAuthorizationTask extends SafeAsyncTask<Uri>
     {
+        private ProgressDialog dialog;
+
+        @Override
+        protected void onPreExecute() throws Exception {
+            dialog = new ProgressDialog(LoginActivity.this);
+            dialog.setTitle("Twitter");
+            dialog.setMessage("通信中です");
+            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            dialog.show();
+        }
+
         @Override
         public Uri call() throws Exception {
             // #135のバグ回避のための措置
@@ -169,8 +202,18 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
         @Override
         protected void onException(Exception e) {
+            dialog.dismiss();
+            dialog = null;
             alerter.alert(getString(R.string.authentication_failed_title),
                     getString(R.string.authentication_failed_message));
+        }
+
+        @Override
+        protected void onFinally() throws RuntimeException {
+            if (dialog != null) {
+                dialog.dismiss();
+                dialog = null;
+            }
         }
     }
 }
