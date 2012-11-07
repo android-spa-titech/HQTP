@@ -179,6 +179,10 @@ public class APIClientImpl implements APIClient {
             request.param("since_id", since_id);
         }
         JSONObject json = new JSONObject(request.send());
+        if (!isStatusOK(json)) {
+            throw new HQTPAPIException("Getting user was failed. : GET /api/user/achievement/ returned status="
+                    + json.getString("status"));
+        }
         ArrayList<Achievement> achievements = new ArrayList<Achievement>();
         JSONArray array = json.getJSONArray("achievements");
         for (int i = 0, length = array.length(); i < length; i++) {
