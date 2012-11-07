@@ -21,7 +21,7 @@ import com.google.inject.Inject;
 
 public class LectureListActivity extends RoboActivity {
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
     @Inject
     Alerter alerter;
     @Inject
@@ -32,6 +32,8 @@ public class LectureListActivity extends RoboActivity {
     Button addLectureButton;
     @InjectView(R.id.refresh)
     Button refreshButton;
+    @InjectView(R.id.profileView)
+    ProfileView profileView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,6 +72,18 @@ public class LectureListActivity extends RoboActivity {
         });
 
         new RefreshTask().execute();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        profileView.startRecurringUpdate();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        profileView.stop();
     }
 
     private static class LectureListAdapter extends ArrayAdapter<Lecture> {

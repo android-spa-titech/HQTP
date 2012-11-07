@@ -30,7 +30,7 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
     @Inject
     TimelineRecurringUpdater updater;
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
 
     private Post testPost, testPost2;
     private User testUser;
@@ -40,7 +40,7 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
 
     @Before
     public void setUpFixture() throws Exception {
-        testUser = new User(1, "testUser", "http://example.com/icon.png");
+        testUser = new User(1, "testUser", "http://example.com/icon.png", 0);
         testLecture = new Lecture(2, "testLecture", "testLectureCode");
         testPost = new Post(3, "body", new Date(), 1000, testUser, testLecture, null);
         testPost2 = new Post(4, "body", new Date(), 1000, testUser, testLecture, null);
@@ -178,7 +178,7 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
+            bind(APIClient.class).toInstance(mock(APIClient.class));
             bind(TimelineRecurringUpdater.class).to(TimelineRecurringUpdaterImpl.class);
             bind(Long.class).annotatedWith(Names.named("TimelineUpdatePeriod")).toInstance(
                     Long.valueOf(500));

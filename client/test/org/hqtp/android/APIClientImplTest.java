@@ -24,16 +24,17 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(HQTPTestRunner.class)
-public class HQTPProxyImplTest extends RoboGuiceTest {
+public class APIClientImplTest extends RoboGuiceTest {
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
 
     @Test
     public void authenticateShouldCallAPI() throws Exception {
         Robolectric.clearHttpResponseRules();
         Robolectric.clearPendingHttpResponses();
         Robolectric.addPendingHttpResponse(200, "{\"status\":\"OK\",\"created\":false," +
-                "\"user\":{\"id\":12,\"name\":\"test user\",\"icon_url\":\"http://example.com/test.png\"}}");
+                "\"user\":{\"id\":12,\"name\":\"test user\",\"icon_url\":\"http://example.com/test.png\"," +
+                "\"total_point\":42}}");
 
         User res = proxy.authenticate("DUMMY_ACCESS_TOKEN_KEY", "DUMMY_ACCESS_TOKEN_SECRET");
 
@@ -49,6 +50,7 @@ public class HQTPProxyImplTest extends RoboGuiceTest {
         assertThat(res.getId(), equalTo(12));
         assertThat(res.getName(), equalTo("test user"));
         assertThat(res.getIconURL(), equalTo("http://example.com/test.png"));
+        assertThat(res.getTotalPoint(), equalTo(42));
     }
 
     @Test(expected = HQTPAPIException.class)
@@ -68,16 +70,16 @@ public class HQTPProxyImplTest extends RoboGuiceTest {
         Robolectric.addPendingHttpResponse(200, "{\"status\":\"OK\",\"posts\":[" +
                 "{\"id\":\"1\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
                 "\"body\":\"test content\"," +
-                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\",\"total_point\":42}," +
                 "\"time\":\"2012-06-22T17:44:23.092839\"," +
                 "\"virtual_ts\":\"1234567890\"}," +
                 "{\"id\":\"2\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
                 "\"body\":\"test content\"," +
-                "\"user\":{\"id\":\"2\",\"name\":\"another user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"user\":{\"id\":\"2\",\"name\":\"another user\",\"icon_url\":\"http://example.com/icon\",\"total_point\":42}," +
                 "\"time\":\"2012-06-23T17:44:23.092839\",\"virtual_ts\":\"1234568900\"}," +
                 "{\"id\":\"3\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
                 "\"image_url\":\"http://example.com/test.png\"," +
-                "\"user\":{\"id\":\"2\",\"name\":\"another user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"user\":{\"id\":\"2\",\"name\":\"another user\",\"icon_url\":\"http://example.com/icon\",\"total_point\":42}," +
                 "\"time\":\"2012-06-24T17:44:23.092839\",\"virtual_ts\":\"1234568990\"}," +
                 "]}");
 
@@ -99,7 +101,7 @@ public class HQTPProxyImplTest extends RoboGuiceTest {
         Robolectric.addPendingHttpResponse(200, "{\"status\":\"OK\",\"post\":" +
                 "{\"id\":\"1\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
                 "\"body\":\"test content\"," +
-                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\",\"total_point\":42}," +
                 "\"time\":\"2012-06-22T17:44:23.092839\"," +
                 "\"virtual_ts\":\"1234567890\"}}");
 
@@ -122,7 +124,7 @@ public class HQTPProxyImplTest extends RoboGuiceTest {
                 "{\"id\":\"1\",\"lecture\":{\"id\":\"1\",\"name\":\"a lecture\",\"code\":\"1234\"}," +
                 "\"body\": null," +
                 "\"image_url\": \"http://example.com/image/hoge.png\"," +
-                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\"}," +
+                "\"user\":{\"id\":\"1\",\"name\":\"a user\",\"icon_url\":\"http://example.com/icon\",\"total_point\":42}," +
                 "\"time\":\"2012-06-22T17:44:23.092839\"," +
                 "\"virtual_ts\":\"1234567890\"}}");
 
@@ -290,10 +292,32 @@ public class HQTPProxyImplTest extends RoboGuiceTest {
         assertThat(achievements.get(0).getPoint(), equalTo(12));
     }
 
+    @Test
+    public void getUserShouldCallAPI() throws Exception {
+        Robolectric.clearHttpResponseRules();
+        Robolectric.clearPendingHttpResponses();
+        Robolectric.addPendingHttpResponse(200, "{\"status\":\"OK\"," +
+                "\"user\":{\"id\":12,\"name\":\"test user\"," +
+                "\"icon_url\":\"http://example.com/test.png\",\"total_point\":42}}");
+
+        User res = proxy.getUser(1);
+
+        HttpUriRequest sentHttpRequest = (HttpUriRequest) Robolectric.getSentHttpRequest(0);
+        assertThat(sentHttpRequest.getMethod(), equalTo("GET"));
+        assertThat(sentHttpRequest.getURI().getHost(), equalTo("www.hqtp.org"));
+        assertThat(sentHttpRequest.getURI().getPath(), equalTo("/api/user/"));
+
+        assertThat(res, notNullValue());
+        assertThat(res.getId(), equalTo(12));
+        assertThat(res.getName(), equalTo("test user"));
+        assertThat(res.getIconURL(), equalTo("http://example.com/test.png"));
+        assertThat(res.getTotalPoint(), equalTo(42));
+    }
+
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(HQTPProxy.class).to(HQTPProxyImpl.class);
+            bind(APIClient.class).to(APIClientImpl.class);
             bind(String.class).annotatedWith(
                     Names.named("HQTP API Endpoint URL")).toInstance(
                     "http://www.hqtp.org/api/");

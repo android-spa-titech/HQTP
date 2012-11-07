@@ -63,7 +63,7 @@ public class TimelineActivityTest extends RoboGuiceTest {
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
+            bind(APIClient.class).toInstance(mock(APIClient.class));
             bind(TimelineRecurringUpdater.class).toInstance(
                     mock(TimelineRecurringUpdater.class));
             bind(TimelineAdapter.class).toInstance(mock(TimelineAdapter.class));
