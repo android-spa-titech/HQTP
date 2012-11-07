@@ -30,6 +30,8 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
     Button changeEndpointButton;
     @InjectView(R.id.endpointText)
     TextView endpointText;
+    @InjectView(R.id.clearLoginInfoButton)
+    Button clearLoginInfoButton;
 
     private final String callback_url = "hqtp://request_callback/";
     private RequestToken requestToken;
@@ -49,6 +51,7 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
         setContentView(R.layout.login);
         loginButton.setOnClickListener(this);
         changeEndpointButton.setOnClickListener(this);
+        clearLoginInfoButton.setOnClickListener(this);
 
         preferences = getPreferences(MODE_PRIVATE);
 
@@ -75,6 +78,11 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
             if (!new_endpoint.isEmpty()) {
                 ((APIClientImpl) proxy).setEndpoint(new_endpoint);
             }
+        } else if (v.getId() == R.id.clearLoginInfoButton) {
+            Editor e = preferences.edit();
+            e.putBoolean(SAVED_AUTH_TOKEN_STATE, false);
+            e.commit();
+            alerter.alert("HQTP", "ログイン情報を消去しました");
         }
     }
 

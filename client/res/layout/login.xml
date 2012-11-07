@@ -27,7 +27,6 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" >
 
         <EditText
@@ -47,5 +46,12 @@
             android:layout_height="wrap_content"
             android:text="change endpoint" />
     </LinearLayout>
+
+    <Button
+        android:id="@+id/clearLoginInfoButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="ログイン情報を消去" />
 
 </RelativeLayout>
