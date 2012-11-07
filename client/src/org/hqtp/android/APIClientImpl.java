@@ -61,8 +61,15 @@ public class APIClientImpl implements APIClient {
     @Override
     public List<Post> getTimeline(int lectureId) throws IOException, HQTPAPIException, JSONException,
             java.text.ParseException {
+        return getTimeline(lectureId, 0);
+    }
+
+    @Override
+    public List<Post> getTimeline(int lectureId, int sinceId) throws IOException, HQTPAPIException, JSONException,
+            java.text.ParseException {
         String response = builder.get("lecture/timeline/")
             .param("id", lectureId)
+            .param("since_id", sinceId)
             .send();
         JSONObject json = new JSONObject(response);
         ArrayList<Post> posts = new ArrayList<Post>();

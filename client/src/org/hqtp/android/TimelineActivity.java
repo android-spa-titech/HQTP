@@ -14,7 +14,7 @@ public class TimelineActivity extends RoboActivity {
     @InjectView(R.id.listPost)
     ListView timelineListView;
     @InjectView(R.id.lectureName)
-    TextView lectureNameTextView;// TODO: id変えたい・・・
+    TextView lectureNameTextView;
     @InjectView(R.id.profileView)
     ProfileView profileView;
     @Inject

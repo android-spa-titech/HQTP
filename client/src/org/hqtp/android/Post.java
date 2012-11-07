@@ -9,7 +9,7 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Post {
+public class Post implements Comparable<Post> {
     private final static int VIRTUAL_TS_SCALE = 100000;
 
     private int id;
@@ -18,6 +18,7 @@ public class Post {
     private long virtualTimestamp;
     private User user;
     private Lecture lecture;
+    private String imageURL;
 
     public int getId() {
         return id;
@@ -44,14 +45,19 @@ public class Post {
         return lecture;
     }
 
+    public String getImageURL() {
+        return imageURL;
+    }
+
     public Post(int id, String body, Date time, long virtualTimestamp,
-            User user, Lecture lecture) {
+            User user, Lecture lecture, String imageURL) {
         this.id = id;
         this.body = body;
         this.time = time;
         this.virtualTimestamp = virtualTimestamp;
         this.user = user;
         this.lecture = lecture;
+        this.imageURL = imageURL;
     }
 
     public static Post fromJSON(JSONObject json) throws JSONException, ParseException {
@@ -59,13 +65,20 @@ public class Post {
         df.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
         User user = User.fromJSON(json.getJSONObject("user"));
         Lecture lecture = Lecture.fromJSON(json.getJSONObject("lecture"));
+        String body = null, imageURL = null;
+        if (json.has("image_url") && !json.isNull("image_url")) {
+            imageURL = json.getString("image_url");
+        } else {
+            body = json.getString("body");
+        }
         Post post = new Post(
                 json.getInt("id"),
-                json.getString("body"),
+                body,
                 df.parse(json.getString("time")),
                 json.getLong("virtual_ts"),
                 user,
-                lecture
+                lecture,
+                imageURL
                 );
         return post;
     }
@@ -76,5 +89,16 @@ public class Post {
 
     public static long dateToVirtualTimestamp(Date date) {
         return date.getTime() * VIRTUAL_TS_SCALE;
+    }
+
+    @Override
+    public int compareTo(Post another) {
+        if (this.virtualTimestamp < another.virtualTimestamp) {
+            return -1;
+        } else if (this.virtualTimestamp == another.virtualTimestamp) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
 }

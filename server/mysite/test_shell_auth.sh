@@ -4,10 +4,10 @@ set timeout 10
 spawn ./manage.py shell
 
 expect ">>>"
-send "import mysite.question.shortcuts as sc\n"
+send "from django.test.client import Client\n"
 
 expect ">>>"
-send "c = sc.make_client()\n"
+send "c = Client()\n"
 
 expect ">>>"
 send "sc.access_auth_view(c)\n"

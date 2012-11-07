@@ -3,6 +3,8 @@ package org.hqtp.android;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -67,6 +69,8 @@ public class TimelineRecurringUpdaterImpl implements TimelineRecurringUpdater {
         private ScheduledExecutorService wait_thread = Executors.newSingleThreadScheduledExecutor();
         private AtomicBoolean stopped = new AtomicBoolean(false);
         private RecurringTask task;
+        private SortedSet<Post> posts = new TreeSet<Post>();
+        private int since_id = 0;
 
         public void start() {
             task = new RecurringTask();
@@ -81,14 +85,22 @@ public class TimelineRecurringUpdaterImpl implements TimelineRecurringUpdater {
         private class RecurringTask extends SafeAsyncTask<List<Post>> {
             @Override
             public List<Post> call() throws Exception {
-                return proxy.getTimeline(lecture_id);
+                return proxy.getTimeline(lecture_id, since_id);
             }
 
             @Override
-            protected void onSuccess(List<Post> posts) throws Exception {
-                if (!stopped.get()) {
-                    for (TimelineObserver observer : observers) {
-                        observer.onUpdate(posts);
+            protected void onSuccess(List<Post> new_posts) throws Exception {
+                // In this task manager, only one instance of this task is run.
+                // We don't need to lock posts member.
+                if (!new_posts.isEmpty()) {
+                    posts.addAll(new_posts);
+                    // NOTE: since_id is the last retrieved post's id, not sorted posts' last item's id.
+                    since_id = new_posts.get(new_posts.size() - 1).getId();
+
+                    if (!stopped.get()) {
+                        for (TimelineObserver observer : observers) {
+                            observer.onUpdate(posts);
+                        }
                     }
                 }
             }
