@@ -281,7 +281,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
                     // Make sure to make a post not to beyond a day.
                     Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Tokyo"));
                     cal.setTime(Post.virtualTimestampToDate(prevVirtualTimestamp));
-                    cal.set(Calendar.HOUR, 23);
+                    cal.set(Calendar.HOUR_OF_DAY, 23);
                     cal.set(Calendar.MINUTE, 59);
                     cal.set(Calendar.SECOND, 59);
                     cal.set(Calendar.MILLISECOND, 999);
@@ -386,7 +386,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
         public DateSeparatorCell(Date date) {
             Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Tokyo"));
             cal.setTime(date);
-            cal.set(Calendar.HOUR, 0);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);
