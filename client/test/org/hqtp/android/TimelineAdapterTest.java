@@ -111,15 +111,18 @@ public class TimelineAdapterTest extends RoboGuiceTest {
         TextView postContent = (TextView) view.findViewById(R.id.postContent);
         TextView postedTime = (TextView) view.findViewById(R.id.postedTime);
         TextView userName = (TextView) view.findViewById(R.id.userName);
+        TextView userPoint = (TextView) view.findViewById(R.id.userPoint);
         ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
 
         assertThat(postContent, notNullValue());
         assertThat(postedTime, notNullValue());
         assertThat(userName, notNullValue());
+        assertThat(userPoint, notNullValue());
         assertThat(userIcon, notNullValue());
 
         assertThat(postContent.getText().toString(), equalTo(testOldPost.getBody()));
         assertThat(userName.getText().toString(), equalTo(testUser.getName()));
+        assertThat(userPoint.getText().toString(), equalTo("0P"));
         assertThat(userIcon.getTag(), instanceOf(String.class));
         assertThat((String) userIcon.getTag(), equalTo(testUser.getIconURL()));
         verify(imageLoader).displayImage(userIcon, activity);
@@ -132,14 +135,17 @@ public class TimelineAdapterTest extends RoboGuiceTest {
         ImageView postImage = (ImageView) view.findViewById(R.id.postImage);
         TextView postedTime = (TextView) view.findViewById(R.id.postedTime);
         TextView userName = (TextView) view.findViewById(R.id.userName);
+        TextView userPoint = (TextView) view.findViewById(R.id.userPoint);
         ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
 
         assertThat(postImage, notNullValue());
         assertThat(postedTime, notNullValue());
         assertThat(userName, notNullValue());
+        assertThat(userPoint, notNullValue());
         assertThat(userIcon, notNullValue());
 
         assertThat(userName.getText().toString(), equalTo(testUser.getName()));
+        assertThat(userPoint.getText().toString(), equalTo("0P"));
         assertThat(userIcon.getTag(), instanceOf(String.class));
         assertThat((String) userIcon.getTag(), equalTo(testUser.getIconURL()));
         verify(imageLoader).displayImage(userIcon, activity);
