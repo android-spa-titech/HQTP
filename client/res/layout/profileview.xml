@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <ImageView
+        android:id="@+id/userIcon"
+        android:layout_width="32dip"
+        android:layout_height="32dip"
+        android:contentDescription="user icon"
+        android:src="@android:drawable/ic_menu_close_clear_cancel" />
+
+    <TextView
+        android:id="@+id/userName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="user name" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=" / " />
+
+    <TextView
+        android:id="@+id/totalPoint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="total point" />
+
+</merge>

@@ -73,7 +73,7 @@ public class TimelineAdapterTest extends RoboGuiceTest {
 
     @Before
     public void setUpFixture() throws Exception {
-        testUser = new User(1, "testUser", "http://example.com/icon.png");
+        testUser = new User(1, "testUser", "http://example.com/icon.png", 0);
         testLecture = new Lecture(2, "testLecture", "testLectureCode");
         testOldPost = new Post(4, "body", new Date(0), 0, testUser, testLecture, null);
         Date d = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
@@ -323,6 +323,35 @@ public class TimelineAdapterTest extends RoboGuiceTest {
         long nextVirtualTS = shadowIntent.getLongExtra(PostTimelineActivity.NEXT_VIRTUAL_TS, 100);
         assertThat(prevVirtualTS, equalTo(Post.dateToVirtualTimestamp(cal.getTime())));
         assertThat(nextVirtualTS, equalTo(testPost.getVirtualTimestamp()));
+    }
+
+    @Test
+    public void postDoesNotMadeBeyondADay() throws Exception {
+        adapter.setLectureId(TEST_LECTURE_ID);
+        adapter.onUpdate(testPosts);
+        View view = adapter.getView(OLD_TEST_POST, null, null);
+        OnItemLongClickListener listener = adapter.new ItemLongClickListener();
+        listener.onItemLongClick(null, view, OLD_TEST_POST, adapter.getItemId(OLD_TEST_POST));
+
+        View postView = adapter.getView(OLD_TEST_POST + 1, null, null);
+        assertThat(postView.findViewById(R.id.postButton), notNullValue());
+        postView.findViewById(R.id.postButton).performClick();
+
+        ShadowActivity shadowActivity = shadowOf(activity);
+        Intent startedIntent = shadowActivity.getNextStartedActivity();
+        assertThat(startedIntent, notNullValue());
+        ShadowIntent shadowIntent = shadowOf(startedIntent);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(Post.virtualTimestampToDate(testOldPost.getVirtualTimestamp()));
+        cal.set(Calendar.HOUR, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+
+        long prevVirtualTS = shadowIntent.getLongExtra(PostTimelineActivity.PREV_VIRTUAL_TS, 100);
+        long nextVirtualTS = shadowIntent.getLongExtra(PostTimelineActivity.NEXT_VIRTUAL_TS, 100);
+        assertThat(prevVirtualTS, equalTo(0L));
+        assertThat(nextVirtualTS, equalTo(Post.dateToVirtualTimestamp(cal.getTime())));
     }
 
     private class TestModule extends AbstractModule {

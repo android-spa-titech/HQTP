@@ -40,7 +40,7 @@ public class LoginActivityTest extends RoboGuiceTest {
     @Inject
     OAuthAuthorization oauth;
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
     @InjectView(R.id.twitter_login)
     Button loginButton;
 
@@ -84,6 +84,8 @@ public class LoginActivityTest extends RoboGuiceTest {
 
         AccessToken accessToken = new AccessToken("123-accessToken", "accessTokenSecret");
         when(oauth.getOAuthAccessToken(requestToken, "verifier")).thenReturn(accessToken);
+        when(proxy.authenticate("123-accessToken", "accessTokenSecret")).thenReturn(
+                new User(1, "test", "http://example.com/hoge.png", 0));
 
         activity.onNewIntent(new Intent(Intent.ACTION_VIEW,
                 Uri.parse("hqtp://request_callback?oauth_verifier=verifier")));
@@ -93,6 +95,8 @@ public class LoginActivityTest extends RoboGuiceTest {
         assertThat(preferences.getString(LoginActivity.SAVED_AUTH_TOKEN, ""), equalTo("123-accessToken"));
         assertThat(preferences.getString(LoginActivity.SAVED_AUTH_TOKEN_SECRET, ""), equalTo("accessTokenSecret"));
         assertThat(preferences.getBoolean(LoginActivity.SAVED_AUTH_TOKEN_STATE, false), is(true));
+
+        verify(proxy).setUserId(1);
 
         Intent startedIntent = shadowActivity.getNextStartedActivity();
         assertThat(startedIntent, notNullValue());
@@ -130,12 +134,15 @@ public class LoginActivityTest extends RoboGuiceTest {
         e.putString(LoginActivity.SAVED_AUTH_TOKEN_SECRET, "accessTokenSecret");
         e.putBoolean(LoginActivity.SAVED_AUTH_TOKEN_STATE, true);
         e.commit();
+        when(proxy.authenticate("123-accessToken", "accessTokenSecret")).thenReturn(
+                new User(1, "test", "http://example.com/hoge.png", 0));
 
         activity.onCreate(null);
         loginButton.performClick();
         Thread.sleep(100);
 
         verify(proxy).authenticate("123-accessToken", "accessTokenSecret");
+        verify(proxy).setUserId(1);
 
         Intent startedIntent = shadowActivity.getNextStartedActivity();
         assertThat(startedIntent, notNullValue());
@@ -167,7 +174,7 @@ public class LoginActivityTest extends RoboGuiceTest {
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
+            bind(APIClient.class).toInstance(mock(APIClient.class));
             bind(OAuthAuthorization.class).toInstance(mock(OAuthAuthorization.class));
             bind(LoginActivity.class).toInstance(activity);
             bind(Activity.class).toInstance(activity);

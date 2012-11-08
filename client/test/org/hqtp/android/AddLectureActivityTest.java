@@ -33,7 +33,7 @@ public class AddLectureActivityTest extends RoboGuiceTest {
     @Inject
     AddLectureActivity activity;
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
     @InjectView(R.id.lecture_code_text)
     TextView lectureCodeText;
     @InjectView(R.id.lecture_name_text)
@@ -151,7 +151,8 @@ public class AddLectureActivityTest extends RoboGuiceTest {
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
+            bind(APIClient.class).toInstance(mock(APIClient.class));
+            bind(ImageLoader.class).toInstance(mock(ImageLoader.class));
             bind(AddLectureActivity.class).toInstance(activity);
             bind(Activity.class).toInstance(activity);
         }

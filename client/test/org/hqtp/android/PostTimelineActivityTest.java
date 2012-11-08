@@ -34,7 +34,7 @@ public class PostTimelineActivityTest extends RoboGuiceTest {
     private static final String TEST_POST_BODY = "Test body";
 
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
     @InjectView(R.id.postBody)
     TextView postBody;
     @InjectView(R.id.postButton)
@@ -115,7 +115,8 @@ public class PostTimelineActivityTest extends RoboGuiceTest {
     private class TestModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(HQTPProxy.class).toInstance(mock(HQTPProxy.class));
+            bind(APIClient.class).toInstance(mock(APIClient.class));
+            bind(ImageLoader.class).toInstance(mock(ImageLoader.class));
         }
     }
 

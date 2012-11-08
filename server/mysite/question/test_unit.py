@@ -350,6 +350,26 @@ class AchievementTests(TestCase):
     def setUp(self):
         self.client.login(username='testuser', password='testpassword')
 
+        self._original_get_vc = tw_util.get_vc
+        tw_util.get_vc = test_views.get_vc_mock
+        self._original_get_img = image_utils.get_img
+        image_utils.get_img = test_views.get_img_mock
+
+        # 既にtwiconが保存されていれば削除
+        relative_pathname = os.path.join('twicon', str(ci.spa_id))
+        self.absolute_pathname = (
+            image_utils.build_media_absolute_pathname(relative_pathname))
+        if os.path.exists(self.absolute_pathname):
+            os.remove(self.absolute_pathname)
+
+    def tearDown(self):
+        tw_util.get_vc = self._original_get_vc
+        image_utils.get_img = self._original_get_img
+
+        # テストで保存されたtwiconを削除
+        if os.path.exists(self.absolute_pathname):
+            os.remove(self.absolute_pathname)
+
     def test_achievement_first_login(self):
         self.client.logout()
         # access_auth_viewを使うため一旦ログアウト
