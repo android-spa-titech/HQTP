@@ -231,7 +231,7 @@ public class TimelineAdapterTest extends RoboGuiceTest {
         // The date separator's virtual timestamp is calculated based on the following post.
         Calendar cal = Calendar.getInstance();
         cal.setTime(Post.virtualTimestampToDate(testPost.getVirtualTimestamp()));
-        cal.set(Calendar.HOUR, 0);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
@@ -320,7 +320,7 @@ public class TimelineAdapterTest extends RoboGuiceTest {
         ShadowIntent shadowIntent = shadowOf(startedIntent);
         Calendar cal = Calendar.getInstance();
         cal.setTime(Post.virtualTimestampToDate(testPost.getVirtualTimestamp()));
-        cal.set(Calendar.HOUR, 0);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
@@ -349,7 +349,7 @@ public class TimelineAdapterTest extends RoboGuiceTest {
         ShadowIntent shadowIntent = shadowOf(startedIntent);
         Calendar cal = Calendar.getInstance();
         cal.setTime(Post.virtualTimestampToDate(testOldPost.getVirtualTimestamp()));
-        cal.set(Calendar.HOUR, 23);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
         cal.set(Calendar.MINUTE, 59);
         cal.set(Calendar.SECOND, 59);
         cal.set(Calendar.MILLISECOND, 999);
