@@ -313,6 +313,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
             }
             TextView bodyView = (TextView) convertView.findViewById(R.id.postContent);
             TextView userNameView = (TextView) convertView.findViewById(R.id.userName);
+            TextView userPointView = (TextView) convertView.findViewById(R.id.userPoint);
             TextView postedTimeView = (TextView) convertView.findViewById(R.id.postedTime);
             ImageView imageView = (ImageView) convertView.findViewById(R.id.userIcon);
             ImageView postImageView = (ImageView) convertView.findViewById(R.id.postImage);
@@ -333,6 +334,7 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
                 bodyView.setVisibility(View.INVISIBLE);
             }
             userNameView.setText(post.getUser().getName());
+            userPointView.setText(Integer.toString(post.getUser().getTotalPoint()) + "P");
             imageView.setTag(post.getUser().getIconURL());
             imageLoader.displayImage(imageView, TimelineAdapter.this.activity);
             final Date postedDate = post.getTime();
