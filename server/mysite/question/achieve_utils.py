@@ -23,4 +23,4 @@ def give_achievement(name, user):
 
 
 def contains_url(string):
-    return re.search(r'(https?|ftp):\/\/[\-.!~|*()\w]+', string)
+    return bool(re.search(r'(https?|ftp):\/\/[\-.!~|*()\w]+', string))
