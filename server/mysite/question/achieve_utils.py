@@ -2,6 +2,7 @@
 
 from mysite.question.models import Achievement
 import re
+import urllib
 
 
 achieve_dict = dict(first_login=100,
@@ -23,4 +24,12 @@ def give_achievement(name, user):
 
 
 def contains_url(string):
-    return bool(re.search(r'(https?|ftp):\/\/[\-.!~|*()\w]+', string))
+    match = re.search(r'(https?|ftp)://[\-.!~|*()\w]+', string)
+    if match is None:
+        return False
+    url = match.group(0)
+    try:
+        urllib.urlopen(url)
+        return True
+    except IOError:
+        return False
