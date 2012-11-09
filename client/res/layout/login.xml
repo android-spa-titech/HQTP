@@ -8,7 +8,6 @@
         android:id="@+id/linearLayout2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" >
 
         <EditText
@@ -46,5 +45,13 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp"
         android:src="@drawable/android_onsen_ldpi" />
+
+    <Button
+        android:id="@+id/clearLoginInfoButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="ログイン情報を消去" />
+
 
 </RelativeLayout>

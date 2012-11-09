@@ -1,10 +1,10 @@
 package org.hqtp.android;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.hqtp.android.util.HQTPTestRunner;
 import org.hqtp.android.util.RoboGuiceTest;
@@ -46,9 +46,10 @@ public class TimelineAdapterTest extends RoboGuiceTest {
     private Activity activity;
     private Post testPost;
     private Post testOldPost;
+    private Post imagePost;
     private User testUser;
     private Lecture testLecture;
-    private List<Post> testPosts;
+    private SortedSet<Post> testPosts;
 
     private static final int INITIAL_FORM = 1;
     private static final int NUM_INITIAL_CELLS = 2;
@@ -59,26 +60,32 @@ public class TimelineAdapterTest extends RoboGuiceTest {
     // NewDateSeparator(vts=(?, NOW - ONE_DAY))
     // testPost(vts=(?, NOW - ONE_DAY), date=NOW)
     // NowDateSeparator(vts=(?, NOW))
+    // imagePost(vts=(?, NOW - ONE_DAY/2), date=NOW)
     // PostingCell()
     private static final int OLD_DATE_SEPARATOR = 0;
     private static final int OLD_TEST_POST = 1;
     private static final int NEW_DATE_SEPARATOR = 2;
     private static final int TEST_POST = 3;
     private static final int NOW_DATE_SEPARATOR = 4;
-    private static final int FORM_CELL = 5;
-    private static final int NUM_CELLS = 6;
+    private static final int IMAGE_POST = 5;
+    private static final int FORM_CELL = 6;
+    private static final int NUM_CELLS = 7;
 
     @Before
     public void setUpFixture() throws Exception {
-        testUser = new User(1, "testUser", "http://example.com/icon.png");
+        testUser = new User(1, "testUser", "http://example.com/icon.png", 0);
         testLecture = new Lecture(2, "testLecture", "testLectureCode");
-        testOldPost = new Post(4, "body", new Date(0), 0, testUser, testLecture);
+        testOldPost = new Post(4, "body", new Date(0), 0, testUser, testLecture, null);
         Date d = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
         testPost = new Post(3, "body", new Date(), Post.dateToVirtualTimestamp(d),
-                testUser, testLecture);
-        testPosts = new ArrayList<Post>();
+                testUser, testLecture, null);
+        Date d2 = new Date(new Date().getTime() - 12 * 60 * 60 * 1000);
+        imagePost = new Post(5, null, new Date(), Post.dateToVirtualTimestamp(d2),
+                testUser, testLecture, "http://example.com/image.png");
+        testPosts = new TreeSet<Post>();
         testPosts.add(testOldPost);
         testPosts.add(testPost);
+        testPosts.add(imagePost);
     }
 
     @Test
@@ -104,18 +111,47 @@ public class TimelineAdapterTest extends RoboGuiceTest {
         TextView postContent = (TextView) view.findViewById(R.id.postContent);
         TextView postedTime = (TextView) view.findViewById(R.id.postedTime);
         TextView userName = (TextView) view.findViewById(R.id.userName);
+        TextView userPoint = (TextView) view.findViewById(R.id.userPoint);
         ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
 
         assertThat(postContent, notNullValue());
         assertThat(postedTime, notNullValue());
         assertThat(userName, notNullValue());
+        assertThat(userPoint, notNullValue());
         assertThat(userIcon, notNullValue());
 
         assertThat(postContent.getText().toString(), equalTo(testOldPost.getBody()));
         assertThat(userName.getText().toString(), equalTo(testUser.getName()));
+        assertThat(userPoint.getText().toString(), equalTo("0P"));
         assertThat(userIcon.getTag(), instanceOf(String.class));
         assertThat((String) userIcon.getTag(), equalTo(testUser.getIconURL()));
         verify(imageLoader).displayImage(userIcon, activity);
+    }
+
+    @Test
+    public void shouldShowImagePost() throws Exception {
+        adapter.onUpdate(testPosts);
+        View view = adapter.getView(IMAGE_POST, null, null);
+        ImageView postImage = (ImageView) view.findViewById(R.id.postImage);
+        TextView postedTime = (TextView) view.findViewById(R.id.postedTime);
+        TextView userName = (TextView) view.findViewById(R.id.userName);
+        TextView userPoint = (TextView) view.findViewById(R.id.userPoint);
+        ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
+
+        assertThat(postImage, notNullValue());
+        assertThat(postedTime, notNullValue());
+        assertThat(userName, notNullValue());
+        assertThat(userPoint, notNullValue());
+        assertThat(userIcon, notNullValue());
+
+        assertThat(userName.getText().toString(), equalTo(testUser.getName()));
+        assertThat(userPoint.getText().toString(), equalTo("0P"));
+        assertThat(userIcon.getTag(), instanceOf(String.class));
+        assertThat((String) userIcon.getTag(), equalTo(testUser.getIconURL()));
+        verify(imageLoader).displayImage(userIcon, activity);
+        assertThat(postImage.getTag(), instanceOf(String.class));
+        assertThat((String) postImage.getTag(), equalTo(imagePost.getImageURL()));
+        verify(imageLoader).displayImage(postImage, activity);
     }
 
     @Test
@@ -195,7 +231,7 @@ public class TimelineAdapterTest extends RoboGuiceTest {
         // The date separator's virtual timestamp is calculated based on the following post.
         Calendar cal = Calendar.getInstance();
         cal.setTime(Post.virtualTimestampToDate(testPost.getVirtualTimestamp()));
-        cal.set(Calendar.HOUR, 0);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
@@ -284,7 +320,7 @@ public class TimelineAdapterTest extends RoboGuiceTest {
         ShadowIntent shadowIntent = shadowOf(startedIntent);
         Calendar cal = Calendar.getInstance();
         cal.setTime(Post.virtualTimestampToDate(testPost.getVirtualTimestamp()));
-        cal.set(Calendar.HOUR, 0);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
@@ -293,6 +329,35 @@ public class TimelineAdapterTest extends RoboGuiceTest {
         long nextVirtualTS = shadowIntent.getLongExtra(PostTimelineActivity.NEXT_VIRTUAL_TS, 100);
         assertThat(prevVirtualTS, equalTo(Post.dateToVirtualTimestamp(cal.getTime())));
         assertThat(nextVirtualTS, equalTo(testPost.getVirtualTimestamp()));
+    }
+
+    @Test
+    public void postDoesNotMadeBeyondADay() throws Exception {
+        adapter.setLectureId(TEST_LECTURE_ID);
+        adapter.onUpdate(testPosts);
+        View view = adapter.getView(OLD_TEST_POST, null, null);
+        OnItemLongClickListener listener = adapter.new ItemLongClickListener();
+        listener.onItemLongClick(null, view, OLD_TEST_POST, adapter.getItemId(OLD_TEST_POST));
+
+        View postView = adapter.getView(OLD_TEST_POST + 1, null, null);
+        assertThat(postView.findViewById(R.id.postButton), notNullValue());
+        postView.findViewById(R.id.postButton).performClick();
+
+        ShadowActivity shadowActivity = shadowOf(activity);
+        Intent startedIntent = shadowActivity.getNextStartedActivity();
+        assertThat(startedIntent, notNullValue());
+        ShadowIntent shadowIntent = shadowOf(startedIntent);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(Post.virtualTimestampToDate(testOldPost.getVirtualTimestamp()));
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+
+        long prevVirtualTS = shadowIntent.getLongExtra(PostTimelineActivity.PREV_VIRTUAL_TS, 100);
+        long nextVirtualTS = shadowIntent.getLongExtra(PostTimelineActivity.NEXT_VIRTUAL_TS, 100);
+        assertThat(prevVirtualTS, equalTo(0L));
+        assertThat(nextVirtualTS, equalTo(Post.dateToVirtualTimestamp(cal.getTime())));
     }
 
     private class TestModule extends AbstractModule {

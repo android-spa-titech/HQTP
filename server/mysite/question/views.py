@@ -1,22 +1,29 @@
 # -*- coding:utf-8 -*-
 
+# Django imports
 from django.http import (HttpResponse,
                          HttpResponseNotFound,
                          HttpResponseForbidden,
                          HttpResponseBadRequest,
                          HttpResponseServerError)
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.utils.datastructures import MultiValueDictKeyError
+
+# Python module imports
 import json
+import os
+import doctest
+from time import time
+
+# mysite imports
 from mysite.question.models import (Post,
                                     user_to_dict,
                                     Lecture)
 import mysite.question.twutil.tw_util as tw_util
 import mysite.question.image_utils as image_utils
-from time import time
-import os
+from mysite.question.achieve_utils import give_achievement
+from django.db.models.aggregates import Sum
 
 
 def convert_context_to_json(context):
@@ -111,6 +118,7 @@ def auth_view(request):
         profile.name = tw_account['name']
         profile.icon_url = icon_url
         profile.save()
+        give_achievement('first_login', user)
         created = True
 
     auth_user = authenticate(username=user_name, password=temp_password)
@@ -137,7 +145,6 @@ def lecture_get_view(request):
     return json_response(context=dict(lectures=lecs))
 
 
-@csrf_exempt
 def lecture_add_view(request):
     try:
         code = request.POST['code']
@@ -152,18 +159,28 @@ def lecture_add_view(request):
     # get_or_create(): 新規作成したらcreated = True
     lec, created = Lecture.objects.get_or_create(
         code=code, defaults=dict(name=name))
+    if created:
+        give_achievement('add_lecture', request.user)
     return json_response(context=dict(created=created, lecture=lec.to_dict()))
 
 
-@csrf_exempt
 def lecture_timeline_view(request):
     if request.method == 'GET':
         try:
             # get timeline
-            lecture_id = request.GET['id']
-        except MultiValueDictKeyError:
+            lecture_id = int(request.GET['id'])
+        except (MultiValueDictKeyError, ValueError):
             # key 'id' is not requested
+            # or id is not integer
             return json_response_bad_request()
+
+        if 'since_id' in request.GET:
+            try:
+                since_id = int(request.GET['since_id'])
+            except ValueError:
+                return json_response_bad_request()
+        else:
+            since_id = 0
 
         if not request.user.is_authenticated():
             # get need authentication
@@ -174,32 +191,44 @@ def lecture_timeline_view(request):
         except Lecture.DoesNotExist:
             # invalid lecture ID
             return json_response_not_found()
-        else:
-            # successfully get timeline
-            posts = [q.to_dict()
-                     for q in lec.post_set.order_by('virtual_ts')]
-            return json_response(context=dict(posts=posts))
+
+        # successfully get timeline
+        posts = [q.to_dict() for q in
+                 lec.post_set.filter(pk__gt=since_id).order_by('virtual_ts')]
+        return json_response(context=dict(posts=posts))
 
     elif request.method == 'POST':
         try:
-            lecture_id = request.POST['id']
-        except MultiValueDictKeyError:
-            return json_response_bad_request()
-
-        if (('body' in request.POST)
-            == ('image' in request.FILES)):
-            # bodyとimageのどちらか一方を指定
+            lecture_id = int(request.POST['id'])
+        except (MultiValueDictKeyError, ValueError):
             return json_response_bad_request()
 
         # boolean flags
         use_before_vts = ('before_virtual_ts' in request.POST)
         use_after_vts = ('after_virtual_ts' in request.POST)
+        use_text = ('body' in request.POST)
+        use_image = ('image' in request.FILES)
 
         if use_before_vts != use_after_vts:
             # only one is requested and the other one is not
             # NOTE: != is logical exclusive-or
             return json_response_bad_request()
 
+        if use_text == use_image:
+            # bodyとimageのどちらか一方を指定
+            return json_response_bad_request()
+
+        if use_before_vts and use_after_vts:
+            # post to between 2 posts
+            try:
+                vts = Post.calc_mid(int(request.POST['before_virtual_ts']),
+                                    int(request.POST['after_virtual_ts']))
+            except ValueError:
+                return json_response_bad_request()
+        else:
+            # post to latest
+            vts = Post.time_to_vts(time())
+
         if not request.user.is_authenticated():
             # get need authentication
             return json_response_forbidden()
@@ -210,22 +239,12 @@ def lecture_timeline_view(request):
             # invalid lecture ID
             return json_response_not_found()
 
-        # CharFieldはデフォルト値が''
-        body = request.POST.get('body', '')
-
-        if use_before_vts and use_after_vts:
-            # post to between 2 posts
-            vts = Post.calc_mid(int(request.POST['before_virtual_ts']),
-                                int(request.POST['after_virtual_ts']))
-        else:
-            # post to latest
-            vts = Post.time_to_vts(time())
-
-        post = lec.post_set.create(body=body,
-                                   added_by=request.user,
+        post = lec.post_set.create(added_by=request.user,
                                    virtual_ts=vts)
-
-        if 'image' in request.FILES:
+        if use_text:
+            post.body = request.POST['body']
+            post.save()
+        elif use_image:
             # save image file
             # ユニークなfilenameとして、Postのpkを使う
             image = request.FILES['image']
@@ -238,10 +257,66 @@ def lecture_timeline_view(request):
                 request, relative_pathname)
             post.image_url = image_url
             post.save()
+            give_achievement('upload_image', request.user)
 
+        give_achievement('one_post', request.user)
         return json_response(context=dict(post=post.to_dict()))
 
 
+def user_view(request):
+    # ユーザー情報取得API
+    if request.method == 'GET':
+        try:
+            user_id = int(request.GET['id'])
+        except (MultiValueDictKeyError, ValueError):
+            return json_response_bad_request()
+
+        if not request.user.is_authenticated():
+            return json_response_forbidden()
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            # ID が不正だったら Not Found
+            return json_response_not_found()
+
+        user_info = user_to_dict(user)
+        return json_response(context=dict(user=user_info))
+
+
+def achievement_view(request):
+    u"実績一覧取得API"
+
+    if request.method == 'GET':
+        try:
+            user_id = int(request.GET['id'])
+        except (MultiValueDictKeyError, ValueError):
+            return json_response_bad_request()
+
+        if 'since_id' in request.GET:
+            try:
+                since_id = int(request.GET['since_id'])
+            except ValueError:
+                return json_response_bad_request()
+        else:
+            since_id = 0
+
+        if not request.user.is_authenticated():
+            return json_response_forbidden()
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return json_response_not_found()
+
+        # Get the total point
+        context = user.achievement_set.aggregate(total_point=Sum('point'))
+
+        achievements = [a.to_dict() for a in
+                        user.achievement_set.filter(pk__gt=since_id)]
+        context['achievements'] = achievements
+        return json_response(context)
+
+
 def _test():
-    import doctest
     doctest.testmod()

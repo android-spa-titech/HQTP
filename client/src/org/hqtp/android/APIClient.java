@@ -7,14 +7,20 @@ import java.util.List;
 
 import org.json.JSONException;
 
-public interface HQTPProxy {
+public interface APIClient {
 
     // Instance methods
-    // TODO: 認証の成否は例外によって知られるべき。何を戻り値にするか検討が必要。
     public abstract User authenticate(String access_token_key, String access_token_secret) throws IOException,
             JSONException, HQTPAPIException;
 
+    public abstract void setUserId(int userId);
+
+    public abstract int getUserId();
+
     public abstract List<Post> getTimeline(int lectureId) throws IOException, HQTPAPIException, JSONException,
+            ParseException;
+
+    public abstract List<Post> getTimeline(int lectureId, int sinceId) throws IOException, HQTPAPIException, JSONException,
             ParseException;
 
     /**
@@ -55,4 +61,6 @@ public interface HQTPProxy {
 
     public abstract AchievementResponse getAchievements(int user_id, int since_id) throws HQTPAPIException,
             IOException, JSONException, ParseException;
+
+    public abstract User getUser(int user_id) throws HQTPAPIException, IOException, JSONException, ParseException;
 }

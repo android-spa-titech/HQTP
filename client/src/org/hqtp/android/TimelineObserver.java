@@ -1,7 +1,7 @@
 package org.hqtp.android;
 
-import java.util.List;
+import java.util.SortedSet;
 
 public interface TimelineObserver {
-    void onUpdate(List<Post> posts);
+    void onUpdate(SortedSet<Post> posts);
 }

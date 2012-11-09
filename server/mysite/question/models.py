@@ -3,6 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from django.db.models.aggregates import Sum
 
 
 class Lecture(models.Model):
@@ -17,35 +18,28 @@ class Lecture(models.Model):
 
 
 class Post(models.Model):
-    body = models.TextField()
+    body = models.TextField(null=True)
     added_by = models.ForeignKey(User)
     posted_at = models.DateTimeField(auto_now_add=True)
     lecture = models.ForeignKey(Lecture)
 
     # 64bit(from -9223372036854775808 to 9223372036854775807)
     virtual_ts = models.BigIntegerField()
-    image_url = models.CharField(max_length=255)
-
+    image_url = models.CharField(max_length=255, null=True)
 
     def __unicode__(self):
-        return self.body
+        if self.body is not None:
+            return self.body
+        return self.image_url
 
     def to_dict(self):
-        # bodyもimage_urlもどちらも''なら、bodyが''の投稿
-        if self.image_url == '':
-            image_url = None
-            body = self.body
-        else:
-            image_url = self.image_url
-            body = None
-
         return dict(id=self.pk,
-                    body=body,
+                    body=self.body,
                     user=user_to_dict(self.added_by),
                     time=self.posted_at.isoformat(),
                     lecture=self.lecture.to_dict(),
                     virtual_ts=self.virtual_ts,
-                    image_url=image_url)
+                    image_url=self.image_url)
 
     @classmethod
     def time_to_vts(cls, t):
@@ -78,6 +72,22 @@ class Post(models.Model):
         return (vts1 + vts2) / 2
 
 
+class Achievement(models.Model):
+    name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    point = models.IntegerField()
+    achieved_by = models.ForeignKey(User)
+
+    def __unicode__(self):
+        return u'%s (%s)' % (self.name, self.point)
+
+    def to_dict(self):
+        return dict(id=self.pk,
+                    name=self.name,
+                    point=self.point,
+                    created_at=self.created_at.isoformat())
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
 
@@ -88,9 +98,11 @@ class UserProfile(models.Model):
 
 
 def user_to_dict(user):
+    point = user.achievement_set.aggregate(Sum('point'))['point__sum']
     return dict(id=user.pk,
                 name=user.get_profile().screen_name,
-                icon_url=user.get_profile().icon_url)
+                icon_url=user.get_profile().icon_url,
+                total_point=point)
 
 
 def create_user_profile(sender, instance, created, **kwargs):

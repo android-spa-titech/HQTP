@@ -6,6 +6,7 @@ import roboguice.util.SafeAsyncTask;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.OAuthAuthorization;
 import twitter4j.auth.RequestToken;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -30,6 +31,8 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
     Button changeEndpointButton;
     @InjectView(R.id.endpointText)
     TextView endpointText;
+    @InjectView(R.id.clearLoginInfoButton)
+    Button clearLoginInfoButton;
 
     private final String callback_url = "hqtp://request_callback/";
     private RequestToken requestToken;
@@ -37,7 +40,7 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
     @Inject
     OAuthAuthorization oauth;
     @Inject
-    private HQTPProxy proxy;
+    private APIClient proxy;
     @Inject
     Alerter alerter;
 
@@ -49,6 +52,7 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
         setContentView(R.layout.login);
         loginButton.setOnClickListener(this);
         changeEndpointButton.setOnClickListener(this);
+        clearLoginInfoButton.setOnClickListener(this);
 
         preferences = getPreferences(MODE_PRIVATE);
 
@@ -73,8 +77,15 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
         } else if (v.getId() == R.id.changeEndpointButton) {// DEBUG: change endpoint(for local test)
             String new_endpoint = endpointText.getText().toString();
             if (!new_endpoint.isEmpty()) {
-                ((HQTPProxyImpl) proxy).setEndpoint(new_endpoint);
+                ((APIClientImpl) proxy).setEndpoint(new_endpoint);
             }
+        } else if (v.getId() == R.id.clearLoginInfoButton) {
+            Editor e = preferences.edit();
+            e.remove(SAVED_AUTH_TOKEN_STATE);
+            e.remove(SAVED_AUTH_TOKEN);
+            e.remove(SAVED_AUTH_TOKEN_SECRET);
+            e.commit();
+            alerter.alert("HQTP", "ログイン情報を消去しました");
         }
     }
 
@@ -96,9 +107,10 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
     private class AfterTwitterAuthorizationTask extends SafeAsyncTask<Void>
     {
-        String token;
-        String tokenSecret;
-        Uri uri;
+        private String token;
+        private String tokenSecret;
+        private Uri uri;
+        private ProgressDialog dialog;
 
         AfterTwitterAuthorizationTask(Uri uri) {
             super();
@@ -109,6 +121,15 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
             super();
             this.token = token;
             this.tokenSecret = tokenSecret;
+        }
+
+        @Override
+        protected void onPreExecute() throws Exception {
+            dialog = new ProgressDialog(LoginActivity.this);
+            dialog.setTitle("HQTPサーバー");
+            dialog.setMessage("通信中です");
+            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            dialog.show();
         }
 
         @Override
@@ -124,14 +145,9 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
                 e.putString(SAVED_AUTH_TOKEN_SECRET, tokenSecret);
                 e.commit();
             }
-            proxy.authenticate(token, tokenSecret);
+            User user = proxy.authenticate(token, tokenSecret);
+            proxy.setUserId(user.getId());
             return null;
-        }
-
-        @Override
-        protected void onException(Exception e) {
-            alerter.alert(getString(R.string.authentication_failed_title),
-                    getString(R.string.authentication_failed_message));
         }
 
         @Override
@@ -148,10 +164,38 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
             // http://stackoverflow.com/questions/3473168/clear-the-entire-history-stack-and-start-a-new-activity-on-android/10015648#10015648
             finish();
         }
+
+        @Override
+        protected void onException(Exception e) {
+            dialog.dismiss();
+            dialog = null;
+            alerter.alert(getString(R.string.authentication_failed_title),
+                    getString(R.string.authentication_failed_message));
+        }
+
+        @Override
+        protected void onFinally() throws RuntimeException {
+            if (dialog != null) {
+                dialog.dismiss();
+                dialog = null;
+            }
+        }
+
     }
 
     private class TwitterAuthorizationTask extends SafeAsyncTask<Uri>
     {
+        private ProgressDialog dialog;
+
+        @Override
+        protected void onPreExecute() throws Exception {
+            dialog = new ProgressDialog(LoginActivity.this);
+            dialog.setTitle("Twitter");
+            dialog.setMessage("通信中です");
+            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            dialog.show();
+        }
+
         @Override
         public Uri call() throws Exception {
             // #135のバグ回避のための措置
@@ -168,8 +212,18 @@ public class LoginActivity extends RoboActivity implements OnClickListener {
 
         @Override
         protected void onException(Exception e) {
+            dialog.dismiss();
+            dialog = null;
             alerter.alert(getString(R.string.authentication_failed_title),
                     getString(R.string.authentication_failed_message));
+        }
+
+        @Override
+        protected void onFinally() throws RuntimeException {
+            if (dialog != null) {
+                dialog.dismiss();
+                dialog = null;
+            }
         }
     }
 }
