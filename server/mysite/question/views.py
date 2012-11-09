@@ -203,18 +203,19 @@ def lecture_timeline_view(request):
         except (MultiValueDictKeyError, ValueError):
             return json_response_bad_request()
 
-        if (('body' in request.POST)
-            == ('image' in request.FILES)):
-            # bodyとimageのどちらか一方を指定
-            return json_response_bad_request()
-
         # boolean flags
         use_before_vts = ('before_virtual_ts' in request.POST)
         use_after_vts = ('after_virtual_ts' in request.POST)
+        use_text = ('body' in request.POST)
+        use_image = ('image' in request.FILES)
 
         if use_before_vts != use_after_vts:
             # only one is requested and the other one is not
             # NOTE: != is logical exclusive-or
+            return json_response_bad_request()
+
+        if use_text == use_image:
+            # bodyとimageのどちらか一方を指定
             return json_response_bad_request()
 
         if use_before_vts and use_after_vts:
@@ -240,10 +241,10 @@ def lecture_timeline_view(request):
 
         post = lec.post_set.create(added_by=request.user,
                                    virtual_ts=vts)
-        if 'body' in request.POST:
+        if use_text:
             post.body = request.POST['body']
             post.save()
-        else:  # 'image' in request.FILES:
+        elif use_image:
             # save image file
             # ユニークなfilenameとして、Postのpkを使う
             image = request.FILES['image']
@@ -256,6 +257,7 @@ def lecture_timeline_view(request):
                 request, relative_pathname)
             post.image_url = image_url
             post.save()
+            give_achievement('upload_image', request.user)
 
         give_achievement('one_post', request.user)
         return json_response(context=dict(post=post.to_dict()))
