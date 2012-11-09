@@ -221,10 +221,11 @@ def lecture_timeline_view(request):
         if use_before_vts and use_after_vts:
             # post to between 2 posts
             try:
-                vts = Post.calc_mid(int(request.POST['before_virtual_ts']),
-                                    int(request.POST['after_virtual_ts']))
+                before_vts = int(request.POST['before_virtual_ts'])
+                after_vts = int(request.POST['after_virtual_ts'])
             except ValueError:
                 return json_response_bad_request()
+            vts = Post.calc_mid(before_vts, after_vts)
         else:
             # post to latest
             vts = Post.time_to_vts(time())
@@ -260,6 +261,10 @@ def lecture_timeline_view(request):
             give_achievement('upload_image', request.user)
 
         give_achievement('one_post', request.user)
+
+        if use_before_vts:
+            for p in Post.objects.filter(virtual_ts=before_vts):
+                give_achievement('post_inserted', p.added_by)
         return json_response(context=dict(post=post.to_dict()))
 
 
