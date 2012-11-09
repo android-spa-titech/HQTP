@@ -308,8 +308,9 @@ class ImagePostTests(TestCase):
         # 画像を投稿した時に実績が追加されている事を確認
         image = open(self.absolute_pathname_src)
         sc.access_timeline_post_view(self.client, lecture_id=1, image=image)
-        j_achieve_image = get_achevements_from_db()[0]
-        self.assertEqual(j_achieve_image['point'], 10)
+        j_achieve = get_achevements_from_db()
+        self.assertDictEqual({a['name']: a['point'] for a in j_achieve},
+                             {'upload_image': 10, 'one_post': 1})
 
 
 class UserGetTests(TestCase):
