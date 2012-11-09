@@ -55,14 +55,19 @@
             android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:layout_weight="1"
-            android:text="更新" />
+            android:text="更新"
+            android:textColor="@color/white"
+            android:background="@drawable/button_bg" />
     </LinearLayout>
 
     <org.hqtp.android.ProfileView
         android:id="@+id/profileView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/main"
+        android:gravity="center_vertical"
         android:orientation="horizontal" >
+
     </org.hqtp.android.ProfileView>
 
 </LinearLayout>

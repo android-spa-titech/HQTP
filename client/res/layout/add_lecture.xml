@@ -6,8 +6,30 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/titlebar"
+        android:gravity="center" >
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="147dp"
+            android:layout_height="48dp"
+            android:layout_marginLeft="8dp"
+            android:src="@drawable/xhedder" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text="add_class"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white"
+            android:textSize="32dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_gravity="fill_vertical"
         android:layout_weight="1"
         android:orientation="vertical" >
 
@@ -24,10 +46,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="授業コード"
-            android:inputType="number" >
-
-            <requestFocus />
-        </EditText>
+            android:inputType="number" />
 
         <TextView
             android:id="@+id/lecture_name_label"
@@ -44,24 +63,43 @@
             android:hint="授業名"
             android:inputType="text" />
 
-        <Button
-            android:id="@+id/lecture_add_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="追加" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:layout_weight="1" >
 
-        <Button
-            android:id="@+id/lecture_add_cancel_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="キャンセル" />
+            <Button
+                android:id="@+id/lecture_add_cancel_button"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:background="@drawable/button_bg"
+                android:text="キャンセル"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/lecture_add_button"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:background="@drawable/button_bg"
+                android:text="追加"
+                android:textColor="@color/white"  />
+        </LinearLayout>
+
     </LinearLayout>
 
     <org.hqtp.android.ProfileView
         android:id="@+id/profileView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:background="@color/main"
         android:orientation="horizontal" >
+
     </org.hqtp.android.ProfileView>
 
 </LinearLayout>
