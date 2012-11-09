@@ -6,6 +6,28 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/titlebar"
+        android:gravity="center" >
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="111dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="6dp"
+            android:src="@drawable/xhedder" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text="post"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="fill_vertical"
         android:layout_weight="1"
