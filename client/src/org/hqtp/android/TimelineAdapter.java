@@ -151,7 +151,6 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
                 cells.add(formCell);
             }
             observable.notifyChanged();
-            alerter.toastShort("投稿しました");
         }
     }
 
