@@ -404,7 +404,11 @@ class AchievementRelateOthersTests(TestCase):
     fixtures = ['test_user.json', 'test_lecture.json', 'test_posts.json']
 
     def setUp(self):
+        # 他人のクライアント
         self.client.login(username='testuser2', password='testpassword')
+        # 自分のクライアント
+        self.client_self = Client()
+        self.client_self.login(username='testuser', password='testpassword')
 
     def test_achievement_post_inserted(self):
         # 投稿が挿入された時に実績が追加されている事を確認
@@ -414,15 +418,21 @@ class AchievementRelateOthersTests(TestCase):
                                      after_virtual_ts=135044902317511100)
 
         # 挿入された側
-        j_achieve_user1 = get_achevements_from_db(user_pk=1)
+        j_achieve = get_achevements_from_db(user_pk=1)
         self.assertDictEqual(
-            {a['name']: a['point'] for a in j_achieve_user1},
+            {a['name']: a['point'] for a in j_achieve},
             {'post_inserted': 10})
 
-        # 挿入した側
-        j_achieve_user2 = get_achevements_from_db(user_pk=2)
+    def test_achievement_self_insert(self):
+        # 自分で投稿を挿入した場合はpost_inserted実績はつかない
+        sc.access_timeline_post_view(self.client_self, lecture_id=1,
+                                     body='1.5th post',
+                                     before_virtual_ts=135044899528200600,
+                                     after_virtual_ts=135044902317511100)
+
+        j_achieve = get_achevements_from_db(user_pk=1)
         self.assertDictEqual(
-            {a['name']: a['point'] for a in j_achieve_user2},
+            {a['name']: a['point'] for a in j_achieve},
             {'one_post': 1})
 
 

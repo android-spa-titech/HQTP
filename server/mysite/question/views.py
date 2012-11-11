@@ -263,7 +263,8 @@ def lecture_timeline_view(request):
         give_achievement('one_post', request.user)
 
         if use_before_vts:
-            for p in Post.objects.filter(virtual_ts=before_vts):
+            for p in Post.objects.filter(
+                virtual_ts=before_vts).exclude(added_by=request.user):
                 give_achievement('post_inserted', p.added_by)
         return json_response(context=dict(post=post.to_dict()))
 
