@@ -22,7 +22,7 @@ from mysite.question.models import (Post,
                                     Lecture)
 import mysite.question.twutil.tw_util as tw_util
 import mysite.question.image_utils as image_utils
-from mysite.question.achieve_utils import give_achievement
+from mysite.question.achieve_utils import give_achievement, is_post_5_minutes
 from django.db.models.aggregates import Sum
 
 
@@ -258,6 +258,9 @@ def lecture_timeline_view(request):
             post.image_url = image_url
             post.save()
             give_achievement('upload_image', request.user)
+
+        if is_post_5_minutes(lec, post.posted_at):
+            give_achievement('consecutive_post', request.user)
 
         give_achievement('one_post', request.user)
         return json_response(context=dict(post=post.to_dict()))
