@@ -395,6 +395,13 @@ class AchievementTests(TestCase):
         j_after = get_achevements_from_db()[0]
         self.assertEqual(j_after['point'], 1)
 
+    def test_achievement_upload_url(self):
+        sc.access_timeline_post_view(self.client, lecture_id=1,
+            body='Google it: https://www.google.com/')
+        j_after = get_achevements_from_db()
+        self.assertDictEqual({a['name']: a['point'] for a in j_after},
+                             {'one_post': 1, 'upload_url': 2})
+
 
 class AchievementRelateOthersTests(TestCase):
     u"""

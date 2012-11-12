@@ -2,9 +2,9 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">  
    <item   
        android:state_pressed="true"   
-       android:drawable="@drawable/post_press"/>  
+       android:drawable="@drawable/navibar_press"/>  
    <item   
        android:state_enabled="false"   
-       android:drawable="@drawable/post_disable" />  
-   <item android:drawable="@drawable/post" />  
+       android:drawable="@drawable/navibar_disable" />  
+   <item android:drawable="@drawable/navibar" />  
 </selector> 

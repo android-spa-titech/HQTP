@@ -4,12 +4,29 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/lectureName"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Please fill here class name" />
+        android:layout_height="48dp"
+        android:background="@drawable/titlebar"
+        android:gravity="center" >
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="111dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="6dp"
+            android:src="@drawable/xhedder" />
+
+        <TextView
+            android:id="@+id/lectureName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:textColor="@color/white"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Please fill here class name" />
+
+    </LinearLayout>
 
     <ListView
         android:id="@+id/listPost"
@@ -24,6 +41,8 @@
         android:id="@+id/profileView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:background="@color/main"
         android:orientation="horizontal" >
     </org.hqtp.android.ProfileView>
 

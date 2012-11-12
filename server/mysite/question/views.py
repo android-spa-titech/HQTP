@@ -22,7 +22,7 @@ from mysite.question.models import (Post,
                                     Lecture)
 import mysite.question.twutil.tw_util as tw_util
 import mysite.question.image_utils as image_utils
-from mysite.question.achieve_utils import give_achievement
+from mysite.question.achieve_utils import give_achievement, contains_url
 from django.db.models.aggregates import Sum
 
 
@@ -245,6 +245,8 @@ def lecture_timeline_view(request):
         if use_text:
             post.body = request.POST['body']
             post.save()
+            if contains_url(request.POST['body']):
+                give_achievement('upload_url', request.user)
         elif use_image:
             # save image file
             # ユニークなfilenameとして、Postのpkを使う

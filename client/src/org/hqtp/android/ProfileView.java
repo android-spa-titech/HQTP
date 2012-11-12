@@ -12,6 +12,7 @@ import roboguice.util.SafeAsyncTask;
 import com.google.inject.Inject;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
@@ -20,6 +21,8 @@ import android.widget.TextView;
 
 public class ProfileView extends LinearLayout {
     private final int UPDATE_INTERVAL = 5;// seconds
+    private final String PREFERENCES_NAME = "PROFILE_VIEW_PREF";
+    private final String SAVED_SINCE_ID = "SAVED_ACHIEVEMENT_SINCE_ID";
     private ImageView icon_view;
     private TextView username_view;
     private TextView total_point_view;
@@ -35,6 +38,8 @@ public class ProfileView extends LinearLayout {
     Activity activity;
     @Inject
     APIClient proxy;
+    @Inject
+    Alerter alerter;
 
     public ProfileView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -56,7 +61,7 @@ public class ProfileView extends LinearLayout {
     {
         if (user != null) {
             username_view.setText(user.getName());
-            updateTotalPoint(user.getTotalPoint());// TODO: show user's point
+            updateTotalPoint(user.getTotalPoint());
             icon_view.setTag(user.getIconURL());
             loader.displayImage(icon_view, this.activity);
         } else {
@@ -88,7 +93,7 @@ public class ProfileView extends LinearLayout {
     public synchronized void startRecurringUpdate()
     {
         new LoadUserInfoTask().execute();
-        // TODO: restore since_id from sharedPreferences
+        since_id = getPreferences().getInt(SAVED_SINCE_ID, 0);
         stopped.set(false);
         executor = Executors.newSingleThreadScheduledExecutor();
         task = new RecurringTask();
@@ -102,7 +107,10 @@ public class ProfileView extends LinearLayout {
             stopped.set(true);
             executor.shutdown();
         }
-        // TODO: save since_id to sharedPreferences
+    }
+
+    private SharedPreferences getPreferences() {
+        return activity.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
     }
 
     private class RecurringTask extends SafeAsyncTask<AchievementResponse> {
@@ -120,8 +128,24 @@ public class ProfileView extends LinearLayout {
             List<Achievement> achievements = achievement_response.getAchievements();
             int size = achievements.size();
             if (size > 0) {
-                // TODO: 実績通知
+
                 since_id = achievements.get(size - 1).getId();
+                SharedPreferences pref = getPreferences();
+                // To avoid duplicate notification, check if since_id is newer.
+                boolean already_shown = false;
+                synchronized (pref) {
+                    int prev_since_id = pref.getInt(SAVED_SINCE_ID, 0);
+                    if (prev_since_id < since_id) {
+                        pref.edit().putInt(SAVED_SINCE_ID, since_id).commit();
+                    } else {
+                        already_shown = true;
+                    }
+                }
+                if (!already_shown) {
+                    for (Achievement achieve : achievements) {
+                        alerter.toastShort(Achievement.getDescription(achieve) + "！ +" + achieve.getPoint());
+                    }
+                }
             }
         }
 

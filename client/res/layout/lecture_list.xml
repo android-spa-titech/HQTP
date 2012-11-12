@@ -4,13 +4,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Class List"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="32dp" />
+        android:layout_height="48dp"
+        android:background="@drawable/titlebar"
+        android:gravity="center" >
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="111dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="6dp"
+            android:src="@drawable/xhedder" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text="class_list"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
 
     <ListView
         android:id="@+id/lecture_list"
@@ -23,28 +38,35 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content">
 
         <Button
             android:id="@+id/add_lecture"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="36dp"
             android:layout_weight="1"
-            android:text="授業追加" />
+            android:background="@drawable/button_bg"
+            android:text="授業追加"
+            android:textColor="@color/white" />
 
-        <Button
+            <Button
             android:id="@+id/refresh"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="36dp"
             android:layout_weight="1"
-            android:text="更新" />
+            android:text="更新"
+            android:textColor="@color/white"
+            android:background="@drawable/button_bg" />
     </LinearLayout>
 
     <org.hqtp.android.ProfileView
         android:id="@+id/profileView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/main"
+        android:gravity="center_vertical"
         android:orientation="horizontal" >
+
     </org.hqtp.android.ProfileView>
 
 </LinearLayout>
