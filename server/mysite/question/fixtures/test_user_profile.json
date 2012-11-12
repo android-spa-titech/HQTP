@@ -8,5 +8,15 @@
 			"name": "android_spa",
 			"screen_name": "android_spa"
 		}
+	},
+	{
+		"pk": 2,
+		"model": "question.userprofile",
+		"fields": {
+			"icon_url": "http://testserver/site_media/twicon/580619600",
+			"user": 2,
+			"name": "android_spa2",
+			"screen_name": "android_spa2"
+		}
 	}
 ]
