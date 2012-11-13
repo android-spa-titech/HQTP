@@ -2,6 +2,7 @@
 
 from mysite.question.models import Achievement
 import re
+import datetime
 
 
 achieve_dict = dict(first_login=100,
@@ -10,6 +11,7 @@ achieve_dict = dict(first_login=100,
                     upload_image=10,
                     post_inserted=10,
                     upload_url=2,
+                    attend_lecture=3,
                     )
 
 
@@ -25,3 +27,17 @@ def give_achievement(name, user):
 
 def contains_url(string):
     return bool(re.search(r'(https?|ftp)://[\w\-]+(\.).+', string))
+
+
+def first_or_interval(user):
+    u"""
+    userのattend_lecture実績が0である
+    または，最後にattend_lecture実績をもらった日から1日以上経過している
+    """
+    if user.achievement_set.filter(name='attend_lecture').count() == 0:
+        return True
+    else:
+        last_attend = user.achievement_set.filter(
+            name='attend_lecture').order_by('-pk')[0].created_at.date()
+        delta =  datetime.date.today() - last_attend
+        return delta.days >= 1
