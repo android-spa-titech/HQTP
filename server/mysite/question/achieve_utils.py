@@ -32,7 +32,7 @@ def contains_url(string):
 def first_or_interval(user):
     u"""
     userのattend_lecture実績が0である
-    または，最後にattend_lecture実績をもらった日から1日以上経過している
+    または，最後にattend_lecture実績をもらった日と日付が変わっている
     """
     if user.achievement_set.filter(name='attend_lecture').count() == 0:
         return True

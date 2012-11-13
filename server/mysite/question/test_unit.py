@@ -431,7 +431,7 @@ class AchievementTests(TestCase):
 
     def test_achievement_attend_lecture_yesterday(self):
         u"""
-        1日経過したら実績attend_lectureが付与される
+        日付が変わっていたら実績attend_lectureが付与される
         """
         # 準備 ちょうど24時間前にattend_lecture実績を獲得した状況を作る
         # 注意: サーバーへの問い合わせの関係で実際には24時間より長く経過
