@@ -8,6 +8,7 @@ achieve_dict = dict(first_login=100,
                     add_lecture=30,
                     one_post=1,
                     upload_image=10,
+                    post_inserted=10,
                     upload_url=2,
                     )
 
