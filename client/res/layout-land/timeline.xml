@@ -8,7 +8,7 @@
         android:id="@+id/profileView"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="@color/main"
+        android:background="@color/shadow"
         android:orientation="vertical" >
     </org.hqtp.android.ProfileView>
 
