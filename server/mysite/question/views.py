@@ -22,7 +22,9 @@ from mysite.question.models import (Post,
                                     Lecture)
 import mysite.question.twutil.tw_util as tw_util
 import mysite.question.image_utils as image_utils
-from mysite.question.achieve_utils import give_achievement, contains_url
+from mysite.question.achieve_utils import (give_achievement,
+                                           contains_url,
+                                           contains_specialwords)
 from django.db.models.aggregates import Sum
 
 
@@ -247,6 +249,8 @@ def lecture_timeline_view(request):
             post.save()
             if contains_url(request.POST['body']):
                 give_achievement('upload_url', request.user)
+            if contains_specialwords(request.POST['body']):
+                give_achievement('easter_egg', request.user)
         elif use_image:
             # save image file
             # ユニークなfilenameとして、Postのpkを使う
