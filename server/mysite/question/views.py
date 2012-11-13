@@ -240,6 +240,9 @@ def lecture_timeline_view(request):
             # invalid lecture ID
             return json_response_not_found()
 
+        # 実績 consecutive_post のためにその時点での最新の投稿時刻を保存
+        latest = achieve.latest_post_time(lec)  # May be None
+
         post = lec.post_set.create(added_by=request.user,
                                    virtual_ts=vts)
         if use_text:
@@ -262,7 +265,7 @@ def lecture_timeline_view(request):
             post.save()
             achieve.give_achievement('upload_image', request.user)
 
-        if achieve.is_post_5_minutes(lec, post.posted_at):
+        if achieve.is_post_5_minutes(post.posted_at, latest):
             achieve.give_achievement('consecutive_post', request.user)
 
         achieve.give_achievement('one_post', request.user)

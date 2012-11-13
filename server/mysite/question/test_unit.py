@@ -402,6 +402,15 @@ class AchievementTests(TestCase):
         self.assertDictEqual({a['name']: a['point'] for a in j_after},
                              {'one_post': 1, 'upload_url': 2})
 
+    def test_achievement_consecutive_post(self):
+        sc.access_timeline_post_view(self.client, lecture_id=1,
+                                     body='First Post')
+        sc.access_timeline_post_view(self.client, lecture_id=1,
+                                     body='Second Post')
+        j_after = get_achevements_from_db()
+        self.assertDictEqual({a['name']: a['point'] for a in j_after},
+                             {'one_post': 1, 'consecutive_post': 2})
+
 
 class AchievementRelateOthersTests(TestCase):
     u"""

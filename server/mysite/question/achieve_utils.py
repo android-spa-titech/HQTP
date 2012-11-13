@@ -26,9 +26,14 @@ def give_achievement(name, user):
     Achievement.objects.create(name=name, point=point, achieved_by=user)
 
 
-def is_post_5_minutes(lec_obj, comp_time):
-    latest = lec_obj.post_set.aggregate(Max('posted_at'))['posted_at__max']
-    return comp_time - latest < datetime.timedelta(seconds=300)
+def latest_post_time(lec_obj):
+    return lec_obj.post_set.aggregate(Max('posted_at'))['posted_at__max']
+
+
+def is_post_5_minutes(g_time, l_time):
+    if l_time is None:
+        return False
+    return g_time - l_time < datetime.timedelta(seconds=300)
 
 
 def contains_url(string):
