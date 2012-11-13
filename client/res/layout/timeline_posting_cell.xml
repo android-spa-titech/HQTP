@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="match_parent"
-    android:layout_gravity="right" >
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:gravity="bottom|center_horizontal" >
 
-    <Button
-        android:id="@+id/postButton"
-        android:layout_width="160dp"
-        android:layout_height="52dp"
-        android:background="@drawable/button_post" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@drawable/navibar"
+        android:gravity="bottom|center_horizontal"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/postButton"
+            android:layout_width="144dp"
+            android:layout_height="36dp"
+            android:background="@drawable/button_post"
+            android:text="投稿"
+            android:textColor="@color/white" />
+    </LinearLayout>
 
 </LinearLayout>
