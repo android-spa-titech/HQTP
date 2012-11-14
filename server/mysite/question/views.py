@@ -22,9 +22,7 @@ from mysite.question.models import (Post,
                                     Lecture)
 import mysite.question.twutil.tw_util as tw_util
 import mysite.question.image_utils as image_utils
-from mysite.question.achieve_utils import (give_achievement,
-                                           contains_url,
-                                           contains_specialwords)
+import mysite.question.achieve_utils as achieve
 from django.db.models.aggregates import Sum
 
 
@@ -120,7 +118,7 @@ def auth_view(request):
         profile.name = tw_account['name']
         profile.icon_url = icon_url
         profile.save()
-        give_achievement('first_login', user)
+        achieve.give_achievement('first_login', user)
         created = True
 
     auth_user = authenticate(username=user_name, password=temp_password)
@@ -162,7 +160,7 @@ def lecture_add_view(request):
     lec, created = Lecture.objects.get_or_create(
         code=code, defaults=dict(name=name))
     if created:
-        give_achievement('add_lecture', request.user)
+        achieve.give_achievement('add_lecture', request.user)
     return json_response(context=dict(created=created, lecture=lec.to_dict()))
 
 
@@ -193,6 +191,9 @@ def lecture_timeline_view(request):
         except Lecture.DoesNotExist:
             # invalid lecture ID
             return json_response_not_found()
+
+        if achieve.first_or_interval(request.user):
+            achieve.give_achievement('attend_lecture', request.user)
 
         # successfully get timeline
         posts = [q.to_dict() for q in
@@ -247,10 +248,10 @@ def lecture_timeline_view(request):
         if use_text:
             post.body = request.POST['body']
             post.save()
-            if contains_url(request.POST['body']):
-                give_achievement('upload_url', request.user)
-            if contains_specialwords(request.POST['body']):
-                give_achievement('easter_egg', request.user)
+            if achieve.contains_url(request.POST['body']):
+                achieve.give_achievement('upload_url', request.user)
+            if achieve.contains_specialwords(request.POST['body']):
+                achieve.give_achievement('easter_egg', request.user)
         elif use_image:
             # save image file
             # ユニークなfilenameとして、Postのpkを使う
@@ -264,14 +265,17 @@ def lecture_timeline_view(request):
                 request, relative_pathname)
             post.image_url = image_url
             post.save()
-            give_achievement('upload_image', request.user)
+            achieve.give_achievement('upload_image', request.user)
 
-        give_achievement('one_post', request.user)
+        if achieve.is_post_5_minutes(lec, request.user):
+            achieve.give_achievement('consecutive_post', request.user)
+
+        achieve.give_achievement('one_post', request.user)
 
         if use_before_vts:
             for p in Post.objects.filter(
                 virtual_ts=before_vts).exclude(added_by=request.user):
-                give_achievement('post_inserted', p.added_by)
+                achieve.give_achievement('post_inserted', p.added_by)
         return json_response(context=dict(post=post.to_dict()))
 
 

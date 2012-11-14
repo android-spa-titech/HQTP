@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import mysite.question.shortcuts as sc
-from mysite.question.models import Lecture
+from mysite.question.models import Lecture, Achievement, Post
 from django.test import TestCase
 from django.test.client import Client
 from json import loads
 import re
 import os
+import datetime
 import mysite.question.test_views as test_views
 import mysite.question.twutil.tw_util as tw_util
 import mysite.question.image_utils as image_utils
@@ -408,6 +409,85 @@ class AchievementTests(TestCase):
         j_after = get_achevements_from_db()
         self.assertDictEqual({a['name']: a['point'] for a in j_after},
                              {'one_post': 1, 'easter_egg': 3})
+
+    def test_achievement_consecutive_post(self):
+        # make a post just now
+        testuser = User.objects.get(pk=1)
+        lecture = Lecture.objects.get(pk=1)
+        Post.objects.create(body='First Post', added_by=testuser,
+                            lecture=lecture, virtual_ts=135044899528200600)
+
+        # post to timeline
+        sc.access_timeline_post_view(self.client, lecture_id=1,
+                                     body='Second Post')
+        # there is achievement 'consecutive_post'
+        j_after = get_achevements_from_db()
+        self.assertSetEqual(set([a['name'] for a in j_after]),
+                            set(['consecutive_post', 'one_post']))
+
+    def test_achievement_not_consecutive_post(self):
+        # make a post before 5 minutes
+        testuser = User.objects.get(pk=1)
+        lecture = Lecture.objects.get(pk=1)
+        post_before = Post.objects.create(
+            body='First Post', added_by=testuser, lecture=lecture,
+            virtual_ts=135044899528200600)
+        before_5 = datetime.datetime.now() - datetime.timedelta(minutes=5)
+        post_before.posted_at = before_5
+        post_before.save()
+
+        # post to timeline
+        sc.access_timeline_post_view(self.client, lecture_id=1,
+                                     body='Second Post')
+        # there is not achievement 'consecutive_post'
+        j_after = get_achevements_from_db()
+        self.assertListEqual([a['name'] for a in j_after], ['one_post'])
+
+    def test_achievement_attend_lecture(self):
+        sc.access_timeline_get_view(self.client, lecture_id=1)
+        j_after = get_achevements_from_db()
+        self.assertDictEqual({a['name']: a['point'] for a in j_after},
+                             {'attend_lecture': 3})
+
+    def test_achievement_attend_lecture_same_day(self):
+        u"""
+        同じ日に2つのattend_lecture実績は付与されない
+        """
+        # 準備 今日の00:00 にattend_lecture実績を獲得した状況を作る
+        # 注意: テストを実行中に日付をまたぐという特殊ケースは考慮していない
+        testuser = User.objects.get(pk=1)
+        a = Achievement.objects.create(name='attend_lecture', point=3,
+                                       achieved_by=testuser)
+        # created_atはauto_now_add=Trueなのでcreateで設定できない
+        today_start = datetime.date.today()
+        a.created_at = today_start
+        a.save()
+
+        # 実績は付与されない
+        sc.access_timeline_get_view(self.client, lecture_id=1)
+        j_after = get_achevements_from_db()
+        self.assertListEqual([a['name'] for a in j_after],
+                             [u'attend_lecture'])
+
+    def test_achievement_attend_lecture_yesterday(self):
+        u"""
+        日付が変わっていたら実績attend_lectureが付与される
+        """
+        # 準備 ちょうど24時間前にattend_lecture実績を獲得した状況を作る
+        # 注意: サーバーへの問い合わせの関係で実際には24時間より長く経過
+        testuser = User.objects.get(pk=1)
+        a = Achievement.objects.create(name='attend_lecture', point=3,
+                                       achieved_by=testuser)
+        # created_atはauto_now_add=Trueなのでcreateで設定できない
+        yesterday = datetime.datetime.now() - datetime.timedelta(1)
+        a.created_at = yesterday
+        a.save()
+
+        # 別の日付なので実績がつく
+        sc.access_timeline_get_view(self.client, lecture_id=1)
+        j_after = get_achevements_from_db()
+        self.assertListEqual([a['name'] for a in j_after],
+                             [u'attend_lecture', u'attend_lecture'])
 
 
 class AchievementRelateOthersTests(TestCase):

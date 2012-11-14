@@ -85,6 +85,7 @@ public class TimelineRecurringUpdaterTest extends RoboGuiceTest {
         updater.stop();
         assertThat(observer.times, equalTo(2));
         assertThat(observer.posts, equalTo(sortedTestPosts2));
+        assertThat(observer.posts.size(), equalTo(2));
         verify(proxy).getTimeline(LECTURE_ID, 0);
         verify(proxy).getTimeline(LECTURE_ID, testPost.getId());
     }
