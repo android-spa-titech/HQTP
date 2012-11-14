@@ -323,6 +323,7 @@ class UserGetTests(TestCase):
     def test_get_user_info(self):
         j_user = sc.access_user_get_view(self.client, 1)
         self.assertEqual(j_user['user']['name'], 'android_spa')
+        self.assertEqual(j_user['user']['total_point'], 0)
 
     def test_get_user__not_found(self):
         j_not = sc.access_user_get_view(self.client, 42)
