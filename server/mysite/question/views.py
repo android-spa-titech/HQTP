@@ -192,6 +192,9 @@ def lecture_timeline_view(request):
             # invalid lecture ID
             return json_response_not_found()
 
+        if achieve.first_or_interval(request.user):
+            achieve.give_achievement('attend_lecture', request.user)
+
         # successfully get timeline
         posts = [q.to_dict() for q in
                  lec.post_set.filter(pk__gt=since_id).order_by('virtual_ts')]
