@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from mysite.question.models import Achievement
-from django.db.models.aggregates import Max
 import datetime
 import re
 
@@ -27,14 +26,15 @@ def give_achievement(name, user):
     Achievement.objects.create(name=name, point=point, achieved_by=user)
 
 
-def latest_post_time(lec_obj):
-    return lec_obj.post_set.aggregate(Max('posted_at'))['posted_at__max']
-
-
-def is_post_5_minutes(g_time, l_time):
-    if l_time is None:
+def is_post_5_minutes(lec_obj, user):
+    posts_downwise = lec_obj.post_set.filter(added_by=user).order_by('-pk')
+    if len(posts_downwise) == 1:  # user's first post to this lecture
         return False
-    return g_time - l_time < datetime.timedelta(seconds=300)
+    else:
+        new_post = posts_downwise[0]
+        prev_post = posts_downwise[1]
+        return (new_post.posted_at - prev_post.posted_at
+                < datetime.timedelta(minutes=5))
 
 
 def contains_url(string):
