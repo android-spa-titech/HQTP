@@ -1,6 +1,5 @@
 package org.hqtp.android;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -11,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -91,12 +91,12 @@ public class APIClientImpl implements APIClient {
     }
 
     @Override
-    public Post postTimeline(File image, int lectureId, long prevVirtualTimestamp, long nextVirtualTimestamp)
+    public Post postTimeline(Bitmap image, int lectureId, long prevVirtualTimestamp, long nextVirtualTimestamp)
             throws IOException, HQTPAPIException, JSONException, ParseException {
         return postTimeline(null, image, lectureId, prevVirtualTimestamp, nextVirtualTimestamp);
     }
 
-    private Post postTimeline(String body, File image, int lectureId, long prevVirtualTimestamp,
+    private Post postTimeline(String body, Bitmap image, int lectureId, long prevVirtualTimestamp,
             long nextVirtualTimestamp)
             throws IOException, HQTPAPIException, JSONException, ParseException {
         APIRequestBuilder.APIRequest request = builder.post("lecture/timeline/").param("id", lectureId);

@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -289,16 +288,15 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
                     cal.set(Calendar.MILLISECOND, 999);
                     nextVirtualTimestamp = Post.dateToVirtualTimestamp(cal.getTime());
                 }
-Log.d("info","click some button.");
-                if(v.getId() == R.id.postButton){
+
+                if (v.getId() == R.id.postButton) {
                     Intent intent = new Intent(activity, PostTimelineActivity.class);
                     intent.putExtra(PostTimelineActivity.LECTURE_ID, lectureId);
                     intent.putExtra(PostTimelineActivity.PREV_VIRTUAL_TS, prevVirtualTimestamp);
                     intent.putExtra(PostTimelineActivity.NEXT_VIRTUAL_TS, nextVirtualTimestamp);
                     activity.startActivityForResult(intent, 0);
                 }
-                else if(v.getId() == R.id.postImageButton){
-                    Log.d("info","click image button.");
+                else if (v.getId() == R.id.postImageButton) {
                     Intent intent = new Intent(activity, PostImageActivity.class);
                     intent.putExtra(PostImageActivity.LECTURE_ID, lectureId);
                     intent.putExtra(PostImageActivity.PREV_VIRTUAL_TS, prevVirtualTimestamp);
