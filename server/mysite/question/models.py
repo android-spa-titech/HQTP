@@ -98,7 +98,11 @@ class UserProfile(models.Model):
 
 
 def user_to_dict(user):
-    point = user.achievement_set.aggregate(Sum('point'))['point__sum']
+    if user.achievement_set.count() == 0:
+        point = 0
+    else:
+        point = user.achievement_set.aggregate(Sum('point'))['point__sum']
+
     return dict(id=user.pk,
                 name=user.get_profile().screen_name,
                 icon_url=user.get_profile().icon_url,
