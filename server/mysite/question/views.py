@@ -250,6 +250,8 @@ def lecture_timeline_view(request):
             post.save()
             if achieve.contains_url(request.POST['body']):
                 achieve.give_achievement('upload_url', request.user)
+            if achieve.contains_specialwords(request.POST['body']):
+                achieve.give_achievement('easter_egg', request.user)
         elif use_image:
             # save image file
             # ユニークなfilenameとして、Postのpkを使う
