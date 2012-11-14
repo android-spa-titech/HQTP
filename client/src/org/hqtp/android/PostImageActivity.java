@@ -9,10 +9,10 @@ import roboguice.util.RoboAsyncTask;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -31,7 +31,7 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
     public static final int INTENT_GALLERY_REQUESTCODE = 200;
 
     @Inject
-    HQTPProxy proxy;
+    APIClient proxy;
     @Inject
     Alerter alerter;
     @InjectView(R.id.postImageButton)
@@ -65,13 +65,11 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
         postButton.setOnClickListener(this);
         cameraButton.setOnClickListener(this);
         galleryButton.setOnClickListener(this);
-        
     }
 
     @Override
     public void onClick(View v) {
 
-        Log.d("info","push button.");
         if (v.getId() == R.id.postImageButton) {
             if (imageUri == null) {
                 alerter.toastShort("画像を選択してください");
@@ -82,7 +80,6 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
                         nextVirtualTimestamp).execute();
             }
         } else if (v.getId() == R.id.selectFromCameraButton) {
-Log.d("info","select camera!");
             String imageFileName = System.currentTimeMillis() + ".jpg";
             ContentValues values = new ContentValues();
             values.put(MediaStore.Images.Media.TITLE, imageFileName);
@@ -90,10 +87,9 @@ Log.d("info","select camera!");
             imageUriTmp = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, imageFileName);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUriTmp);
             startActivityForResult(intent, INTENT_CAMERA_REQUESTCODE);
         } else if (v.getId() == R.id.selectFromGalleryButton) {
-Log.d("info","select gallery!");
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -122,7 +118,7 @@ Log.d("info","select gallery!");
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if(imageUri != null){
+        if (imageUri != null) {
             super.onSaveInstanceState(outState);
             outState.putString(SAVED_IMAGE_URI, imageUri.getPath());
         }
@@ -158,7 +154,13 @@ Log.d("info","select gallery!");
 
         @Override
         public Void call() throws Exception {
-            proxy.postTimeline(new File(imageUri), lectureId, prevVirtualTimestamp, nextVirtualTimestamp);
+            // Fileの引数はStringかURI. Uriは指定できない。
+            // Uri="content://..."を直接パス(/mnt/...)に変換
+            Cursor c = getContentResolver().query(imageUri, null, null, null, null);
+            c.moveToFirst();
+            File imageFile = new File(c.getString(c.getColumnIndex(MediaStore.MediaColumns.DATA)));
+            proxy.postTimeline(imageFile, lectureId, prevVirtualTimestamp, nextVirtualTimestamp);
+
             return null;
         }
 
