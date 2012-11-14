@@ -3,6 +3,7 @@
 from mysite.question.models import Achievement
 import datetime
 import re
+from mysite.question.specialwords import special_words
 
 
 achieve_dict = dict(first_login=100,
@@ -12,6 +13,7 @@ achieve_dict = dict(first_login=100,
                     consecutive_post=2,
                     post_inserted=10,
                     upload_url=2,
+                    easter_egg=3,
                     attend_lecture=3,
                     )
 
@@ -39,6 +41,17 @@ def is_post_5_minutes(lec_obj, user):
 
 def contains_url(string):
     return bool(re.search(r'(https?|ftp)://[\w\-]+(\.).+', string))
+
+
+def contains_specialwords(string):
+    u"""
+    特定の語を含んでいるか
+    回数は考慮しない
+    """
+    for w in special_words:
+        if w in string:
+            return True
+    return False
 
 
 def first_or_interval(user):
