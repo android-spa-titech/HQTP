@@ -22,7 +22,9 @@ from mysite.question.models import (Post,
                                     Lecture)
 import mysite.question.twutil.tw_util as tw_util
 import mysite.question.image_utils as image_utils
-from mysite.question.achieve_utils import give_achievement, contains_url
+from mysite.question.achieve_utils import (give_achievement,
+                                           contains_url,
+                                           first_or_interval)
 from django.db.models.aggregates import Sum
 
 
@@ -191,6 +193,9 @@ def lecture_timeline_view(request):
         except Lecture.DoesNotExist:
             # invalid lecture ID
             return json_response_not_found()
+
+        if first_or_interval(request.user):
+            give_achievement('attend_lecture', request.user)
 
         # successfully get timeline
         posts = [q.to_dict() for q in
