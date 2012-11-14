@@ -1,5 +1,7 @@
 package org.hqtp.android;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
@@ -11,6 +13,7 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
@@ -35,6 +38,9 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
 
     public static final int MAX_WIDTH = 1024;
     public static final int MAX_HEIGHT = 768;
+    
+    private static final int QUALITY = 50;
+    
 
     @Inject
     APIClient proxy;
@@ -114,10 +120,19 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
                 imageUri = imageUriTmp;
             }
 
+            if (imageBitmap != null) {
+                imageBitmap.recycle();
+            }
+
             try {
                 InputStream is = getContentResolver().openInputStream(imageUri);
-                Bitmap image = BitmapFactory.decodeStream(is);
-                imageBitmap = resizeImage(image, MAX_WIDTH, MAX_HEIGHT);
+
+                Bitmap value = BitmapFactory.decodeStream(is);
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                value.compress(CompressFormat.JPEG, QUALITY, bos);
+                ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+
+                imageBitmap = resizeImage(BitmapFactory.decodeStream(bis), MAX_WIDTH, MAX_HEIGHT);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }

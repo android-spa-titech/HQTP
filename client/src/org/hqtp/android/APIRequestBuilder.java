@@ -40,7 +40,7 @@ public final class APIRequestBuilder {
     private Uri api_gateway;
     private CookieStore cookie_store;
 
-    private static final int QUALITY = 50;
+    private static final int QUALITY = 100;
 
     @Inject
     public APIRequestBuilder(@Named("HQTP API Endpoint URL") String api_gateway, Application application) {
@@ -187,7 +187,7 @@ public final class APIRequestBuilder {
         @Override
         public APIRequest param(String key, Bitmap value) throws Exception {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            value.compress(CompressFormat.JPEG, QUALITY, bos); // (4)
+            value.compress(CompressFormat.JPEG, QUALITY, bos);
             byte[] data = bos.toByteArray();
             entity.addPart(key, new ByteArrayBody(data, System.currentTimeMillis() + ".jpg"));
             return this;
