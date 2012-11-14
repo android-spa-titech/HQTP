@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import mysite.question.shortcuts as sc
-from mysite.question.models import Lecture, Achievement
+from mysite.question.models import Lecture, Achievement, Post
 from django.test import TestCase
 from django.test.client import Client
 from json import loads
@@ -402,6 +402,39 @@ class AchievementTests(TestCase):
         j_after = get_achevements_from_db()
         self.assertDictEqual({a['name']: a['point'] for a in j_after},
                              {'one_post': 1, 'upload_url': 2})
+
+    def test_achievement_consecutive_post(self):
+        # make a post just now
+        testuser = User.objects.get(pk=1)
+        lecture = Lecture.objects.get(pk=1)
+        Post.objects.create(body='First Post', added_by=testuser,
+                            lecture=lecture, virtual_ts=135044899528200600)
+
+        # post to timeline
+        sc.access_timeline_post_view(self.client, lecture_id=1,
+                                     body='Second Post')
+        # there is achievement 'consecutive_post'
+        j_after = get_achevements_from_db()
+        self.assertSetEqual(set([a['name'] for a in j_after]),
+                            set(['consecutive_post', 'one_post']))
+
+    def test_achievement_not_consecutive_post(self):
+        # make a post before 5 minutes
+        testuser = User.objects.get(pk=1)
+        lecture = Lecture.objects.get(pk=1)
+        post_before = Post.objects.create(
+            body='First Post', added_by=testuser, lecture=lecture,
+            virtual_ts=135044899528200600)
+        before_5 = datetime.datetime.now() - datetime.timedelta(minutes=5)
+        post_before.posted_at = before_5
+        post_before.save()
+
+        # post to timeline
+        sc.access_timeline_post_view(self.client, lecture_id=1,
+                                     body='Second Post')
+        # there is not achievement 'consecutive_post'
+        j_after = get_achevements_from_db()
+        self.assertListEqual([a['name'] for a in j_after], ['one_post'])
 
     def test_achievement_attend_lecture(self):
         sc.access_timeline_get_view(self.client, lecture_id=1)
