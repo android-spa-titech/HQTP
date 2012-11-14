@@ -404,7 +404,7 @@ class AchievementTests(TestCase):
 
     def test_achievement_easter_egg(self):
         sc.access_timeline_post_view(self.client, lecture_id=1,
-            body=u'眠いなう♨')
+            body=u'՞ਊ ՞')
         j_after = get_achevements_from_db()
         self.assertDictEqual({a['name']: a['point'] for a in j_after},
                              {'one_post': 1, 'easter_egg': 3})

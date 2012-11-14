@@ -2,6 +2,7 @@
 
 from mysite.question.models import Achievement
 import re
+from mysite.question.specialwords import special_words
 
 
 achieve_dict = dict(first_login=100,
@@ -26,13 +27,6 @@ def give_achievement(name, user):
 
 def contains_url(string):
     return bool(re.search(r'(https?|ftp)://[\w\-]+(\.).+', string))
-
-
-special_words = {
-    u'遅刻した',
-    u'眠い',
-    u'♨',
-    }
 
 
 def contains_specialwords(string):
