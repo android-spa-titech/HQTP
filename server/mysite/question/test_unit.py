@@ -415,8 +415,8 @@ class AchievementTests(TestCase):
                                      body='Second Post')
         # there is achievement 'consecutive_post'
         j_after = get_achevements_from_db()
-        self.assertListEqual([a['name'] for a in j_after],
-                             ['consecutive_post', 'one_post'])
+        self.assertSetEqual(set([a['name'] for a in j_after]),
+                            set(['consecutive_post', 'one_post']))
 
     def test_achievement_not_consecutive_post(self):
         # make a post before 5 minutes
