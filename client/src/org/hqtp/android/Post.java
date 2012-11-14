@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Post implements Comparable<Post> {
+
     private final static int VIRTUAL_TS_SCALE = 100000;
 
     private int id;
@@ -96,9 +97,19 @@ public class Post implements Comparable<Post> {
         if (this.virtualTimestamp < another.virtualTimestamp) {
             return -1;
         } else if (this.virtualTimestamp == another.virtualTimestamp) {
-            return 0;
+            return Integer.valueOf(this.id).compareTo(another.id);
         } else {
             return 1;
+        }
+    }
+
+    @Override
+    public boolean equals(Object another) {
+        if (another instanceof Post){
+            Post obj = (Post) another;
+            return obj.id == this.id;
+        } else {
+            return false;
         }
     }
 }
