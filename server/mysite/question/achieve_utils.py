@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from mysite.question.models import Achievement
-import re
 import datetime
+import re
 
 
 achieve_dict = dict(first_login=100,
                     add_lecture=30,
                     one_post=1,
                     upload_image=10,
+                    consecutive_post=2,
                     post_inserted=10,
                     upload_url=2,
                     attend_lecture=3,
@@ -25,6 +26,17 @@ def give_achievement(name, user):
     Achievement.objects.create(name=name, point=point, achieved_by=user)
 
 
+def is_post_5_minutes(lec_obj, user):
+    posts_downwise = lec_obj.post_set.filter(added_by=user).order_by('-pk')
+    if len(posts_downwise) == 1:  # user's first post to this lecture
+        return False
+    else:
+        new_post = posts_downwise[0]
+        prev_post = posts_downwise[1]
+        return (new_post.posted_at - prev_post.posted_at
+                < datetime.timedelta(minutes=5))
+
+
 def contains_url(string):
     return bool(re.search(r'(https?|ftp)://[\w\-]+(\.).+', string))
 
@@ -39,5 +51,5 @@ def first_or_interval(user):
     else:
         last_attend = user.achievement_set.filter(
             name='attend_lecture').order_by('-pk')[0].created_at.date()
-        delta =  datetime.date.today() - last_attend
+        delta = datetime.date.today() - last_attend
         return delta.days >= 1
