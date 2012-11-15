@@ -2,6 +2,7 @@ package org.hqtp.android;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,6 +51,9 @@ public class ImageLoaderImpl implements ImageLoader {
     }
 
     public void clearCache() {
+        for (Entry<String, Bitmap> entry : image_cache.entrySet()) {
+            entry.getValue().recycle();
+        }
         image_cache.clear();
     }
 
