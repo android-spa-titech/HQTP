@@ -108,6 +108,7 @@ public class ProfileView extends LinearLayout {
             executor.shutdown();
         }
         loader.clearCache();
+        updateUserInfo(null);
     }
 
     private SharedPreferences getPreferences() {
