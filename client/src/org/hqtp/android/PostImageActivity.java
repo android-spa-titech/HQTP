@@ -126,7 +126,6 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
 
             try {
                 InputStream is = getContentResolver().openInputStream(imageUri);
-
                 Bitmap value = BitmapFactory.decodeStream(is);
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 value.compress(CompressFormat.JPEG, QUALITY, bos);
@@ -136,7 +135,7 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-            imageView.setImageURI(imageUri);
+            imageView.setImageBitmap(imageBitmap);
         }
     }
 
