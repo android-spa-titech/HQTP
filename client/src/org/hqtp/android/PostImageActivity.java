@@ -38,9 +38,8 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
 
     public static final int MAX_WIDTH = 1024;
     public static final int MAX_HEIGHT = 768;
-    
+
     private static final int QUALITY = 50;
-    
 
     @Inject
     APIClient proxy;
@@ -54,6 +53,8 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
     Button galleryButton;
     @InjectView(R.id.postImageView)
     ImageView imageView;
+    @InjectView(R.id.profileView)
+    ProfileView profileView;
 
     @InjectExtra(LECTURE_ID)
     int lectureId;
@@ -137,6 +138,18 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
             }
             imageView.setImageBitmap(imageBitmap);
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        profileView.startRecurringUpdate();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        profileView.stop();
     }
 
     private Bitmap resizeImage(Bitmap image, int maxWidth, int maxHeight) {
