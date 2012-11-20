@@ -6,6 +6,8 @@
 
     <uses-sdk android:minSdkVersion="13" />
 
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -34,6 +36,7 @@
         <activity android:name=".LectureListActivity"></activity>
         <activity android:name=".AddLectureActivity"></activity>
         <activity android:name=".PostTimelineActivity"></activity>
+        <activity android:name=".PostImageActivity"></activity>
     </application>
 
 </manifest>

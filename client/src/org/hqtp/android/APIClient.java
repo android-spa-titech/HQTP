@@ -1,11 +1,12 @@
 package org.hqtp.android;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 
 import org.json.JSONException;
+
+import android.graphics.Bitmap;
 
 public interface APIClient {
 
@@ -20,7 +21,8 @@ public interface APIClient {
     public abstract List<Post> getTimeline(int lectureId) throws IOException, HQTPAPIException, JSONException,
             ParseException;
 
-    public abstract List<Post> getTimeline(int lectureId, int sinceId) throws IOException, HQTPAPIException, JSONException,
+    public abstract List<Post> getTimeline(int lectureId, int sinceId) throws IOException, HQTPAPIException,
+            JSONException,
             ParseException;
 
     /**
@@ -48,7 +50,7 @@ public interface APIClient {
      * @throws JSONException
      * @throws ParseException
      */
-    public abstract Post postTimeline(File image, int lectureId, long prevVirtualTimestamp,
+    public abstract Post postTimeline(Bitmap image, int lectureId, long prevVirtualTimestamp,
             long nextVirtualTimestamp) throws IOException, HQTPAPIException, JSONException, ParseException;
 
     public abstract List<Lecture> getLectures() throws HQTPAPIException, IOException, JSONException, ParseException;

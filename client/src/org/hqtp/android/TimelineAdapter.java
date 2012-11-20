@@ -227,7 +227,9 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
             if (postView == null) {
                 postView = inflater.inflate(R.layout.timeline_posting_cell, null);
                 Button postButton = (Button) postView.findViewById(R.id.postButton);
+                Button postImageButton = (Button) postView.findViewById(R.id.postImageButton);
                 postButton.setOnClickListener(new PostButtonOnClickListener());
+                postImageButton.setOnClickListener(new PostButtonOnClickListener());
             }
             return postView;
         }
@@ -287,15 +289,22 @@ class TimelineAdapter extends BaseAdapter implements TimelineObserver {
                     nextVirtualTimestamp = Post.dateToVirtualTimestamp(cal.getTime());
                 }
 
-                Intent intent = new Intent(activity, PostTimelineActivity.class);
-                intent.putExtra(PostTimelineActivity.LECTURE_ID, lectureId);
-                intent.putExtra(PostTimelineActivity.PREV_VIRTUAL_TS, prevVirtualTimestamp);
-                intent.putExtra(PostTimelineActivity.NEXT_VIRTUAL_TS, nextVirtualTimestamp);
-
-                activity.startActivityForResult(intent, 0);
+                if (v.getId() == R.id.postButton) {
+                    Intent intent = new Intent(activity, PostTimelineActivity.class);
+                    intent.putExtra(PostTimelineActivity.LECTURE_ID, lectureId);
+                    intent.putExtra(PostTimelineActivity.PREV_VIRTUAL_TS, prevVirtualTimestamp);
+                    intent.putExtra(PostTimelineActivity.NEXT_VIRTUAL_TS, nextVirtualTimestamp);
+                    activity.startActivityForResult(intent, 0);
+                }
+                else if (v.getId() == R.id.postImageButton) {
+                    Intent intent = new Intent(activity, PostImageActivity.class);
+                    intent.putExtra(PostImageActivity.LECTURE_ID, lectureId);
+                    intent.putExtra(PostImageActivity.PREV_VIRTUAL_TS, prevVirtualTimestamp);
+                    intent.putExtra(PostImageActivity.NEXT_VIRTUAL_TS, nextVirtualTimestamp);
+                    activity.startActivityForResult(intent, 0);
+                }
             }
         }
-
     }
 
     private class PostCell extends ListCell {
