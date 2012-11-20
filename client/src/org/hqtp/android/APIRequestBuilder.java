@@ -1,9 +1,10 @@
 package org.hqtp.android;
 
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -13,14 +14,16 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 
 import android.app.Application;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.net.Uri;
 
 import com.google.inject.Inject;
@@ -36,6 +39,8 @@ import com.loopj.android.http.PersistentCookieStore;
 public final class APIRequestBuilder {
     private Uri api_gateway;
     private CookieStore cookie_store;
+
+    private static final int QUALITY = 100;
 
     @Inject
     public APIRequestBuilder(@Named("HQTP API Endpoint URL") String api_gateway, Application application) {
@@ -74,7 +79,7 @@ public final class APIRequestBuilder {
 
         public abstract APIRequest param(String key, String value);
 
-        public APIRequest param(String key, File value) throws Exception
+        public APIRequest param(String key, Bitmap value) throws Exception
         {
             throw new Exception("Not Implemented");
         }
@@ -180,9 +185,11 @@ public final class APIRequestBuilder {
         }
 
         @Override
-        public APIRequest param(String key, File value) throws Exception {
-            FileBody body = new FileBody(value);
-            entity.addPart(key, body);
+        public APIRequest param(String key, Bitmap value) throws Exception {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            value.compress(CompressFormat.JPEG, QUALITY, bos);
+            byte[] data = bos.toByteArray();
+            entity.addPart(key, new ByteArrayBody(data, System.currentTimeMillis() + ".jpg"));
             return this;
         };
 

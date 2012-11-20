@@ -9,7 +9,7 @@
         android:layout_height="40dp"
         android:background="@drawable/navibar"
         android:gravity="bottom|center_horizontal"
-        android:orientation="vertical" >
+        android:orientation="horizontal" >
 
         <Button
             android:id="@+id/postButton"
@@ -17,6 +17,14 @@
             android:layout_height="36dp"
             android:background="@drawable/button_post"
             android:text="投稿"
+            android:textColor="@color/white" />
+        
+    	<Button
+            android:id="@+id/postImageButton"
+            android:layout_width="144dp"
+            android:layout_height="36dp"
+            android:background="@drawable/button_post"
+            android:text="画像投稿"
             android:textColor="@color/white" />
     </LinearLayout>
 
