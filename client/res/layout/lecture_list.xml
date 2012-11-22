@@ -63,7 +63,7 @@
         android:id="@+id/profileView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/main"
+        android:background="@color/shadow"
         android:gravity="center_vertical"
         android:orientation="horizontal" >
 
