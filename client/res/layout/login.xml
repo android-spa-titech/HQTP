@@ -16,7 +16,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:ems="10"
-            android:text="http://10.0.2.2:8000/api/" >
+            android:text="http://10.0.2.2:8000/api/"
+            android:visibility="invisible" >
 
             <requestFocus />
         </EditText>
@@ -25,7 +26,9 @@
             android:id="@+id/changeEndpointButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="change endpoint" />
+            android:text="change endpoint"
+            android:visibility="invisible" />
+
     </LinearLayout>
 
     <Button

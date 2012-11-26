@@ -13,7 +13,7 @@ public class HQTPModule extends AbstractModule {
         bind(APIClient.class).to(APIClientImpl.class);
         bind(TimelineRecurringUpdater.class).to(TimelineRecurringUpdaterImpl.class);
         bind(ImageLoader.class).to(ImageLoaderImpl.class);
-        bind(String.class).annotatedWith(Names.named("HQTP API Endpoint URL")).toInstance("http://www.hqtp.org/api/");
+        bind(String.class).annotatedWith(Names.named("HQTP API Endpoint URL")).toInstance("http://www16307ue.sakura.ne.jp:61234/api/");
         bind(Long.class).annotatedWith(Names.named("TimelineUpdatePeriod")).toInstance(Long.valueOf(500));
 
         OAuthAuthorization oauth = new OAuthAuthorization(ConfigurationContext.getInstance());
