@@ -59,6 +59,7 @@ public class TimelineActivity extends RoboActivity {
         super.onPause();
         updater.stop();
         updater.unregisterTimelineObserver(adapter);
+        imageLoader.clearCache();
         profileView.stop();
     }
 

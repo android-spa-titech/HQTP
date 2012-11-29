@@ -19,19 +19,28 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.util.LruCache;
 import android.widget.ImageView;
 
 @ContextSingleton
 public class ImageLoaderImpl implements ImageLoader {
-    private Map<String, Bitmap> image_cache;
+    private LruCache<String, Bitmap> image_cache;
     private final int placeholder = android.R.drawable.ic_menu_close_clear_cancel;
     // ImageViewとURL文字列の対応を管理することでImageViewを使い回しているときの画像を一意に決める。
     // 参考： http://lablog.lanche.jp/archives/220
     private Map<ImageView, String> view2url;
     private ExecutorService loading_service;
+    private int memory_cache_size = 4 * 1024 * 1024;// 4MB
 
     public ImageLoaderImpl() {
-        image_cache = new ConcurrentHashMap<String, Bitmap>();
+        memory_cache_size = (int) Runtime.getRuntime().maxMemory() / 8;
+        Log.d("memorycache", memory_cache_size + "BYTE");
+        image_cache = new LruCache<String, Bitmap>(memory_cache_size) {
+            @Override
+            protected int sizeOf(String key, Bitmap value) {
+                return value.getByteCount();
+            }
+        };
         view2url = new ConcurrentHashMap<ImageView, String>();
         loading_service = Executors.newSingleThreadExecutor();
     }
@@ -50,7 +59,7 @@ public class ImageLoaderImpl implements ImageLoader {
     }
 
     public void clearCache() {
-        image_cache.clear();
+        image_cache.evictAll();
     }
 
     public void shutdown() {
@@ -69,15 +78,15 @@ public class ImageLoaderImpl implements ImageLoader {
     }
 
     private void queueJob(ImageView image_view, String image_url, Activity activity) {
-        loading_service.submit(new LodingHandler(image_view, image_url, activity));
+        loading_service.submit(new LoadingHandler(image_view, image_url, activity));
     }
 
-    private class LodingHandler implements Runnable {
+    private class LoadingHandler implements Runnable {
         private ImageView image_view;
         private String image_url;
         private Activity activity;
 
-        public LodingHandler(ImageView image_view, String image_url, Activity activity) {
+        public LoadingHandler(ImageView image_view, String image_url, Activity activity) {
             this.image_view = image_view;
             this.image_url = image_url;
             this.activity = activity;
