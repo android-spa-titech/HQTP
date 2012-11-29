@@ -1,5 +1,7 @@
 package org.hqtp.android;
 
+import java.io.File;
+
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
 import android.content.Intent;
@@ -43,6 +45,8 @@ public class TimelineActivity extends RoboActivity {
         timelineListView.setAdapter(adapter);
         timelineListView.setOnItemLongClickListener(
             adapter.new ItemLongClickListener());
+
+        imageLoader.initializeDiskCache(new File(getCacheDir().getPath() + File.separator + "IMAGE_CACHE"));
     }
 
     @Override

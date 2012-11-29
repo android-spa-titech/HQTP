@@ -1,6 +1,11 @@
 package org.hqtp.android;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -14,9 +19,13 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import com.jakewharton.DiskLruCache;
+import com.jakewharton.DiskLruCache.Snapshot;
+
 import roboguice.inject.ContextSingleton;
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.LruCache;
@@ -25,12 +34,16 @@ import android.widget.ImageView;
 @ContextSingleton
 public class ImageLoaderImpl implements ImageLoader {
     private LruCache<String, Bitmap> image_cache;
+    private DiskLruCache disk_image_cache = null;
+    private Object disk_lock = new Object();
     private final int placeholder = android.R.drawable.ic_menu_close_clear_cancel;
+    private final int DISK_CACHE_INDEX = 0;
     // ImageViewとURL文字列の対応を管理することでImageViewを使い回しているときの画像を一意に決める。
     // 参考： http://lablog.lanche.jp/archives/220
     private Map<ImageView, String> view2url;
     private ExecutorService loading_service;
-    private int memory_cache_size = 4 * 1024 * 1024;// 4MB
+    private int memory_cache_size;
+    private int disk_cache_size = 16 * 1024 * 1024;// 16 MB
 
     public ImageLoaderImpl() {
         memory_cache_size = (int) Runtime.getRuntime().maxMemory() / 8;
@@ -41,8 +54,40 @@ public class ImageLoaderImpl implements ImageLoader {
                 return value.getByteCount();
             }
         };
+
         view2url = new ConcurrentHashMap<ImageView, String>();
         loading_service = Executors.newSingleThreadExecutor();
+    }
+
+    public void initializeDiskCache(File directory) {
+        synchronized (disk_lock) {
+            try {
+                disk_image_cache = DiskLruCache.open(directory, 1, DISK_CACHE_INDEX + 1, disk_cache_size);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private String url2key(String url) {
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) { // UNREACHABLE
+            e.printStackTrace();
+        }
+        assert digest != null;
+        byte[] res = digest.digest(url.getBytes());
+        StringBuilder builder = new StringBuilder();
+        char[] digits = {
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+        };
+        for (int i = 0; i < res.length; ++i) {
+            byte b = res[i];
+            builder.append(digits[(b & 0xf0) >> 4]);
+            builder.append(digits[b & 0x0f]);
+        }
+        return builder.toString().substring(0, 64);
     }
 
     public void displayImage(ImageView image_view, Activity activity) {
@@ -50,11 +95,55 @@ public class ImageLoaderImpl implements ImageLoader {
         view2url.put(image_view, image_url);
         Bitmap bmp = image_cache.get(image_url);
         if (bmp != null && !bmp.isRecycled()) {
+            // Log.d("imageloader", "mem cache : " + image_url);
             image_view.setImageBitmap(bmp);
             return;
         } else {
             image_view.setImageResource(placeholder);
             queueJob(image_view, image_url, activity);
+        }
+    }
+
+    private boolean writeBitmapToCache(Bitmap bmp, DiskLruCache.Editor editor) throws IOException
+    {
+        OutputStream os = null;
+        try {
+            os = new BufferedOutputStream(editor.newOutputStream(DISK_CACHE_INDEX));
+            return bmp.compress(CompressFormat.JPEG, 100, os);
+        } finally {
+            if (os != null) {
+                os.close();
+            }
+        }
+    }
+
+    private void putToDiskCache(String url, Bitmap bmp)
+    {
+        if (disk_image_cache == null) {
+            return;
+        }
+        DiskLruCache.Editor editor = null;
+        synchronized (disk_lock) {
+            try {
+                editor = disk_image_cache.edit(url2key(url));
+                if (editor == null) {
+                    return;
+                }
+                if (writeBitmapToCache(bmp, editor)) {
+                    disk_image_cache.flush();
+                    editor.commit();
+                } else {
+                    editor.abort();
+                }
+            } catch (IOException e) {
+                if (editor != null) {
+                    try {
+                        editor.abort();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
         }
     }
 
@@ -94,8 +183,12 @@ public class ImageLoaderImpl implements ImageLoader {
 
         @Override
         public void run() {
-            Bitmap bmp = loadBitmap(image_url);
-            Log.d("LoadingHandler", (bmp != null ? "succeed" : "failed") + " to load url=" + image_url);
+            Bitmap bmp = loadBitmapFromDiskCache(image_url);
+            if (bmp == null) {
+                bmp = loadBitmap(image_url);
+                putToDiskCache(image_url, bmp);
+            }
+            // Log.d("LoadingHandler", (bmp != null ? "succeed" : "failed") + " to load url=" + image_url);
             image_cache.put(image_url, bmp);
             if (isReused(image_view, image_url)) {
                 return;
@@ -123,6 +216,25 @@ public class ImageLoaderImpl implements ImageLoader {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private Bitmap loadBitmapFromDiskCache(String image_url) {
+        Snapshot snapshot = null;
+        Bitmap bmp = null;
+        if (disk_image_cache != null) {
+            synchronized (disk_lock) {
+                try {
+                    snapshot = disk_image_cache.get(url2key(image_url));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if (snapshot != null) {
+            // Log.d("imageloader", "disk cache : " + image_url);
+            bmp = BitmapFactory.decodeStream(snapshot.getInputStream(DISK_CACHE_INDEX));
+        }
+        return bmp;
     }
 
     private boolean isReused(ImageView image_view, String image_url) {
