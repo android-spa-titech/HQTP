@@ -122,7 +122,9 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
             }
 
             if (imageBitmap != null) {
+                imageView.setImageBitmap(null);
                 imageBitmap.recycle();
+                imageBitmap = null;
             }
 
             try {
