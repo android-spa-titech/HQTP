@@ -3,6 +3,7 @@ package org.hqtp.android;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 import roboguice.activity.RoboActivity;
@@ -129,16 +130,23 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
 
             try {
                 InputStream is = getContentResolver().openInputStream(imageUri);
-                Bitmap value = BitmapFactory.decodeStream(is);
+                Bitmap value = resizeImage(BitmapFactory.decodeStream(is), MAX_WIDTH, MAX_HEIGHT);
+                is.close();
+
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 value.compress(CompressFormat.JPEG, QUALITY, bos);
-                ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+                value.recycle();
 
-                imageBitmap = resizeImage(BitmapFactory.decodeStream(bis), MAX_WIDTH, MAX_HEIGHT);
+                ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+                bos.close();
+                imageBitmap = BitmapFactory.decodeStream(bis);
+                bis.close();
+                imageView.setImageBitmap(imageBitmap);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            imageView.setImageBitmap(imageBitmap);
         }
     }
 
