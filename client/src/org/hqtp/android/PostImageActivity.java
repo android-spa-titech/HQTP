@@ -1,10 +1,6 @@
 package org.hqtp.android;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 
 import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectExtra;
@@ -14,9 +10,7 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -40,12 +34,15 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
     public static final int MAX_WIDTH = 1024;
     public static final int MAX_HEIGHT = 768;
 
+    private static final Bitmap.CompressFormat FORMAT = Bitmap.CompressFormat.JPEG;
     private static final int QUALITY = 50;
 
     @Inject
     APIClient proxy;
     @Inject
     Alerter alerter;
+    @Inject
+    ImageConverter imageConverter;
     @InjectView(R.id.postImageButton)
     Button postButton;
     @InjectView(R.id.selectFromCameraButton)
@@ -64,8 +61,7 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
     @InjectExtra(NEXT_VIRTUAL_TS)
     long nextVirtualTimestamp;
 
-    Uri imageUriTmp;
-    Bitmap imageBitmap;
+    Uri imageUri;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,8 +69,22 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
         assert ((prevVirtualTimestamp != -1 && nextVirtualTimestamp != -1) || (prevVirtualTimestamp == -1 && nextVirtualTimestamp == -1));
 
         if (savedInstanceState != null) {
-            imageBitmap = (Bitmap) savedInstanceState.getParcelable(SAVED_IMAGE_URI);
-            imageView.setImageBitmap(imageBitmap);
+            String imageUriString = savedInstanceState.getString(SAVED_IMAGE_URI);
+            if (imageUriString != null) {
+                imageUri = Uri.parse(imageUriString);
+                int width = MAX_WIDTH, height = MAX_HEIGHT;
+                // Here, imageView's size is happened to be zero. Use default size to avoid OutOfMemory.
+                if (imageView.getWidth() != 0 && imageView.getHeight() != 0) {
+                    width = imageView.getWidth();
+                    height = imageView.getHeight();
+                }
+                try {
+                    imageView.setImageBitmap(imageConverter.loadImageWithinSize(imageUri, width, height));
+                } catch (FileNotFoundException e) {
+                    alerter.alert("HQTP", "画像のロード時にエラーが発生しました");
+                    imageUri = null;
+                }
+            }
         }
 
         postButton.setOnClickListener(this);
@@ -84,12 +94,11 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
 
     @Override
     public void onClick(View v) {
-
         if (v.getId() == R.id.postImageButton) {
-            if (imageBitmap == null) {
+            if (imageUri == null) {
                 alerter.toastShort("画像を選択してください");
             } else {
-                new PostImageTask(imageBitmap,
+                new PostImageTask(imageUri,
                         lectureId,
                         prevVirtualTimestamp,
                         nextVirtualTimestamp).execute();
@@ -99,10 +108,10 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
             ContentValues values = new ContentValues();
             values.put(MediaStore.Images.Media.TITLE, imageFileName);
             values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
-            imageUriTmp = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUriTmp);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
             startActivityForResult(intent, INTENT_CAMERA_REQUESTCODE);
         } else if (v.getId() == R.id.selectFromGalleryButton) {
             Intent intent = new Intent();
@@ -114,38 +123,18 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
-            Uri imageUri = null;
             if (requestCode == INTENT_GALLERY_REQUESTCODE) {
                 imageUri = data.getData();
             }
-            else if (requestCode == INTENT_CAMERA_REQUESTCODE) {
-                imageUri = imageUriTmp;
-            }
 
-            if (imageBitmap != null) {
-                imageView.setImageBitmap(null);
-                imageBitmap.recycle();
-                imageBitmap = null;
-            }
+            imageView.setImageBitmap(null);
 
             try {
-                InputStream is = getContentResolver().openInputStream(imageUri);
-                Bitmap value = resizeImage(BitmapFactory.decodeStream(is), MAX_WIDTH, MAX_HEIGHT);
-                is.close();
-
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                value.compress(CompressFormat.JPEG, QUALITY, bos);
-                value.recycle();
-
-                ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-                bos.close();
-                imageBitmap = BitmapFactory.decodeStream(bis);
-                bis.close();
-                imageView.setImageBitmap(imageBitmap);
+                imageView.setImageBitmap(imageConverter.loadImageWithinSize(imageUri, imageView.getWidth(),
+                        imageView.getHeight()));
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+                alerter.alert("HQTP", "画像のロード時にエラーが発生しました");
+                imageUri = null;
             }
         }
     }
@@ -162,20 +151,6 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
         profileView.stop();
     }
 
-    private Bitmap resizeImage(Bitmap image, int maxWidth, int maxHeight) {
-        if (image == null || maxHeight < 0 || maxWidth < 0) {
-            return null;
-        }
-        int imageWidth = image.getWidth();
-        int imageHeight = image.getHeight();
-        float scale = Math.min(Math.min((float) maxWidth / imageWidth, (float) maxHeight / imageHeight), 1);
-
-        Matrix matrix = new Matrix();
-        matrix.postScale(scale, scale);
-
-        return Bitmap.createBitmap(image, 0, 0, imageWidth, imageHeight, matrix, true);
-    }
-
     @Override
     public void onBackPressed() {
         // Do not call super. Calling it leads to finish this activity.
@@ -185,9 +160,9 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if (imageBitmap != null) {
+        if (imageUri != null) {
             super.onSaveInstanceState(outState);
-            outState.putParcelable(SAVED_IMAGE_URI, imageBitmap);
+            outState.putString(SAVED_IMAGE_URI, imageUri.toString());
         }
     }
 
@@ -199,14 +174,14 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
      * </p>
      */
     private class PostImageTask extends RoboAsyncTask<Void> {
-        private final Bitmap imageBitmap;
+        private final Uri imageUri;
         private final int lectureId;
         private final long prevVirtualTimestamp;
         private final long nextVirtualTimestamp;
 
-        public PostImageTask(Bitmap imageBitmap, int lectureId, long prevVirtualTimestamp, long nextVirtualTimestamp) {
+        public PostImageTask(Uri imageUri, int lectureId, long prevVirtualTimestamp, long nextVirtualTimestamp) {
             super(PostImageActivity.this);
-            this.imageBitmap = imageBitmap;
+            this.imageUri = imageUri;
             this.lectureId = lectureId;
             this.prevVirtualTimestamp = prevVirtualTimestamp;
             this.nextVirtualTimestamp = nextVirtualTimestamp;
@@ -221,7 +196,9 @@ public class PostImageActivity extends RoboActivity implements OnClickListener {
 
         @Override
         public Void call() throws Exception {
-            proxy.postTimeline(imageBitmap, lectureId, prevVirtualTimestamp, nextVirtualTimestamp);
+            byte[] bytes = imageConverter.compressImageWithinSize(imageUri, FORMAT, QUALITY, MAX_WIDTH, MAX_HEIGHT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            proxy.postTimeline(bitmap, lectureId, prevVirtualTimestamp, nextVirtualTimestamp);
             return null;
         }
 
