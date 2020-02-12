@@ -1,4 +1,4 @@
-Django==1.4
+Django==1.11.28
 pep8==1.2
 pyflakes==0.5.0
 tweepy==1.9
